@@ -1,7 +1,10 @@
+from .key import Key
+from .chord import Chord
+
 import re
 
 
-class FileParser:
+class Song:
     @staticmethod
     def _extract_keyword(keyword, text):
         try:
@@ -18,21 +21,29 @@ class FileParser:
             title = section_header_re.search(remaining_text)
 
             if title is None:
-                sections.append({'section_title': '', 'body': remaining_text})
+                sections.append(self._parse_section('', remaining_text))
                 break
 
             remaining_text = remaining_text[title.end():]
             next_break = section_header_re.search(remaining_text)
             if next_break is None:
-                sections.append({'section_title': title.group(0).strip(), 'body': remaining_text})
+                sections.append(self._parse_section(title.group(0).strip(), remaining_text))
                 break
             else:
-                sections.append({'section_title': title.group(0).strip(), 'body': remaining_text[:next_break.start()]})
-
-        for section in sections:
-            self._parse_section(section)
+                sections.append(self._parse_section(title.group(0).strip(), remaining_text[:next_break.start()]))
 
         return sections
+
+    def _parse_section(self, title, text):
+
+        section = {}
+        section['title'] = title
+
+        section['lines'] = []
+        for line in text.split('\n'):
+            section['lines'].append(self._parse_line(line))
+
+        return section
 
     def _parse_line(self, line):
         blocks = []
@@ -45,18 +56,11 @@ class FileParser:
             else:
                 chord = ''
                 lyric = block
-            blocks.append({'chord': chord, 'lyric': lyric})
+            blocks.append({'chord': Chord(chord, self.key), 'lyric': lyric})
         return blocks
 
-    def _parse_section(self, section):
-        section['lines'] = []
-        for line in section['body'].split('\n'):
-            section['lines'].append(self._parse_line(line))
-
-    def parse(self, text):
+    def from_text(self, text):
         print("Parsing")
-
-        song = {}
 
         # strip comments
         lines = text.split('\n')
@@ -97,21 +101,29 @@ class FileParser:
             'scene',
         ]
 
+        metadata = {}
+
         for word in metadata_keywords:
-            song[word] = self._extract_keyword(word, header)
+            metadata[word] = self._extract_keyword(word, header)
 
-        if song['title'] == '':
-            song['title'] = lines[0]
+        self.title = metadata.pop('title')
+        if self.title == '':
+            self.title = lines[0]
 
-        if song['artist'] == '':
-            song['artist'] = lines[1]
+        self.artist = metadata.pop('artist')
+        if self.artist == '':
+            self.artist = lines[0]
 
         # Extract key
-        if song['key'] == '':
+        if metadata['key'] == '':
             try:
-                song['key'] = body.split('[')[1].split[
+                # Extract the first chord of the song (just a guess!)
+                metadata['key'] = body.split('[')[1].split(']')[0]
+            except IndexError:
+                # Failing that, it's in C. This shouldn't matter as we've established it has no chords anyway!
+                metadata['key'] = 'C'
+        self.key = Key(metadata['key'])
 
-
-        sections = self._extract_sections(body)
-        print(sections)
+        self.sections = self._extract_sections(body)
+        print(self.sections)
 

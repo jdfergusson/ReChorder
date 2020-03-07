@@ -1,4 +1,4 @@
-from parser.file_parser import FileParser
+from music_handler.song import Song
 
 dummy_song = '''Title: Amazing Grace
 Artist:
@@ -20,5 +20,5 @@ How pr[G]ecious [G7]did that [C]grace app[G]ear,
 The [Em]hour I [D]first bel[G]ieved.'''
 
 def test_file_parser():
-    fp = FileParser()
-    fp.parse(dummy_song)
+    fp = Song()
+    fp.from_text(dummy_song)
