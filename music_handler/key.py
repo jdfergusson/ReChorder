@@ -7,3 +7,10 @@ class Key:
         self.index = chord.index
         self.qualification = chord.qualification
 
+    def __repr__(self):
+        return {
+            'index': self.index,
+            'qualification': self.qualification
+        }
+
+

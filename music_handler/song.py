@@ -127,3 +127,13 @@ class Song:
         self.sections = self._extract_sections(body)
         print(self.sections)
 
+    def __str__(self):
+        return '{} ({})'.format(self.title, self.artist)
+
+    def __repr__(self):
+        return {
+            'title': self.title,
+            'artist': self.artist,
+            'key': repr(self.key),
+            'sections': self.sections
+        }
