@@ -1,0 +1,37 @@
+<html>
+<head>
+<style>
+.block {
+  color: maroon;
+  float: none;
+}
+
+.container {
+    display: flex;
+    justify-content: flex-start;
+}
+</style>
+</head>
+<p>
+
+<h1>{{ song.title }}</h1>
+{{ song.artist }}
+
+
+{% for section in song.sections %}
+    <h3>{{ section.title }}</h3>
+    {% for line in section.lines %}
+        <div class="container">
+        {% for block in line %}
+            <div class="block">
+                <b>{{ block.chord }}</b><br>
+                {{ block.lyric | safe}}
+            </div>
+        {% endfor %}
+        </div>
+    {% endfor %}
+{% endfor %}
+
+
+</body>
+</html>

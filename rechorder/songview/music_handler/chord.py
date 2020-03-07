@@ -36,7 +36,7 @@ class Chord:
         bass_string = s[1] if len(s) > 1 else ''
         s = s[0]
 
-        qualifier_search = re.search('(add|sus|m|min|man|aug|dim)', s)
+        qualifier_search = re.search('(add|sus|m|min|man|aug|dim|[0-9])', s)
         if qualifier_search is None:
             note = s
             self.qualification = ''
@@ -72,5 +72,13 @@ class Chord:
         return chord
 
     def __str__(self):
+        if self.index == -1:
+            return ''
         return self.to_string()
 
+    def __repr__(self):
+        return repr({
+            'index': self.index,
+            'qualification': self.qualification,
+            'bass_index': self.bass_index
+        })

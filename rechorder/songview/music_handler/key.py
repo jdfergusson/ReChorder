@@ -8,9 +8,9 @@ class Key:
         self.qualification = chord.qualification
 
     def __repr__(self):
-        return {
+        return repr({
             'index': self.index,
             'qualification': self.qualification
-        }
+        })
 
 

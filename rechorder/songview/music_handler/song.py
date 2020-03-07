@@ -1,14 +1,18 @@
+import re
+
 from .key import Key
 from .chord import Chord
 
-import re
-
 
 class Song:
+    def __init__(self, text=''):
+        if text:
+            self.from_text(text)
+
     @staticmethod
     def _extract_keyword(keyword, text):
         try:
-            return re.search(r'^{}: (.*)'.format(keyword), text, re.IGNORECASE).group(1)
+            return re.search(r'^{}: (.*)'.format(keyword), text, re.IGNORECASE | re.MULTILINE).group(1)
         except AttributeError:
             return ''
 
@@ -41,7 +45,9 @@ class Song:
 
         section['lines'] = []
         for line in text.split('\n'):
-            section['lines'].append(self._parse_line(line))
+            # Gets rid of extra line breaks
+            if line.strip() != '':
+                section['lines'].append(self._parse_line(line))
 
         return section
 
@@ -56,11 +62,15 @@ class Song:
             else:
                 chord = ''
                 lyric = block
+            lyric = lyric.replace(' ', '&nbsp;').replace('\n','')
             blocks.append({'chord': Chord(chord, self.key), 'lyric': lyric})
         return blocks
 
     def from_text(self, text):
         print("Parsing")
+
+        # line breaks
+        text = text.replace('\r', '')
 
         # strip comments
         lines = text.split('\n')
@@ -106,13 +116,15 @@ class Song:
         for word in metadata_keywords:
             metadata[word] = self._extract_keyword(word, header)
 
+        print(metadata)
+
         self.title = metadata.pop('title')
         if self.title == '':
             self.title = lines[0]
 
         self.artist = metadata.pop('artist')
         if self.artist == '':
-            self.artist = lines[0]
+            self.artist = lines[1]
 
         # Extract key
         if metadata['key'] == '':
@@ -125,15 +137,14 @@ class Song:
         self.key = Key(metadata['key'])
 
         self.sections = self._extract_sections(body)
-        print(self.sections)
 
     def __str__(self):
         return '{} ({})'.format(self.title, self.artist)
 
     def __repr__(self):
-        return {
+        return repr({
             'title': self.title,
             'artist': self.artist,
             'key': repr(self.key),
             'sections': self.sections
-        }
+        })

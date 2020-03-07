@@ -1,5 +1,5 @@
-from music_handler.chord import Chord
-from music_handler.key import Key
+from ..songview.music_handler.chord import Chord
+from ..songview.music_handler.key import Key
 
 def test_chord_init():
     key = Key('A')

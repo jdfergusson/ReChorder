@@ -1,4 +1,4 @@
-from music_handler.song import Song
+from ..songview.music_handler.song import Song
 
 dummy_song = '''Title: Amazing Grace
 Artist:
