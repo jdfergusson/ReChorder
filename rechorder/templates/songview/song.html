@@ -17,7 +17,23 @@
 <h1>{{ song.title }}</h1>
 {{ song.artist }}
 
-Current key: {{ song.key.index }}, {{ song.key }}
+Current key: {{ song.key.index }}, {{ song.key }},
+
+<p>
+    <form action="{% url 'song' song_id %}" method="get">
+        <select name="target_key">
+        {% for key in keys %}
+            <option
+                    value="{{ forloop.counter0 }}"
+                    {% if forloop.counter0 == song.key.index %}selected{% endif %}>
+                {{ key }}
+            </option>
+        {% endfor %}
+        </select>
+
+        <input type="submit" value="Go" />
+    </form>
+</p>
 
 {% for section in song.sections %}
     <h3>{{ section.title }}</h3>

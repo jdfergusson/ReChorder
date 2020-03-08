@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from songview.music_handler.song import Song as MhSong
+from songview.music_handler.interpret import KEYS
 
 from .models import Song
 
@@ -37,9 +38,24 @@ def songs(request):
 
 def song(request, song_id):
     song = MhSong(Song.objects.get(pk=song_id).raw)
-    target_key = request.GET.get('key')
+
+    # This gets the user's personal list of keys, or creates it if it doesn't exist
+    keys = request.session.get('keys')
+    if keys is None:
+        keys = request.session['keys'] = {}
+
+    # This is for if we've had a post request to change the key
+    target_key = request.GET.get('target_key')
     if target_key is not None:
-        song.transpose(target_key)
-    return render(request, 'songview/song.html', {'song': song})
+        keys[song_id] = target_key
+    request.session.modified = True
 
+    key = keys.get(song_id, song.original_key.index)
+    song.transpose(key)
 
+    context = {
+        'song': song,
+        'keys': KEYS,
+        'song_id': song_id
+    }
+    return render(request, 'songview/song.html', context)
