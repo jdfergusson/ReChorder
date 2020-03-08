@@ -17,6 +17,7 @@
 <h1>{{ song.title }}</h1>
 {{ song.artist }}
 
+Current key: {{ song.key.index }}, {{ song.key }}
 
 {% for section in song.sections %}
     <h3>{{ section.title }}</h3>
@@ -24,7 +25,7 @@
         <div class="container">
         {% for block in line %}
             <div class="block">
-                <b>{{ block.chord }}</b><br>
+                <b>{{ block.chord }}&nbsp;&nbsp;</b><br>
                 {{ block.lyric | safe}}
             </div>
         {% endfor %}

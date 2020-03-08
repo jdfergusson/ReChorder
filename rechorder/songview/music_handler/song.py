@@ -2,12 +2,22 @@ import re
 
 from .key import Key
 from .chord import Chord
+from .interpret import interpret_absolute_chord
 
 
 class Song:
     def __init__(self, text=''):
         if text:
             self.from_text(text)
+
+    def transpose(self, target_key):
+        try:
+            target_index = int(target_key) % 12
+        except ValueError:
+            target_index, _, _ = interpret_absolute_chord(target_key)
+
+        if target_index is not None:
+            self.key.index = target_index
 
     @staticmethod
     def _extract_keyword(keyword, text):
@@ -39,7 +49,6 @@ class Song:
         return sections
 
     def _parse_section(self, title, text):
-
         section = {}
         section['title'] = title
 
@@ -67,8 +76,6 @@ class Song:
         return blocks
 
     def from_text(self, text):
-        print("Parsing")
-
         # line breaks
         text = text.replace('\r', '')
 
@@ -116,8 +123,6 @@ class Song:
         for word in metadata_keywords:
             metadata[word] = self._extract_keyword(word, header)
 
-        print(metadata)
-
         self.title = metadata.pop('title')
         if self.title == '':
             self.title = lines[0]
@@ -134,6 +139,9 @@ class Song:
             except IndexError:
                 # Failing that, it's in C. This shouldn't matter as we've established it has no chords anyway!
                 metadata['key'] = 'C'
+
+        # key is the currently displayed key. Modifying that object changes the key of the song as displayed
+        self.original_key = Key(metadata['key'])
         self.key = Key(metadata['key'])
 
         self.sections = self._extract_sections(body)

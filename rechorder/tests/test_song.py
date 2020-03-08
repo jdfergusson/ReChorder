@@ -19,6 +19,8 @@ And [G]grace my [G7]fears reli[D]eved.
 How pr[G]ecious [G7]did that [C]grace app[G]ear,
 The [Em]hour I [D]first bel[G]ieved.'''
 
+
 def test_file_parser():
-    fp = Song()
-    fp.from_text(dummy_song)
+    s = Song(dummy_song)
+    assert(s.title == 'Amazing Grace')
+    assert(s.key.index == 10)

@@ -1,9 +1,8 @@
 from ..songview.music_handler.chord import Chord
 from ..songview.music_handler.key import Key
 
-def test_chord_init():
-    key = Key('A')
 
+def test_chord_init():
     c = Chord('A')
     assert(c.index == 0)
     assert(c.qualification == '')
@@ -32,8 +31,7 @@ def test_chord_init():
     assert(c.qualification == 'sus4add9')
 
     c = Chord('L')
-    assert(c.index == -1)
-
+    assert(c.index == None)
 
     c = Chord('Bb/G')
     assert(c.index == 1)

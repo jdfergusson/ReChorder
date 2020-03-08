@@ -1,80 +1,43 @@
 import re
 
-ABSOLUTE_LOOKUP = {
-    'a': 0,
-    'a#': 1,
-    'bb': 1,
-    'b': 2,
-    'b#': 3,
-    'cb': 2,
-    'c': 3,
-    'c#': 4,
-    'db': 4,
-    'd': 5,
-    'd#': 6,
-    'eb': 6,
-    'e': 7,
-    'e#': 8,
-    'fb': 7,
-    'f': 8,
-    'f#': 9,
-    'gb': 9,
-    'g': 10,
-    'g#': 11,
-    'ab': 11
-}
+from .key import Key
+from .interpret import interpret_absolute_chord
 
 CHORD_NAMES = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#']
 
 class Chord:
     def __init__(self, string, key=None):
 
-        self.key_index = 0 if key is None else key.index
+        # This will link the key to the key object, so that you can have multiple chords with one shared key
+        self.key = Key('A') if key is None or key.index is None else key
 
-        s = string.strip().split('/')
+        index, qualification, bass_index = interpret_absolute_chord(string)
 
-        bass_string = s[1] if len(s) > 1 else ''
-        s = s[0]
-
-        qualifier_search = re.search('(add|sus|m|min|man|aug|dim|[0-9])', s)
-        if qualifier_search is None:
-            note = s
-            self.qualification = ''
+        # Make chord relative to the key
+        if index is not None:
+            self.index = (index - self.key.index + 12) % 12
         else:
-            note = s[:qualifier_search.start()]
-            self.qualification = s[qualifier_search.start():].strip()
+            self.index = None
 
-        try:
-            self.index = (ABSOLUTE_LOOKUP[note.strip().lower()] - self.key_index + 12) % 12
-        except KeyError:
-            # Invalid note!
-            self.index = -1
+        self.qualification = qualification
 
-        try:
-            self.bass_index = (ABSOLUTE_LOOKUP[bass_string.strip().lower()] - self.key_index + 12) % 12
-        except KeyError:
-            # Invalid note - no bass
+        if bass_index:
+            self.bass_index = (bass_index - self.key.index + 12) % 12
+        else:
             self.bass_index = None
 
-    def to_string(self, relative_key=None):
-        if relative_key is None:
-            key_index = self.key_index
-        else:
-            key_index = relative_key.index
+    def __str__(self):
+        if self.index is None:
+            return ''
 
         chord = '{}{}'.format(
-            CHORD_NAMES[(self.index + key_index) % 12],
+            CHORD_NAMES[(self.index + self.key.index) % 12],
             self.qualification)
 
-        if self.bass_index:
-            chord += '/{}'.format(CHORD_NAMES[(self.bass_index + key_index) % 12])
+        if self.bass_index is not None:
+            chord += '/{}'.format(CHORD_NAMES[(self.bass_index + self.key.index) % 12])
 
         return chord
-
-    def __str__(self):
-        if self.index == -1:
-            return ''
-        return self.to_string()
 
     def __repr__(self):
         return repr({

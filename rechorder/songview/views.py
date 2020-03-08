@@ -37,6 +37,9 @@ def songs(request):
 
 def song(request, song_id):
     song = MhSong(Song.objects.get(pk=song_id).raw)
+    target_key = request.GET.get('key')
+    if target_key is not None:
+        song.transpose(target_key)
     return render(request, 'songview/song.html', {'song': song})
 
 

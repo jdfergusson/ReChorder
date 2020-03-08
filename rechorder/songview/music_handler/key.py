@@ -1,11 +1,9 @@
-from .chord import Chord
+from .interpret import interpret_absolute_chord
 
 
 class Key:
     def __init__(self, text):
-        chord = Chord(text)
-        self.index = chord.index
-        self.qualification = chord.qualification
+        self.index, self.qualification, _ = interpret_absolute_chord(text)
 
     def __repr__(self):
         return repr({
