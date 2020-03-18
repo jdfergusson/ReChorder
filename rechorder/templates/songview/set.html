@@ -1,0 +1,9 @@
+<h1>Set list{% if set_songs %} - <a href="{% url 'set.song' 0 %}">Go</a>{% endif %}</h1>
+
+<a href="{% url 'set.clear' %}">Clear set list</a>
+
+<ul>
+    {% for song in set_songs %}
+        <li><a href="{% url 'song' song.id %}">{{ song.title }}</a> in {{ song.key_index }}</li>
+    {% endfor %}
+</ul>

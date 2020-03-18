@@ -21,7 +21,7 @@
 
 Current key: {{ song.key.index }}, {{ song.key }},
 
-<p><a href="{% url 'service.add_song' song_id %}">Add to service</a></p>
+<p><a href="{% url 'set.add_song' song_id %}">Add to set list</a></p>
 
 <p>
     <form action="{% url 'song' song_id %}" method="get">

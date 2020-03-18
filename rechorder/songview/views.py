@@ -8,81 +8,80 @@ from songview.music_handler.interpret import KEYS
 
 from .models import Song
 
-def _get_or_create_service(request):
-    d = request.session.get('service')
+def _get_or_create_set(request):
+    d = request.session.get('set')
     if d is None:
-        request.session['service'] = {
+        request.session['set'] = {
             'songs': [],
         }
 
-    return request.session['service']
+    return request.session['set']
 
 
 def _get_song_key_index(request, song):
     return request.session.get('keys', {}).get(str(song.pk), MhSong(song.raw).original_key.index)
 
 
-def service_add_song(request, song_id):
+def set_add_song(request, song_id):
     song = Song.objects.get(pk=song_id)
 
-    service = _get_or_create_service(request)
+    set = _get_or_create_set(request)
 
-    song_in_service = {
+    song_in_set = {
         'id': song_id,
         'key_index': _get_song_key_index(request, song),
     }
 
-    service['songs'].append(song_in_service)
-    song_in_service['title'] = song.title
+    set['songs'].append(song_in_set)
+    song_in_set['title'] = song.title
 
     request.session.modified = True
-    return render(request, 'songview/service_added_song.html', {'song': song_in_service})
+    return render(request, 'songview/set_added_song.html', {'song': song_in_set})
 
 
-def service_clear(request):
-    service = _get_or_create_service(request)
-    service['songs'] = []
+def set_clear(request):
+    set = _get_or_create_set(request)
+    set['songs'] = []
     request.session.modified = True
 
-    return redirect(reverse('service'), permanent=True)
+    return redirect(reverse('set'), permanent=True)
 
 
-def service(request):
-    service = _get_or_create_service(request)
-    service_songs = []
-    print(service)
+def set(request):
+    set = _get_or_create_set(request)
+    set_songs = []
 
-    for song in service['songs']:
+    for song in set['songs']:
         s = Song.objects.get(pk=song['id'])
-        service_song = {
+        set_song = {
             'id': s.pk,
             'key_index': song['key_index'],
             'title': s.title,
         }
-        service_songs.append(service_song)
+        set_songs.append(set_song)
 
-    return render(request, 'songview/service.html', {'service_songs': service_songs})
+    return render(request, 'songview/set.html', {'set_songs': set_songs})
 
 
-def service_show_song(request, song_index):
-    service = _get_or_create_service(request)
+def set_show_song(request, song_index):
+    set = _get_or_create_set(request)
     try:
         song_index = int(song_index)
-        song_in_service = service['songs'][song_index]
+        song_in_set = set['songs'][song_index]
     except (ValueError, IndexError):
         return HttpResponseNotFound('<h1>Error: Page not found</h1>')
 
-    song = MhSong(Song.objects.get(pk=song_in_service['id']).raw)
+    song = MhSong(Song.objects.get(pk=song_in_set['id']).raw)
 
-    song.transpose(song_in_service['key_index'])
+    song.transpose(song_in_set['key_index'])
 
     context = {
         'song': song,
-        'song_id': song_in_service['id'],
+        'song_id': song_in_set['id'],
         'current_index': song_index,
-        'max_index': len(service['songs']) - 1,
+        'max_index': len(set['songs']) - 1,
     }
-    return render(request, 'songview/service_song.html', context)
+    return render(request, 'songview/song_in_set.html', context)
 
 
 def songs(request):
