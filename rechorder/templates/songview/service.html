@@ -1,0 +1,9 @@
+<h1>Service</h1>
+
+<a href="{% url 'service.clear' %}">Clear service</a>
+
+<ul>
+    {% for song in service_songs %}
+        <li><a href="{% url 'song' song.id %}">{{ song.title }}</a> in {{ song.key_index }}</li>
+    {% endfor %}
+</ul>

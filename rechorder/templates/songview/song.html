@@ -12,6 +12,8 @@
 }
 </style>
 </head>
+<p><a href="{% url 'songs' %}">Back to songs</a></p>
+
 <p>
 
 <h1>{{ song.title }}</h1>
@@ -19,9 +21,11 @@
 
 Current key: {{ song.key.index }}, {{ song.key }},
 
+<p><a href="{% url 'service.add_song' song_id %}">Add to service</a></p>
+
 <p>
     <form action="{% url 'song' song_id %}" method="get">
-        <select name="target_key">
+        <select name="target_key" onchange="this.form.submit()">
         {% for key in keys %}
             <option
                     value="{{ forloop.counter0 }}"
@@ -30,24 +34,10 @@ Current key: {{ song.key.index }}, {{ song.key }},
             </option>
         {% endfor %}
         </select>
-
-        <input type="submit" value="Go" />
     </form>
 </p>
 
-{% for section in song.sections %}
-    <h3>{{ section.title }}</h3>
-    {% for line in section.lines %}
-        <div class="container">
-        {% for block in line %}
-            <div class="block">
-                <b>{{ block.chord }}&nbsp;&nbsp;</b><br>
-                {{ block.lyric | safe}}
-            </div>
-        {% endfor %}
-        </div>
-    {% endfor %}
-{% endfor %}
+{% include "songview/_print_song.html" %}
 
 
 </body>

@@ -1,0 +1,13 @@
+{% for section in song.sections %}
+    <h3>{{ section.title }}</h3>
+    {% for line in section.lines %}
+        <div class="container">
+        {% for block in line %}
+            <div class="block">
+                <b>{{ block.chord }}&nbsp;&nbsp;</b><br>
+                {{ block.lyric | safe}}
+            </div>
+        {% endfor %}
+        </div>
+    {% endfor %}
+{% endfor %}

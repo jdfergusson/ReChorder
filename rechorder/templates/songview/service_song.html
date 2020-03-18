@@ -1,0 +1,29 @@
+<html>
+<head>
+<style>
+.block {
+  color: maroon;
+  float: none;
+}
+
+.container {
+    display: flex;
+    justify-content: flex-start;
+}
+</style>
+</head>
+<p>
+
+<h1>{{ song.title }}</h1>
+{{ song.artist }}
+
+Current key: {{ song.key.index }}, {{ song.key }},
+
+{% if current_index > 0 %}<a href="{% url 'service.song' current_index|add:"-1" %}">Previous</a>{% endif %}
+{% if current_index < max_index %}<a href="{% url 'service.song' current_index|add:"1" %}">Next</a>{% endif %}
+
+{% include "songview/_print_song.html" %}
+
+
+</body>
+</html>

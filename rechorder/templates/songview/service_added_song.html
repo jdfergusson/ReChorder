@@ -1,0 +1,6 @@
+{{ song.title }} in {{ song.key_index }} added to service.
+
+<p>
+    <a href="{% url 'song' song.id %}">Back to song</a>
+    <a href="{% url 'service' %}">Go to service</a>
+</p>

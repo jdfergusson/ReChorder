@@ -1,8 +1,10 @@
+
 import re
 
 from .key import Key
 from .chord import Chord
 from .interpret import interpret_absolute_chord
+
 
 
 class Song:
