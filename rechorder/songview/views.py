@@ -1,12 +1,17 @@
-from django.shortcuts import render, redirect
 from django.http import HttpResponseNotFound
 from django.urls import reverse
+from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import (
+    render,
+    redirect,
+    get_object_or_404,
+)
 
 from songview.music_handler.song import Song as MhSong
 from songview.music_handler.interpret import KEYS
 
 
-from .models import Song
+from .models import Song, BeamMaster
 
 def _get_or_create_set(request):
     d = request.session.get('set')
@@ -20,6 +25,23 @@ def _get_or_create_set(request):
 
 def _get_song_key_index(request, song):
     return request.session.get('keys', {}).get(str(song.pk), MhSong(song.raw).original_key.index)
+
+
+def _get_beam_master(request):
+    bm = None
+    bm_id = request.session.get('beam_master_my_id')
+
+    if bm_id is not None:
+        try:
+            bm = BeamMaster.objects.get(pk=bm_id)
+        except ObjectDoesNotExist:
+            bm = None
+
+    if bm is None:
+        bm= BeamMaster()
+        bm.save()
+        request.session['beam_master_my_id'] = bm.pk
+    return bm
 
 
 def set_add_song(request, song_id):
@@ -71,16 +93,53 @@ def set_show_song(request, song_index):
     except (ValueError, IndexError):
         return HttpResponseNotFound('<h1>Error: Page not found</h1>')
 
-    song = MhSong(Song.objects.get(pk=song_in_set['id']).raw)
+    song_database_object = Song.objects.get(pk=song_in_set['id'])
+
+    # Set service view in database
+    beam = _get_beam_master(request)
+    beam.current_song = song_database_object
+    beam.current_key_index = song_in_set['key_index']
+    beam.save()
+
+    song = MhSong(song_database_object.raw)
 
     song.transpose(song_in_set['key_index'])
 
     context = {
         'song': song,
         'song_id': song_in_set['id'],
+        'am_i_master': True,
         'current_index': song_index,
         'max_index': len(set['songs']) - 1,
     }
+    return render(request, 'songview/song_in_set.html', context)
+
+
+def get_beam_masters(request):
+    context = {
+        'beam_masters': BeamMaster.objects.all()
+    }
+    return render(request, 'songview/beam_masters.html', context)
+
+
+def slave_to_master(request, master_id):
+    master = get_object_or_404(BeamMaster, pk=master_id)
+
+    if master.current_song:
+        song = MhSong(master.current_song.raw)
+        song.transpose(master.current_key_index)
+        context = {
+            'song': song,
+            'song_id': master.current_song.pk,
+            'am_i_master': False,
+        }
+    else:
+        context = {
+            'song': None,
+            'song_id': None,
+            'am_i_master': False,
+        }
+
     return render(request, 'songview/song_in_set.html', context)
 
 

@@ -14,16 +14,21 @@
 </head>
 <p>
 
-<h1>{{ song.title }}</h1>
-{{ song.artist }}
+{% if song %}
+    <h1>{{ song.title }}</h1>
+    {{ song.artist }}
 
-Current key: {{ song.key.index }}, {{ song.key }},
+    Current key: {{ song.key.index }}, {{ song.key }},
 
-{% if current_index > 0 %}<a href="{% url 'set.song' current_index|add:"-1" %}">Previous</a>{% endif %}
-{% if current_index < max_index %}<a href="{% url 'set.song' current_index|add:"1" %}">Next</a>{% endif %}
+    {% if am_i_master %}
+        {% if current_index > 0 %}<a href="{% url 'set.song' current_index|add:"-1" %}">Previous</a>{% endif %}
+        {% if current_index < max_index %}<a href="{% url 'set.song' current_index|add:"1" %}">Next</a>{% endif %}
+    {% endif %}
 
-{% include "songview/_print_song.html" %}
-
+    {% include "songview/_print_song.html" %}
+{% else %}
+    <h1>No song. Waiting for beaming to start...</h1>
+{% endif %}
 
 </body>
 </html>

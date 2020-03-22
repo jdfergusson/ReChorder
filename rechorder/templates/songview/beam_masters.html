@@ -1,0 +1,7 @@
+<h1>Currently or recently beaming</h1>
+
+<ul>
+    {% for master in beam_masters %}
+    <li><a href="{% url 'slave_to' master.pk %}">Last modified on {{ master.last_updated }}</a></li>
+    {% endfor %}
+</ul>
