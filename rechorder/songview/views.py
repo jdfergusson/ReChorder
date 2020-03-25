@@ -1,4 +1,4 @@
-from django.http import HttpResponseNotFound
+from django.http import HttpResponseNotFound, JsonResponse
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import (
@@ -38,10 +38,18 @@ def _get_beam_master(request):
             bm = None
 
     if bm is None:
-        bm= BeamMaster()
+        bm = BeamMaster()
         bm.save()
         request.session['beam_master_my_id'] = bm.pk
     return bm
+
+
+###########################
+# VIEWS
+###########################
+
+def index(request):
+    return render(request, 'songview/index.html')
 
 
 def set_add_song(request, song_id):
@@ -132,15 +140,24 @@ def slave_to_master(request, master_id):
             'song': song,
             'song_id': master.current_song.pk,
             'am_i_master': False,
+            'master_id': master_id,
+            'update_key': master.has_changed_count,
         }
     else:
         context = {
             'song': None,
             'song_id': None,
             'am_i_master': False,
+            'master_id': master_id,
+            'update_key': -1,
         }
 
     return render(request, 'songview/song_in_set.html', context)
+
+
+def slave_get_update_key(request, master_id):
+    master = get_object_or_404(BeamMaster, pk=master_id)
+    return JsonResponse({'update_key': master.has_changed_count})
 
 
 def songs(request):

@@ -1,17 +1,43 @@
 <html>
 <head>
-<style>
-.block {
-  color: maroon;
-  float: none;
-}
+    <style>
+    .block {
+      color: maroon;
+      float: none;
+    }
 
-.container {
-    display: flex;
-    justify-content: flex-start;
-}
-</style>
+    .container {
+        display: flex;
+        justify-content: flex-start;
+    }
+    </style>
+
+    {% if not am_i_master %}
+        <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+        <script type="text/javascript">
+            function checkForUpdates() {
+                $.ajax({
+                    url: '{% url 'slave_key' master_id %}',
+                    success: function (data)
+                    {
+                        if (data.update_key != {{ update_key }})
+                        {
+                            location.reload();
+                        }
+                    }
+                });
+            }
+
+            $(function() {
+                /* Check for an update every second */
+                window.setInterval(checkForUpdates, 1000);
+            });
+
+        </script>
+    {% endif %}
+
 </head>
+<body>
 <p>
 
 {% if song %}
@@ -21,11 +47,13 @@
     Current key: {{ song.key.index }}, {{ song.key }},
 
     {% if am_i_master %}
-        {% if current_index > 0 %}<a href="{% url 'set.song' current_index|add:"-1" %}">Previous</a>{% endif %}
-        {% if current_index < max_index %}<a href="{% url 'set.song' current_index|add:"1" %}">Next</a>{% endif %}
+        {% if current_index > 0 %}<a href="{% url 'set.song' current_index|add:'-1' %}">Previous</a>{% endif %}
+        {% if current_index < max_index %}<a href="{% url 'set.song' current_index|add:'1' %}">Next</a>{% endif %}
     {% endif %}
 
-    {% include "songview/_print_song.html" %}
+    <p>
+        {% include "songview/_print_song.html" %}
+    </p>
 {% else %}
     <h1>No song. Waiting for beaming to start...</h1>
 {% endif %}
