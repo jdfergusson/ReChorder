@@ -25,7 +25,7 @@ Current key: {{ song.key.index }}, {{ song.key }},
 <p><a href="{% url 'set.add_song' song_id %}">Add to set list</a></p>
 
 <p>
-    <form action="{% url 'song' song_id %}" method="get">
+    <form method="get">
         <select name="target_key" onchange="this.form.submit()">
         {% for key in keys %}
             <option

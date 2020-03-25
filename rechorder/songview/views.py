@@ -23,8 +23,13 @@ def _get_or_create_set(request):
     return request.session['set']
 
 
-def _get_song_key_index(request, song):
-    return request.session.get('keys', {}).get(str(song.pk), MhSong(song.raw).original_key.index)
+def _get_key_dict_key(song_id, master_id=-1):
+    return "{}:{}".format(master_id, song_id)
+
+
+def _get_song_key_index(request, song_id, fallback, master_id=-1):
+    key_dict_key = _get_key_dict_key(song_id, master_id)
+    return request.session.get('keys', {}).get(key_dict_key, fallback)
 
 
 def _get_beam_master(request):
@@ -59,7 +64,7 @@ def set_add_song(request, song_id):
 
     song_in_set = {
         'id': song_id,
-        'key_index': _get_song_key_index(request, song),
+        'key_index': _get_song_key_index(request, song.pk, MhSong(song.raw).original_key.index),
     }
 
     set['songs'].append(song_in_set)
@@ -111,7 +116,13 @@ def set_show_song(request, song_index):
 
     song = MhSong(song_database_object.raw)
 
-    song.transpose(song_in_set['key_index'])
+    key_index = _get_song_key_index(
+        request,
+        song_in_set['id'],
+        fallback=song_in_set['key_index'],
+        master_id=beam.pk
+    )
+    song.transpose(key_index)
 
     context = {
         'song': song,
@@ -119,6 +130,8 @@ def set_show_song(request, song_index):
         'am_i_master': True,
         'current_index': song_index,
         'max_index': len(set['songs']) - 1,
+        'master_id': beam.pk,
+        'keys': KEYS,
     }
     return render(request, 'songview/song_in_set.html', context)
 
@@ -133,22 +146,34 @@ def get_beam_masters(request):
 def slave_to_master(request, master_id):
     master = get_object_or_404(BeamMaster, pk=master_id)
 
+    context_base = {
+        'master_id': master_id,
+        'keys': KEYS,
+        'am_i_master': False,
+    }
+
     if master.current_song:
         song = MhSong(master.current_song.raw)
-        song.transpose(master.current_key_index)
+
+        key_index = _get_song_key_index(
+            request,
+            master.current_song.pk,
+            fallback=master.current_key_index,
+            master_id=master_id
+        )
+        song.transpose(key_index)
+
         context = {
+            **context_base,
             'song': song,
             'song_id': master.current_song.pk,
-            'am_i_master': False,
-            'master_id': master_id,
             'update_key': master.has_changed_count,
         }
     else:
         context = {
+            **context_base,
             'song': None,
             'song_id': None,
-            'am_i_master': False,
-            'master_id': master_id,
             'update_key': -1,
         }
 
@@ -158,6 +183,19 @@ def slave_to_master(request, master_id):
 def slave_get_update_key(request, master_id):
     master = get_object_or_404(BeamMaster, pk=master_id)
     return JsonResponse({'update_key': master.has_changed_count})
+
+
+def song_transpose(request):
+    target_key_index = request.GET['target_key_index']
+    dict_key = _get_key_dict_key(request.GET['song_id'], request.GET.get('master_id', -1))
+
+    keys = request.session.get('keys')
+    if keys is None:
+        keys = request.session['keys'] = {}
+    keys[dict_key] = target_key_index
+    request.session.modified = True
+
+    return JsonResponse({})
 
 
 def songs(request):

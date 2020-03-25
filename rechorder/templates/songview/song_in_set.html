@@ -12,9 +12,10 @@
     }
     </style>
 
-    {% if not am_i_master %}
-        <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-        <script type="text/javascript">
+
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript">
+        {% if not am_i_master %}
             function checkForUpdates() {
                 $.ajax({
                     url: '{% url 'slave_key' master_id %}',
@@ -27,14 +28,35 @@
                     }
                 });
             }
+        {% endif %}
 
-            $(function() {
-                /* Check for an update every second */
-                window.setInterval(checkForUpdates, 1000);
+        function transposeSong()
+        {
+            sel = $('#target_key')[0];
+            target_key_index = sel.options[sel.selectedIndex].value;
+            $.ajax({
+                url: '{% url 'song_transpose' %}',
+                data: {
+                    'target_key_index': target_key_index,
+                    'song_id': {{ song_id }},
+                    'master_id': {{ master_id }},
+                },
+                dataType: 'json',
+                success: function (data) {
+                    location.reload();
+                }
             });
+        }
 
-        </script>
-    {% endif %}
+        $(function() {
+            /* Check for an update every second */
+            {% if not am_i_master %}
+                window.setInterval(checkForUpdates, 1000);
+            {% endif %}
+            $('#target_key')[0].value = {{ song.key.index }};
+        });
+
+    </script>
 
 </head>
 <body>
@@ -44,7 +66,17 @@
     <h1>{{ song.title }}</h1>
     {{ song.artist }}
 
-    Current key: {{ song.key.index }}, {{ song.key }},
+    {{ song.key.index }}
+
+    <p>
+        <form method="get">
+            <select name="target_key" onchange="transposeSong()" id="target_key">
+            {% for key in keys %}
+                <option value="{{ forloop.counter0 }}">{{ key }}</option>
+            {% endfor %}
+            </select>
+        </form>
+    </p>
 
     {% if am_i_master %}
         {% if current_index > 0 %}<a href="{% url 'set.song' current_index|add:'-1' %}">Previous</a>{% endif %}

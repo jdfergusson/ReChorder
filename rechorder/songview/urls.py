@@ -4,8 +4,9 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
-    url(r'^songs/$', views.songs, name='songs'),
-    url(r'^songs/(?P<song_id>[0-9]+)$', views.song, name='song'),
+    url(r'^song/$', views.songs, name='songs'),
+    url(r'^song/(?P<song_id>[0-9]+)$', views.song, name='song'),
+    url(r'^song/transpose$', views.song_transpose, name='song_transpose'),
     url(r'^set/addsong/(?P<song_id>[0-9]+)$', views.set_add_song, name='set.add_song'),
     url(r'^set/$', views.set, name='set'),
     url(r'^set/clear/$', views.set_clear, name='set.clear'),

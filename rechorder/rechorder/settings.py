@@ -24,7 +24,7 @@ SECRET_KEY = 'c2&hg!yh-vpa1=q(w4uh7e8h-w&2@*zbf!c^md11@u54by3@^4'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '192.168.10.24']
 
 
 # Application definition
