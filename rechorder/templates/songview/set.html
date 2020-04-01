@@ -1,9 +1,5 @@
 <html>
 <head>
-    <h1>Set list{% if set_songs %} - <a href="{% url 'set.song' 0 %}">Go</a>{% endif %}</h1>
-
-    <a href="{% url 'set.clear' %}">Clear set list</a>
-
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script>
@@ -16,14 +12,10 @@
         {% endfor %}
     ];
 
-    function doThing(event, ui)
-    {
-        onListChange();
-    }
 
     function onListChange()
     {
-        var idsInOrder = $("#sortable").sortable("toArray");
+        var idsInOrder = $("#list-sortable").sortable("toArray");
 
         var new_set = [];
         for (let i = 0; i < idsInOrder.length; i++)
@@ -42,18 +34,32 @@
             url: '{% url 'set.update' %}',
             headers: { "X-CSRFToken": '{{ csrf_token }}' },
             data: {new_set: JSON.stringify(new_set)},
+            dataType: 'json'
+        });
+    }
+
+
+    function clearList() {
+        console.log("Clearing list");
+        $.ajax({
+            url: '{% url 'set.clear' %}',
+            /* It seems ajax requires some data for it to work correctly */
+            data: {clear: true},
             dataType: 'json',
             success: function (data) {
-                console.log(data)
+                location.reload();
             }
         });
     }
 
+
     $( function() {
-        $("#sortable").sortable({
-            update: doThing
-        });
-        $("#sortable").disableSelection();
+        /* Set up sortable list */
+        $("#list-sortable").sortable({update: onListChange});
+        $("#list-sortable").disableSelection();
+        $("#list-sortable .set-item-delete").click(function() {$(this).parent().remove(); onListChange()});
+
+        $("#btn-clear-set-list").click(clearList);
 
         for (let i = 0; i < initial_set_list.length; i++) {
             $("#target-key_" + i)[0].value = initial_set_list[i].key_index;
@@ -64,9 +70,12 @@
 </head>
 <body>
 
-    <ul id="sortable">
+    <h1>Set list{% if set_songs %} - <a href="{% url 'set.song' 0 %}">Go</a>{% endif %}</h1>
+
+    <ul id="list-sortable">
         {% for song in set_songs %}
             <li id="set-item_{{ forloop.counter0 }}_{{ song.id }}">
+                <button class="set-item-delete">X</button>
                 <a href="{% url 'song' song.id %}">{{ song.title }}</a> in
 
                 <select id="target-key_{{ forloop.counter0 }}">
@@ -78,6 +87,12 @@
             </li>
         {% endfor %}
     </ul>
+
+    {% if set_songs.length > 0 %}
+        <button id="btn-clear-set-list">Clear set list</button>
+    {% else %}
+        Set list currently empty. Why not add some <a href="{% url 'songs' %}">songs</a>?
+    {% endif %}
 
 </body>
 </html>

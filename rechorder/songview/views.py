@@ -76,12 +76,10 @@ def set_add_song(request, song_id):
 
 
 def set_clear(request):
-    # TODO: Turn this into an AJAX GET request
     request.session['set'] = None
     _get_or_create_set(request)
     request.session.modified = True
-
-    return redirect(reverse('set'), permanent=True)
+    return JsonResponse({'result': True})
 
 
 def set(request):
