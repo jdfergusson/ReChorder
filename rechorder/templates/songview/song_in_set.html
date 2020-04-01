@@ -35,7 +35,7 @@
             sel = $('#target_key')[0];
             target_key_index = sel.options[sel.selectedIndex].value;
             $.ajax({
-                url: '{% url 'song_transpose' %}',
+                url: '{% url 'song.transpose' %}',
                 data: {
                     'target_key_index': target_key_index,
                     'song_id': {{ song_id }},
@@ -70,7 +70,7 @@
 
     <p>
         <form method="get">
-            <select name="target_key" onchange="transposeSong()" id="target_key">
+            <select id="target_key">
             {% for key in keys %}
                 <option value="{{ forloop.counter0 }}">{{ key }}</option>
             {% endfor %}

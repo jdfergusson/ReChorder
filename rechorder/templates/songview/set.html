@@ -1,9 +1,83 @@
-<h1>Set list{% if set_songs %} - <a href="{% url 'set.song' 0 %}">Go</a>{% endif %}</h1>
+<html>
+<head>
+    <h1>Set list{% if set_songs %} - <a href="{% url 'set.song' 0 %}">Go</a>{% endif %}</h1>
 
-<a href="{% url 'set.clear' %}">Clear set list</a>
+    <a href="{% url 'set.clear' %}">Clear set list</a>
 
-<ul>
-    {% for song in set_songs %}
-        <li><a href="{% url 'song' song.id %}">{{ song.title }}</a> in {{ song.key_index }}</li>
-    {% endfor %}
-</ul>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+    var initial_set_list = [
+        {% for song in set_songs %}
+            {
+                song_id: {{ song.id }},
+                key_index: {{ song.key_index }}
+            },
+        {% endfor %}
+    ];
+
+    function doThing(event, ui)
+    {
+        onListChange();
+    }
+
+    function onListChange()
+    {
+        var idsInOrder = $("#sortable").sortable("toArray");
+
+        var new_set = [];
+        for (let i = 0; i < idsInOrder.length; i++)
+        {
+            song_id = idsInOrder[i].split("_")[2];
+            index = idsInOrder[i].split("_")[1];
+
+            new_set.push({
+                id: parseInt(song_id),
+                key_index: parseInt($("#target-key_" + index)[0].value)
+            });
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url 'set.update' %}',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            data: {new_set: JSON.stringify(new_set)},
+            dataType: 'json',
+            success: function (data) {
+                console.log(data)
+            }
+        });
+    }
+
+    $( function() {
+        $("#sortable").sortable({
+            update: doThing
+        });
+        $("#sortable").disableSelection();
+
+        for (let i = 0; i < initial_set_list.length; i++) {
+            $("#target-key_" + i)[0].value = initial_set_list[i].key_index;
+            $("#target-key_" + i).change(onListChange);
+        }
+    });
+    </script>
+</head>
+<body>
+
+    <ul id="sortable">
+        {% for song in set_songs %}
+            <li id="set-item_{{ forloop.counter0 }}_{{ song.id }}">
+                <a href="{% url 'song' song.id %}">{{ song.title }}</a> in
+
+                <select id="target-key_{{ forloop.counter0 }}">
+                {% for key in keys %}
+                    <option value="{{ forloop.counter0 }}">{{ key }}</option>
+                {% endfor %}
+                </select>
+
+            </li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>

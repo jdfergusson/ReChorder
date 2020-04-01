@@ -7,6 +7,8 @@ from django.shortcuts import (
     get_object_or_404,
 )
 
+import json
+
 from songview.music_handler.song import Song as MhSong
 from songview.music_handler.interpret import KEYS
 
@@ -68,15 +70,15 @@ def set_add_song(request, song_id):
     }
 
     set['songs'].append(song_in_set)
-    song_in_set['title'] = song.title
 
     request.session.modified = True
     return render(request, 'songview/set_added_song.html', {'song': song_in_set})
 
 
 def set_clear(request):
-    set = _get_or_create_set(request)
-    set['songs'] = []
+    # TODO: Turn this into an AJAX GET request
+    request.session['set'] = None
+    _get_or_create_set(request)
     request.session.modified = True
 
     return redirect(reverse('set'), permanent=True)
@@ -95,7 +97,17 @@ def set(request):
         }
         set_songs.append(set_song)
 
-    return render(request, 'songview/set.html', {'set_songs': set_songs})
+    return render(request, 'songview/set.html', {
+        'set_songs': set_songs,
+        'keys': KEYS,
+    })
+
+
+def set_update(request):
+    set = _get_or_create_set(request)
+    set['songs'] = json.loads(request.POST.get('new_set'))
+    request.session.modified = True
+    return JsonResponse({'result': True})
 
 
 def set_show_song(request, song_index):
@@ -207,17 +219,19 @@ def song(request, song_id):
     song = MhSong(Song.objects.get(pk=song_id).raw)
 
     # This gets the user's personal list of keys, or creates it if it doesn't exist
-    keys = request.session.get('keys')
-    if keys is None:
-        keys = request.session['keys'] = {}
+    users_keys = request.session.get('keys')
+    if users_keys is None:
+        users_keys = request.session['keys'] = {}
+
+    key_dict_key = _get_key_dict_key(song_id)
 
     # This is for if we've had a request to change the key
     target_key = request.GET.get('target_key')
     if target_key is not None:
-        keys[song_id] = target_key
+        users_keys[key_dict_key] = target_key
     request.session.modified = True
 
-    key = keys.get(song_id, song.original_key.index)
+    key = users_keys.get(key_dict_key, song.original_key.index)
     song.transpose(key)
 
     context = {
