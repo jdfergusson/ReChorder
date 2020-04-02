@@ -110,6 +110,7 @@ def set_update(request):
 
 def set_show_song(request, song_index):
     set = _get_or_create_set(request)
+
     try:
         song_index = int(song_index)
         song_in_set = set['songs'][song_index]
@@ -196,13 +197,25 @@ def slave_get_update_key(request, master_id):
 
 
 def song_transpose(request):
-    target_key_index = request.GET['target_key_index']
+    try:
+        target_key_index = int(request.GET['target_key_index'])
+    except ValueError:
+        target_key_index = -1
     dict_key = _get_key_dict_key(request.GET['song_id'], request.GET.get('master_id', -1))
 
     keys = request.session.get('keys')
     if keys is None:
         keys = request.session['keys'] = {}
-    keys[dict_key] = target_key_index
+    if 0 <= target_key_index < 12:
+        print("Setting key to %d" % target_key_index)
+        keys[dict_key] = target_key_index
+    else:
+        print("Trying to remove")
+        try:
+            keys.pop(dict_key)
+            print("Removed")
+        except KeyError:
+            pass
     request.session.modified = True
 
     return JsonResponse({})

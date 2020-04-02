@@ -1,3 +1,4 @@
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <html>
 <head>
 <style>
@@ -19,8 +20,6 @@
 
 <h1>{{ song.title }}</h1>
 {{ song.artist }}
-
-Current key: {{ song.key.index }}, {{ song.key }},
 
 <p><a href="{% url 'set.add_song' song_id %}">Add to set list</a></p>
 

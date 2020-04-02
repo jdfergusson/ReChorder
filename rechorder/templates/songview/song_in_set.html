@@ -1,3 +1,4 @@
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <html>
 <head>
     <style>
@@ -30,9 +31,27 @@
             }
         {% endif %}
 
+        function resetTransposition()
+        {
+            $.ajax({
+                url: '{% url 'song.transpose' %}',
+                data: {
+                    /* -1 will delete the current transpositon */
+                    'target_key_index': -1,
+                    'song_id': {{ song_id }},
+                    'master_id': {{ master_id }},
+                },
+                dataType: 'json',
+                success: function (data) {
+                    location.reload();
+                }
+            });
+        }
+
         function transposeSong()
         {
-            sel = $('#target_key')[0];
+            console.log("T1");
+            sel = $('#target-key')[0];
             target_key_index = sel.options[sel.selectedIndex].value;
             $.ajax({
                 url: '{% url 'song.transpose' %}',
@@ -53,7 +72,9 @@
             {% if not am_i_master %}
                 window.setInterval(checkForUpdates, 1000);
             {% endif %}
-            $('#target_key')[0].value = {{ song.key.index }};
+            $('#target-key')[0].value = {{ song.key.index }};
+            $('#target-key').change(transposeSong);
+            $('#key-reset').click(resetTransposition);
         });
 
     </script>
@@ -66,16 +87,13 @@
     <h1>{{ song.title }}</h1>
     {{ song.artist }}
 
-    {{ song.key.index }}
-
     <p>
-        <form method="get">
-            <select id="target_key">
+            <select id="target-key">
             {% for key in keys %}
                 <option value="{{ forloop.counter0 }}">{{ key }}</option>
             {% endfor %}
             </select>
-        </form>
+        <button id="key-reset">Reset</button>
     </p>
 
     {% if am_i_master %}
