@@ -12,11 +12,18 @@ class Song:
         if text:
             self.from_text(text)
 
+    # target_key can be index, absolute key string, or key object
     def transpose(self, target_key):
-        try:
-            target_index = int(target_key) % 12
-        except ValueError:
-            target_index, _, _ = interpret_absolute_chord(target_key)
+        print("Trying to transpose song to {}".format(target_key))
+        if isinstance(target_key, Key):
+            target_index = target_key.index
+        else:
+            try:
+                target_index = int(target_key) % 12
+            except ValueError:
+                target_index, _, _ = interpret_absolute_chord(target_key)
+
+        print("Trying to transpose song to {}".format(target_index))
 
         if target_index is not None:
             self.key.index = target_index

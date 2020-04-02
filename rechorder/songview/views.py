@@ -197,28 +197,32 @@ def slave_get_update_key(request, master_id):
 
 
 def song_transpose(request):
-    try:
-        target_key_index = int(request.GET['target_key_index'])
-    except ValueError:
-        target_key_index = -1
-    dict_key = _get_key_dict_key(request.GET['song_id'], request.GET.get('master_id', -1))
+    # These may raise an exception but that's fine - the data is invalid anyway
+    target_key_index = int(request.GET['target_key_index'])
+    song_id = int(request.GET['song_id'])
+    db_song = get_object_or_404(Song, pk=song_id)
+    master_id = int(request.GET.get('master_id', -1))
 
-    keys = request.session.get('keys')
-    if keys is None:
-        keys = request.session['keys'] = {}
+    dict_key = _get_key_dict_key(song_id, master_id)
+
+    users_keys = request.session.get('keys')
+    if users_keys is None:
+        users_keys = request.session['keys'] = {}
+
     if 0 <= target_key_index < 12:
-        print("Setting key to %d" % target_key_index)
-        keys[dict_key] = target_key_index
+        users_keys[dict_key] = target_key_index
     else:
-        print("Trying to remove")
         try:
-            keys.pop(dict_key)
-            print("Removed")
+            users_keys.pop(dict_key)
         except KeyError:
             pass
     request.session.modified = True
 
-    return JsonResponse({})
+    song = MhSong(db_song.raw)
+    key = _get_song_key_index(request, song_id, song.original_key, master_id)
+    song.transpose(key)
+
+    return render(request, 'songview/_print_song.html', {'song': song})
 
 
 def songs(request):

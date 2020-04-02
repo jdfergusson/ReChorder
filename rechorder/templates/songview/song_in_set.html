@@ -41,8 +41,9 @@
                     'song_id': {{ song_id }},
                     'master_id': {{ master_id }},
                 },
-                dataType: 'json',
                 success: function (data) {
+                    /* This is because we don't know the index of the key we've gone to, and
+                     * the server doesn't return it. Let's just refresh instead */
                     location.reload();
                 }
             });
@@ -50,7 +51,6 @@
 
         function transposeSong()
         {
-            console.log("T1");
             sel = $('#target-key')[0];
             target_key_index = sel.options[sel.selectedIndex].value;
             $.ajax({
@@ -60,9 +60,8 @@
                     'song_id': {{ song_id }},
                     'master_id': {{ master_id }},
                 },
-                dataType: 'json',
                 success: function (data) {
-                    location.reload();
+                    $('#song').html(data);
                 }
             });
         }
@@ -88,11 +87,11 @@
     {{ song.artist }}
 
     <p>
-            <select id="target-key">
-            {% for key in keys %}
-                <option value="{{ forloop.counter0 }}">{{ key }}</option>
-            {% endfor %}
-            </select>
+        <select id="target-key">
+        {% for key in keys %}
+            <option value="{{ forloop.counter0 }}">{{ key }}</option>
+        {% endfor %}
+        </select>
         <button id="key-reset">Reset</button>
     </p>
 
@@ -101,9 +100,9 @@
         {% if current_index < max_index %}<a href="{% url 'set.song' current_index|add:'1' %}">Next</a>{% endif %}
     {% endif %}
 
-    <p>
+    <span id="song">
         {% include "songview/_print_song.html" %}
-    </p>
+    </span>
 {% else %}
     <h1>No song. Waiting for beaming to start...</h1>
 {% endif %}

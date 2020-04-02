@@ -1,44 +1,82 @@
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <html>
 <head>
-<style>
-.block {
-  color: maroon;
-  float: none;
-}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-.container {
-    display: flex;
-    justify-content: flex-start;
-}
-</style>
+    <style>
+    .block {
+      color: maroon;
+      float: none;
+    }
+
+    .container {
+        display: flex;
+        justify-content: flex-start;
+    }
+    </style>
+
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript">
+        function resetTransposition()
+        {
+            $.ajax({
+                url: '{% url 'song.transpose' %}',
+                data: {
+                    /* -1 will delete the current transpositon */
+                    'target_key_index': -1,
+                    'song_id': {{ song_id }},
+                },
+                success: function (data) {
+                    $('#song').html(data);
+                    $('#target-key')[0].value = {{ song.original_key.index }};
+                }
+            });
+        }
+
+        function transposeSong()
+        {
+            sel = $('#target-key')[0];
+            target_key_index = sel.options[sel.selectedIndex].value;
+            $.ajax({
+                url: '{% url 'song.transpose' %}',
+                data: {
+                    'target_key_index': target_key_index,
+                    'song_id': {{ song_id }},
+                },
+                success: function (data) {
+                    $('#song').html(data);
+                }
+            });
+        }
+
+        $(function() {
+            $('#target-key')[0].value = {{ song.key.index }};
+            $('#target-key').change(transposeSong);
+            $('#key-reset').click(resetTransposition);
+        });
+
+    </script>
 </head>
 <body>
-<p><a href="{% url 'songs' %}">Back to songs</a></p>
+    <p><a href="{% url 'songs' %}">Back to songs</a></p>
 
-<p>
+    <h1>{{ song.title }}</h1>
+    {{ song.artist }}
 
-<h1>{{ song.title }}</h1>
-{{ song.artist }}
+    <p><a href="{% url 'set.add_song' song_id %}">Add to set list</a></p>
 
-<p><a href="{% url 'set.add_song' song_id %}">Add to set list</a></p>
-
-<p>
-    <form method="get">
-        <select name="target_key" onchange="this.form.submit()">
+    <p>
+        <select id="target-key">
         {% for key in keys %}
-            <option
-                    value="{{ forloop.counter0 }}"
-                    {% if forloop.counter0 == song.key.index %}selected{% endif %}>
-                {{ key }}
-            </option>
+            <option value="{{ forloop.counter0 }}">{{ key }}</option>
         {% endfor %}
         </select>
-    </form>
-</p>
+        <button id="key-reset">Reset</button>
+    </p>
 
-{% include "songview/_print_song.html" %}
 
+    <span id="song">
+        {% include "songview/_print_song.html" %}
+    </span>
 
 </body>
 </html>
