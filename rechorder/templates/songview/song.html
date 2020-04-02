@@ -16,36 +16,32 @@
 
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
     <script type="text/javascript">
-        function resetTransposition()
+        function doTranspose(key_index)
         {
             $.ajax({
                 url: '{% url 'song.transpose' %}',
                 data: {
-                    /* -1 will delete the current transpositon */
-                    'target_key_index': -1,
+                    'target_key_index': key_index,
                     'song_id': {{ song_id }},
                 },
-                success: function (data) {
-                    $('#song').html(data);
-                    $('#target-key')[0].value = {{ song.original_key.index }};
-                }
+                success: updateSong,
             });
         }
 
-        function transposeSong()
+        function updateSong(data) {
+            /* Data should contain object with song_html and key_index */
+            $('#song').html(data.song_html);
+            $('#target-key')[0].value = data.key_index;
+        }
+
+        function resetTransposition()
         {
+            doTranspose(-1);
+        }
+
+        function transposeSong() {
             sel = $('#target-key')[0];
-            target_key_index = sel.options[sel.selectedIndex].value;
-            $.ajax({
-                url: '{% url 'song.transpose' %}',
-                data: {
-                    'target_key_index': target_key_index,
-                    'song_id': {{ song_id }},
-                },
-                success: function (data) {
-                    $('#song').html(data);
-                }
-            });
+            doTranspose(sel.options[sel.selectedIndex].value);
         }
 
         $(function() {

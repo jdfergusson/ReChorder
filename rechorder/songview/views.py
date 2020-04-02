@@ -3,9 +3,9 @@ from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import (
     render,
-    redirect,
     get_object_or_404,
 )
+from django.template.loader import render_to_string
 
 import json
 
@@ -222,7 +222,11 @@ def song_transpose(request):
     key = _get_song_key_index(request, song_id, song.original_key, master_id)
     song.transpose(key)
 
-    return render(request, 'songview/_print_song.html', {'song': song})
+    json_data = {
+        'song_html': render_to_string('songview/_print_song.html', {'song': song}),
+        'key_index': song.key.index,
+    }
+    return JsonResponse(json_data)
 
 
 def songs(request):
