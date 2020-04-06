@@ -19,7 +19,7 @@
         {% if not am_i_master %}
             function checkForUpdates() {
                 $.ajax({
-                    url: '{% url 'slave_key' master_id %}',
+                    url: '{% url 'slave_key' set_id %}',
                     success: function (data)
                     {
                         if (data.update_key != {{ update_key }})
@@ -38,7 +38,7 @@
                 data: {
                     'target_key_index': key_index,
                     'song_id': {{ song_id }},
-                    'master_id': {{ master_id }},
+                    'set_id': {{ set_id }},
                 },
                 success: updateSong,
             });

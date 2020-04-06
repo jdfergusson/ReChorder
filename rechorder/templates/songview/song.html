@@ -59,6 +59,7 @@
     {{ song.artist }}
 
     <p><a href="{% url 'set.add_song' song_id %}">Add to set list</a></p>
+    <p><a href="{% url 'set.add_song' song_id %}?golive=1">Add song and go live</a></p>
 
     <p>
         <select id="target-key">
