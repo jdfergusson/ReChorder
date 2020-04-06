@@ -60,6 +60,31 @@
             doTranspose(sel.options[sel.selectedIndex].value);
         }
 
+        {% if am_i_master %}
+        function processKeyPress(e) {
+            e = e || window.event;
+
+            {% if current_index > 0 %}
+                if (e.key == 'PageUp') {
+                    if (window.scrollY <= 0)
+                    {
+                        window.location.href = "{% url 'set.song' current_index|add:'-1' %}";
+                    }
+                }
+            {% endif %}
+
+            {% if current_index < max_index %}
+            if (e.key == 'PageDown') {
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight)
+                {
+                    window.location.href = "{% url 'set.song' current_index|add:'1' %}";
+                }
+            }
+            {% endif %}
+        }
+        {% endif %}
+
+
         $(function() {
             /* Check for an update every second */
             {% if not am_i_master %}
@@ -68,6 +93,8 @@
             $('#target-key')[0].value = {{ song.key.index }};
             $('#target-key').change(transposeSong);
             $('#key-reset').click(resetTransposition);
+
+            document.onkeydown = processKeyPress;
         });
 
     </script>
