@@ -90,11 +90,16 @@
             {% if not am_i_master %}
                 window.setInterval(checkForUpdates, 1000);
             {% endif %}
+
+            {% if song %}
             $('#target-key')[0].value = {{ song.key.index }};
             $('#target-key').change(transposeSong);
             $('#key-reset').click(resetTransposition);
+            {% endif %}
 
-            document.onkeydown = processKeyPress;
+            {% if am_i_master %}
+                document.onkeydown = processKeyPress;
+            {% endif %}
         });
 
     </script>
