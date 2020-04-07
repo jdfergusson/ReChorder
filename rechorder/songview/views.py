@@ -9,7 +9,6 @@ from django.template.loader import render_to_string
 
 import json
 
-from songview.music_handler.song import Song as MhSong
 from songview.music_handler.interpret import KEYS
 
 
@@ -123,19 +122,11 @@ def set_show_song(request, song_index):
     except (ValueError, IndexError):
         return HttpResponseNotFound('<h1>Error: Page not found</h1>')
 
-    song_database_object = Song.objects.get(pk=song_in_set['id'])
+    song = Song.objects.get(pk=song_in_set['id'])
 
     # Set service view in database
     set.beamed_song_index = song_index
     set.save()
-
-    song = MhSong(
-        song_database_object.raw,
-        title=song_database_object.title,
-        artist=song_database_object.artist,
-        #TODO: is this original key index? or actual key?
-        original_key=song_database_object.original_key
-    )
 
     key_index = _get_song_key_index(
         request,
@@ -143,11 +134,11 @@ def set_show_song(request, song_index):
         fallback=song_in_set['key_index'],
         set_id=set.pk,
     )
+
     song.transpose(key_index)
 
     context = {
         'song': song,
-        'song_id': song_in_set['id'],
         'am_i_master': True,
         'current_index': song_index,
         'max_index': len(set.song_list) - 1,
@@ -177,18 +168,11 @@ def slave_to_master(request, set_id):
     if set.beamed_song_index is not None and \
             0 <= set.beamed_song_index < len(set.song_list):
         song_in_set = set.song_list[set.beamed_song_index]
-        db_song = get_object_or_404(Song, pk=song_in_set['id'])
-        song = MhSong(
-            db_song.raw,
-            title=db_song.title,
-            artist=db_song.artist,
-            #TODO: is this original key index? or actual key?
-            original_key=db_song.original_key
-        )
+        song = get_object_or_404(Song, pk=song_in_set['id'])
 
         key_index = _get_song_key_index(
             request,
-            db_song.pk,
+            song.pk,
             fallback=song_in_set['key_index'],
             set_id=set_id
         )
@@ -197,14 +181,12 @@ def slave_to_master(request, set_id):
         context = {
             **context_base,
             'song': song,
-            'song_id': db_song.pk,
             'update_key': set.has_changed_count,
         }
     else:
         context = {
             **context_base,
             'song': None,
-            'song_id': None,
             'update_key': -1,
         }
 
@@ -217,10 +199,11 @@ def slave_get_update_key(request, set_id):
 
 
 def song_transpose(request):
+
     # These may raise an exception but that's fine - the data is invalid anyway
     target_key_index = int(request.GET['target_key_index'])
     song_id = int(request.GET['song_id'])
-    db_song = get_object_or_404(Song, pk=song_id)
+    song = get_object_or_404(Song, pk=song_id)
     master_id = int(request.GET.get('master_id', -1))
 
     dict_key = _get_key_dict_key(song_id, master_id)
@@ -238,19 +221,12 @@ def song_transpose(request):
             pass
     request.session.modified = True
 
-    song = MhSong(
-        db_song.raw,
-        title=db_song.title,
-        artist=db_song.artist,
-        #TODO: is this original key index? or actual key?
-        original_key=db_song.original_key
-    )
     key = _get_song_key_index(request, song_id, song.original_key, master_id)
     song.transpose(key)
 
     json_data = {
         'song_html': render_to_string('songview/_print_song.html', {'song': song}),
-        'key_index': song.key.index,
+        'key_index': song.key,
     }
     return JsonResponse(json_data)
 
@@ -265,14 +241,7 @@ def songs(request):
 
 
 def song(request, song_id):
-    db_song = get_object_or_404(Song, pk=song_id)
-    song = MhSong(
-        db_song.raw,
-        title=db_song.title,
-        artist=db_song.artist,
-        #TODO: is this original key index? or actual key?
-        original_key=db_song.original_key
-    )
+    song = get_object_or_404(Song, pk=song_id)
 
     # This gets the user's personal list of keys, or creates it if it doesn't exist
     users_keys = request.session.get('keys')
@@ -287,12 +256,11 @@ def song(request, song_id):
         users_keys[key_dict_key] = target_key
     request.session.modified = True
 
-    key = users_keys.get(key_dict_key, song.original_key.index)
+    key = users_keys.get(key_dict_key, song.original_key)
     song.transpose(key)
 
     context = {
         'song': song,
         'keys': KEYS,
-        'song_id': song_id
     }
     return render(request, 'songview/song.html', context)

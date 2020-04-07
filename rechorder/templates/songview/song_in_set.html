@@ -37,7 +37,7 @@
                 url: '{% url 'song.transpose' %}',
                 data: {
                     'target_key_index': key_index,
-                    'song_id': {{ song_id }},
+                    'song_id': {{ song.pk }},
                     'set_id': {{ set_id }},
                 },
                 success: updateSong,
@@ -92,7 +92,7 @@
             {% endif %}
 
             {% if song %}
-            $('#target-key')[0].value = {{ song.key.index }};
+            $('#target-key')[0].value = {{ song.key }};
             $('#target-key').change(transposeSong);
             $('#key-reset').click(resetTransposition);
             {% endif %}

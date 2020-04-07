@@ -22,7 +22,7 @@
                 url: '{% url 'song.transpose' %}',
                 data: {
                     'target_key_index': key_index,
-                    'song_id': {{ song_id }},
+                    'song_id': {{ song.pk }},
                 },
                 success: updateSong,
             });
@@ -45,7 +45,7 @@
         }
 
         $(function() {
-            $('#target-key')[0].value = {{ song.key.index }};
+            $('#target-key')[0].value = {{ song.key }};
             $('#target-key').change(transposeSong);
             $('#key-reset').click(resetTransposition);
         });
@@ -58,8 +58,8 @@
     <h1>{{ song.title }}</h1>
     {{ song.artist }}
 
-    <p><a href="{% url 'set.add_song' song_id %}">Add to set list</a></p>
-    <p><a href="{% url 'set.add_song' song_id %}?golive=1">Add song and go live</a></p>
+    <p><a href="{% url 'set.add_song' song.pk %}">Add to set list</a></p>
+    <p><a href="{% url 'set.add_song' song.pk %}?golive=1">Add song and go live</a></p>
 
     <p>
         <select id="target-key">

@@ -1,7 +1,7 @@
 from .interpret import interpret_absolute_chord
 
 
-class Key:
+class Key_:
     def __init__(self, text):
         try:
             self.index = int(text) % 12

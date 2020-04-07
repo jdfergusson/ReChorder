@@ -23,8 +23,6 @@ class Song:
             except ValueError:
                 target_index, _, _ = interpret_absolute_chord(target_key)
 
-        print("Trying to transpose song to {}".format(target_index))
-
         if target_index is not None:
             self.key.index = target_index
 
