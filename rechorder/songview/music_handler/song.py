@@ -8,9 +8,9 @@ from .interpret import interpret_absolute_chord
 
 
 class Song:
-    def __init__(self, text=''):
+    def __init__(self, text='', title="", artist="", original_key=None):
         if text:
-            self.from_text(text)
+            self.from_text(text, title=title, artist=artist, original_key=original_key)
 
     # target_key can be index, absolute key string, or key object
     def transpose(self, target_key):
@@ -84,7 +84,7 @@ class Song:
             blocks.append({'chord': Chord(chord, self.key), 'lyric': lyric})
         return blocks
 
-    def from_text(self, text):
+    def from_text(self, text, title="", artist="", original_key=None):
         # line breaks
         text = text.replace('\r', '')
 
@@ -134,11 +134,11 @@ class Song:
 
         self.title = metadata.pop('title')
         if self.title == '':
-            self.title = lines[0]
+            self.title = title
 
         self.artist = metadata.pop('artist')
         if self.artist == '':
-            self.artist = lines[1]
+            self.artist = artist
 
         # Extract key
         if metadata['key'] == '':
@@ -150,8 +150,12 @@ class Song:
                 metadata['key'] = 'C'
 
         # key is the currently displayed key. Modifying that object changes the key of the song as displayed
-        self.original_key = Key(metadata['key'])
-        self.key = Key(metadata['key'])
+        if original_key is None:
+            self.original_key = Key(metadata['key'])
+            self.key = Key(metadata['key'])
+        else:
+            self.original_key = Key(original_key)
+            self.key = Key(original_key)
 
         self.sections = self._extract_sections(body)
 

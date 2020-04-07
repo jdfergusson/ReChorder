@@ -1,9 +1,93 @@
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% load static %}
 
-<h1>Songs</h1>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<ul>
-    {% for song in songs %}
-    <li><a href="{% url 'song' song.id %}">{{ song }}</a></li>
-    {% endfor %}
-</ul>
+    <style>
+        #index {
+            position:fixed;
+            top:0px;
+            right:0px;
+            width:30px;
+            background:rgba(0,0,0,0.1);
+        }
+    </style>
+
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+
+    <script type="text/javascript">
+        function setUpAlphabetIndex() {
+            var previous = "";
+
+            $("#songlist li").each(function() {
+                var current = $(this).text()[0];
+                if (current != previous) {
+                    $(this).attr("id", "first_letter_" + current);
+                    previous = current;
+                    $("#alphabet").append("<a href='#first_letter_" + current + "'>" + current + "</a>&nbsp;");
+                }
+            });
+        }
+
+        function filterByKey(key) {
+            if (key == -1) {
+                $("#songlist li").filter(function() {
+                    $(this).toggle(true);
+                });
+            }
+            else {
+                $("#songlist li").filter(function() {
+                    $(this).toggle($(this).find('.song-key').text() == key)
+                });
+            }
+        }
+
+        $(document).ready(function(){
+            $("#filtertext").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#songlist li").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+
+            setUpAlphabetIndex();
+
+            /* Set up key filters */
+            for (let i = 0; i < 12; i++)
+            {
+                $('#filterByKey' + i).click(function() {filterByKey(i);});
+            }
+            $('#filterByKeyAll').click(function() {filterByKey(-1);});
+        });
+    </script>
+
+</head>
+<body>
+    <h1>Songs</h1>
+
+    <div id="alphabet"></div>
+
+    <p>
+        Filter: <input id="filtertext" />
+    </p>
+    <p>
+        Key Filter:
+        <span id="keyfilters">
+            {% for key in keys %}
+                <button id="filterByKey{{ forloop.counter0 }}">{{ key }}</button>&nbsp;
+            {% endfor %}
+            <button id="filterByKeyAll">All</button>
+        </span>
+    </p>
+
+    <ul id="songlist">
+        {% for song in songs %}
+        <li><a href="{% url 'song' song.id %}">{{ song }}</a>
+            <span class="song-artist">{{ song.artist }}</span>
+            <span class="song-key">{{ song.original_key }}</span></li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>

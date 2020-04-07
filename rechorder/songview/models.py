@@ -1,9 +1,16 @@
 from django.db import models
 from django.urls import reverse
 from django.contrib.postgres.fields import JSONField
+from django.core.validators import MaxValueValidator, MinValueValidator
+
+
 
 class Song(models.Model):
     title = models.CharField(max_length=200)
+    original_key = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(11)]
+    )
+    artist = models.CharField(max_length=200, null=True)
     raw = models.TextField()
 
     def __str__(self):

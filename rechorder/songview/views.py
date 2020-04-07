@@ -59,7 +59,7 @@ def set_add_song(request, song_id):
 
     song_in_set = {
         'id': song_id,
-        'key_index': _get_song_key_index(request, song.pk, MhSong(song.raw).original_key.index),
+        'key_index': _get_song_key_index(request, song.pk, song.original_key),
     }
 
     if request.GET.get('golive'):
@@ -129,7 +129,13 @@ def set_show_song(request, song_index):
     set.beamed_song_index = song_index
     set.save()
 
-    song = MhSong(song_database_object.raw)
+    song = MhSong(
+        song_database_object.raw,
+        title=song_database_object.title,
+        artist=song_database_object.artist,
+        #TODO: is this original key index? or actual key?
+        original_key=song_database_object.original_key
+    )
 
     key_index = _get_song_key_index(
         request,
@@ -172,7 +178,13 @@ def slave_to_master(request, set_id):
             0 <= set.beamed_song_index < len(set.song_list):
         song_in_set = set.song_list[set.beamed_song_index]
         db_song = get_object_or_404(Song, pk=song_in_set['id'])
-        song = MhSong(db_song.raw)
+        song = MhSong(
+            db_song.raw,
+            title=db_song.title,
+            artist=db_song.artist,
+            #TODO: is this original key index? or actual key?
+            original_key=db_song.original_key
+        )
 
         key_index = _get_song_key_index(
             request,
@@ -226,7 +238,13 @@ def song_transpose(request):
             pass
     request.session.modified = True
 
-    song = MhSong(db_song.raw)
+    song = MhSong(
+        db_song.raw,
+        title=db_song.title,
+        artist=db_song.artist,
+        #TODO: is this original key index? or actual key?
+        original_key=db_song.original_key
+    )
     key = _get_song_key_index(request, song_id, song.original_key, master_id)
     song.transpose(key)
 
@@ -238,12 +256,23 @@ def song_transpose(request):
 
 
 def songs(request):
-    songs = Song.objects.all()
-    return render(request, 'songview/songs.html', {'songs': songs})
+    songs = Song.objects.order_by('title')
+    context = {
+        'songs': songs,
+        'keys': KEYS,
+    }
+    return render(request, 'songview/songs.html', context)
 
 
 def song(request, song_id):
-    song = MhSong(Song.objects.get(pk=song_id).raw)
+    db_song = get_object_or_404(Song, pk=song_id)
+    song = MhSong(
+        db_song.raw,
+        title=db_song.title,
+        artist=db_song.artist,
+        #TODO: is this original key index? or actual key?
+        original_key=db_song.original_key
+    )
 
     # This gets the user's personal list of keys, or creates it if it doesn't exist
     users_keys = request.session.get('keys')
