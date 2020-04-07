@@ -199,14 +199,13 @@ def slave_get_update_key(request, set_id):
 
 
 def song_transpose(request):
-
     # These may raise an exception but that's fine - the data is invalid anyway
     target_key_index = int(request.GET['target_key_index'])
     song_id = int(request.GET['song_id'])
     song = get_object_or_404(Song, pk=song_id)
-    master_id = int(request.GET.get('master_id', -1))
+    set_id = int(request.GET.get('set_id', -1))
 
-    dict_key = _get_key_dict_key(song_id, master_id)
+    dict_key = _get_key_dict_key(song_id, set_id)
 
     users_keys = request.session.get('keys')
     if users_keys is None:
@@ -221,7 +220,7 @@ def song_transpose(request):
             pass
     request.session.modified = True
 
-    key = _get_song_key_index(request, song_id, song.original_key, master_id)
+    key = _get_song_key_index(request, song_id, song.original_key, set_id)
     song.transpose(key)
 
     json_data = {
