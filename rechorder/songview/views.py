@@ -1,4 +1,4 @@
-from django.http import HttpResponseNotFound, JsonResponse
+from django.http import HttpResponseNotFound, HttpResponseBadRequest, JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import (
     render,
@@ -196,6 +196,58 @@ def slave_to_master(request, set_id):
 def slave_get_update_key(request, set_id):
     set = get_object_or_404(Set, pk=set_id)
     return JsonResponse({'update_key': set.has_changed_count})
+
+
+def song_edit(request, song_id):
+    song = get_object_or_404(Song, pk=song_id)
+    context = {
+        'song': song,
+        'keys': KEYS,
+    }
+    return render(request, 'songview/song_edit.html', context)
+
+
+def song_change_data(request, song_id):
+    song = get_object_or_404(Song, pk=song_id)
+
+    title = request.POST.get('title')
+    artist = request.POST.get('artist')
+    original_key = request.POST.get('original_key')
+    content = request.POST.get('content')
+
+    if None not in (title, artist, original_key, content):
+        song.title = title
+        song.artist = artist
+        song.original_key = original_key
+        song.raw = content
+        song.save()
+
+        return JsonResponse({'success': True})
+    return HttpResponseBadRequest('Invalid POST data')
+
+
+def song_delete(request, song_id):
+    song = get_object_or_404(Song, pk=song_id)
+    song.delete()
+    return JsonResponse({'success': True})
+
+
+def song_create(request):
+    if request.POST:
+        song = Song(
+            title=request.POST.get('title'),
+            artist=request.POST.get('artist'),
+            original_key=request.POST.get('original_key'),
+            raw=request.POST.get('content')
+        )
+        song.save()
+        return JsonResponse({
+            'success': True,
+            'new_song_url': song.get_absolute_url(),
+        })
+
+    else:
+        return render(request, 'songview/song_create.html', {'keys': KEYS})
 
 
 def song_transpose(request):
