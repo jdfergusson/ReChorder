@@ -107,6 +107,7 @@ class Set(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
     beamed_song_index = models.IntegerField(null=True, default=None)
     has_changed_count = models.IntegerField(default=0)
+    name = models.CharField(max_length=200, default='')
 
     def save(self, *args, **kwargs):
         if self.beamed_song_index is not None:
@@ -114,3 +115,14 @@ class Set(models.Model):
                 self.beamed_song_index = None
         self.has_changed_count = self.has_changed_count + 1 % 10000
         super().save(*args, **kwargs)
+
+    def check_list_integrity(self):
+        """
+        This is basically a hack for not having implemented a properly relational song list
+        """
+        self.song_list = [song for song in self.song_list if Song.objects.filter(pk=song['id']).exists()]
+        # Don't update the has_changed_count here
+        super().save()
+
+    def __str__(self):
+        return '"{}" containing {} songs'.format(self.name, len(self.song_list))

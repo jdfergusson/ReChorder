@@ -8,6 +8,7 @@ from django.shortcuts import (
 from django.template.loader import render_to_string
 
 import json
+import datetime
 
 from songview.music_handler.interpret import KEYS
 
@@ -31,6 +32,7 @@ def _get_or_create_my_set(request):
     if set_id is not None:
         try:
             set = Set.objects.get(pk=set_id)
+            set.check_list_integrity()
         except ObjectDoesNotExist:
             set = None
 
@@ -83,7 +85,7 @@ def set_clear(request):
     set.song_list = []
     set.beamed_song_index = -1
     set.save()
-    return JsonResponse({'result': True})
+    return JsonResponse({'success': True})
 
 
 def set(request):
@@ -101,6 +103,7 @@ def set(request):
 
     return render(request, 'songview/set.html', {
         'set_songs': set_songs,
+        'set': set,
         'keys': KEYS,
     })
 
@@ -109,7 +112,15 @@ def set_update(request):
     set = _get_or_create_my_set(request)
     set.song_list = json.loads(request.POST.get('new_set'))
     set.save()
-    return JsonResponse({'result': True})
+    return JsonResponse({'success': True})
+
+
+def set_rename(request):
+    print(request.POST)
+    set = _get_or_create_my_set(request)
+    set.name = request.POST.get('name')[:200]
+    set.save()
+    return JsonResponse({'success': True, 'new_name': set.name})
 
 
 def set_show_song(request, song_index):
@@ -149,9 +160,13 @@ def set_show_song(request, song_index):
 
 
 def get_beam_masters(request):
+    update_time_cutoff = datetime.datetime.now() - datetime.timedelta(days=1)
     context = {
         # Will get all sets that have a beamed song index
-        'beam_masters': Set.objects.filter(beamed_song_index__gte=0)
+        'sets': Set.objects.filter(
+            beamed_song_index__isnull=False,
+            last_updated__gte=update_time_cutoff,
+        ).order_by('-last_updated'),
     }
     return render(request, 'songview/beam_masters.html', context)
 

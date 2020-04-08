@@ -1,8 +1,11 @@
+{% load humanize %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <h1>Currently or recently beaming</h1>
 
 <ul>
-    {% for master in beam_masters %}
-    <li><a href="{% url 'slave_to' master.pk %}">Last modified on {{ master.last_updated }}</a></li>
+    {% for set in sets %}
+    <li><a href="{% url 'slave_to' set.pk %}">"{{ set.name }}" - last used {{ set.last_updated|naturaltime }}</a></li>
     {% endfor %}
 </ul>
+
+<a href="javascript:history.go(0)">Refresh list</a>

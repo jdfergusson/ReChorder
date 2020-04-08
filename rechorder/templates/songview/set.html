@@ -75,12 +75,42 @@
             $("#target-key_" + i)[0].value = initial_set_list[i].key_index;
             $("#target-key_" + i).change(onListChange);
         }
+
+        $('#name-read-only').text("{{ set.name }}");
+        $('#input-set-name').val("{{ set.name }}");
+        $('#name-edit').hide();
+        $('#btn-rename').click(function() {
+            $('#name-edit').show()
+            $('#name-show').hide()
+        });
+        $('#btn-name-edit-done').click(function() {
+            $.ajax({
+                type: 'POST',
+                url: '{% url 'set.rename' %}',
+                headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                data: {
+                    'name': $('#input-set-name').val(),
+                },
+                dataType: 'json',
+                success: function(data) {
+                    $('#name-read-only').text(data.new_name);
+                    $('#input-set-name').val(data.new_name);
+                    $('#name-edit').hide()
+                    $('#name-show').show()
+                }
+            });
+        });
     });
     </script>
 </head>
 <body>
 
     <h1>Set list{% if set_songs %} - <a href="{% url 'set.song' 0 %}">Go</a>{% endif %}</h1>
+
+    <p>
+        <span id="name-edit"><input id="input-set-name"><button id="btn-name-edit-done">Done</button></span>
+        <span id="name-show"><span id="name-read-only"></span><button id="btn-rename">Rename</button></span>
+    </p>
 
     <ul id="list-sortable">
         {% for song in set_songs %}
