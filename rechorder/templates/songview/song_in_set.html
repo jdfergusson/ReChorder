@@ -32,34 +32,6 @@
             }
         {% endif %}
 
-        function doTranspose(key_index)
-        {
-            $.ajax({
-                url: '{% url 'song.transpose' %}',
-                data: {
-                    'target_key_index': key_index,
-                    'song_id': {{ song.pk }},
-                    'set_id': {{ set_id }},
-                },
-                success: updateSong,
-            });
-        }
-
-        function updateSong(data) {
-            /* Data should contain object with song_html and key_index */
-            $('#song').html(data.song_html);
-            $('#target-key')[0].value = data.key_index;
-        }
-
-        function resetTransposition()
-        {
-            doTranspose(-1);
-        }
-
-        function transposeSong() {
-            sel = $('#target-key')[0];
-            doTranspose(sel.options[sel.selectedIndex].value);
-        }
 
         {% if am_i_master %}
         function processKeyPress(e) {
@@ -92,18 +64,13 @@
                 window.setInterval(checkForUpdates, 1000);
             {% endif %}
 
-            {% if song %}
-            $('#target-key')[0].value = {{ song.key }};
-            $('#target-key').change(transposeSong);
-            $('#key-reset').click(resetTransposition);
-            {% endif %}
-
             {% if am_i_master %}
                 document.onkeydown = processKeyPress;
             {% endif %}
         });
 
     </script>
+
 
 </head>
 <body>
@@ -113,14 +80,7 @@
     <h1>{{ song.title }}</h1>
     {{ song.artist }}
 
-    <p>
-        <select id="target-key">
-        {% for key in keys %}
-            <option value="{{ forloop.counter0 }}">{{ key }}</option>
-        {% endfor %}
-        </select>
-        <button id="key-reset">Reset</button>
-    </p>
+    {% include "songview/_transposer.html" %}
 
     {% if am_i_master %}
         {% if current_index > 0 %}<a href="{% url 'set.song' current_index|add:'-1' %}">Previous</a>{% endif %}

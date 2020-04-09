@@ -1,0 +1,168 @@
+
+{# Requires keys, song, chord_shapes, frets, cnotes #}
+
+{{ key_details|json_script:"init_key_details" }}
+
+<script type="text/javascript">
+    function getFormData($form){
+        var unindexed_array = $form.serializeArray();
+        var indexed_array = {};
+
+        $.map(unindexed_array, function(n, i){
+            indexed_array[n['name']] = n['value'];
+        });
+
+        return indexed_array;
+    }
+
+    function updateSong(data) {
+        /* Data should contain object with song_html and key_index */
+        $('#song').html(data.song_html);
+        setTransposeUi(data.key_details);
+    }
+
+    function setTransposeUi(key_details) {
+        $('#tran-sk-key').val(key_details.sounding_key_index)
+        $('#tran-gc-capo').val(key_details.capo_fret_number)
+        $('#tran-abs-sel').val(key_details.key_index);
+
+        switch (key_details.transpose_data['adv-tran-opt']) {
+            case 'sk':
+            default:
+                $('#tran-sk-rad').prop('checked', true);
+                break;
+            case 'cs':
+                $('#tran-cs-rad').prop('checked', true);
+                $('#tran-cs-auto').prop('checked', true);
+                $('#tran-cs-shape').val(key_details.transpose_data['chord-shape-index']);
+                $('#tran-cs-auto').prop('checked', key_details.transpose_data.hasOwnProperty('tran-cs-auto'));
+                break;
+            case 'gc':
+                $('#tran-gc-rad').prop('checked', true);
+                break;
+            case 'ti':
+                $('#tran-ti-rad').prop('checked', true);
+                $('#tran-ti-cnote').val(key_details.transpose_data['tran-ti-cnote']);
+                break;
+            case 'abs':
+                $('#tran-abs-rad').prop('checked', true);
+                break;
+        }
+
+        enableAndDisableTransposeFields(key_details.transpose_data['adv-tran-opt']);
+    }
+
+    function enableAndDisableTransposeFields(transpose_type) {
+        /* Disable all */
+        $('#tran-cs-shape').prop('disabled', true);
+        $('#tran-cs-auto').prop('disabled', true);
+        $('#tran-gc-capo').prop('disabled', true);
+        $('#tran-ti-cnote').prop('disabled', true);
+        $('#tran-abs-sel').prop('disabled', true);
+
+        /* Re-enable relevant line */
+        switch (transpose_type) {
+            case 'cs':
+                $('#tran-cs-auto').prop('disabled', false);
+                if (!$('#tran-cs-auto').prop('checked')) {
+                    $('#tran-cs-shape').prop('disabled', false);
+                }
+                break;
+            case 'gc':
+                $('#tran-gc-capo').prop('disabled', false);
+                break;
+            case 'ti':
+                $('#tran-ti-cnote').prop('disabled', false);
+                break;
+            case 'abs':
+                $('#tran-abs-sel').prop('disabled', false);
+                break;
+        }
+    }
+
+    function transposeSettingsChanged() {
+        enableAndDisableTransposeFields($('input[name=adv-tran-opt]:checked', '#transposer').val());
+
+        $.ajax({
+            url: '{% url 'song.transpose' %}',
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            data: {
+                'song_id': {{ song.id }},
+                {% if set_id %}
+                'sounding_key_index': "{{ key_details.sounding_key_index }}",
+                'set_id': "{{ set_id }}",
+                {% endif %}
+                'transpose_data': JSON.stringify(getFormData($('#transposer'))),
+            },
+            success: updateSong,
+        });
+    }
+
+    $(function() {
+        $('#transposer input, #transposer select').each(function(index) {
+            $(this).change(transposeSettingsChanged);
+        });
+
+        setTransposeUi(JSON.parse($('#init_key_details').text()));
+    });
+</script>
+
+<form id="transposer">
+    Sounded key:
+    {% if sk_editable == 'true' %}
+        <select id="tran-sk-key" name="sounding-key">
+        {% for key in keys %}
+            <option value="{{ forloop.counter0 }}">{{ key }}</option>
+        {% endfor %}
+        </select>
+        <button id="tran-reset">Reset to original key</button>
+    {% else %}
+    <span id="sk-read-only">{{ key_details.sounding_key_index }}</span>
+    {% endif %}
+    <br>
+
+    <input type="radio" id="tran-sk-rad" name="adv-tran-opt" value="sk">
+    <label for="tran-sk-rad">
+        Display in sounded key
+    </label>
+    <br>
+
+    <input type="radio" id="tran-cs-rad" name="adv-tran-opt" value="cs">
+    <label for="tran-cs-rad">Chord shapes</label>
+    <select id="tran-cs-shape" name="chord-shape-index">
+        {% for shape in chord_shapes %}
+            <option value="{{ shape.index }}">{{ shape.name }} shapes</option>
+        {% endfor %}
+    </select>
+    <input type="checkbox" id="tran-cs-auto" name="tran-cs-auto" value="auto">
+    <label for="tran-cs-auto">Choose for me</label>
+    <a href="#">Auto settings</a>
+    <br>
+
+    <input type="radio" id="tran-gc-rad" name="adv-tran-opt" value="gc">
+    <label for="tran-gc-rad">I'm putting my capo on fret</label>
+    <select id="tran-gc-capo" name="capo-fret-number">
+        {% for fret in frets %}
+            <option value="{{ fret }}">{{ fret }}</option>
+        {% endfor %}
+    </select>
+    <br>
+
+    <input type="radio" id="tran-ti-rad" name="adv-tran-opt" value="ti">
+    <label for="tran-ti-rad">Transposing instrument in</label>
+    <select id="tran-ti-cnote" name="transposing-cnote">
+        {% for cnote in cnotes %}
+            <option value="{{ cnote.index }}">{{ cnote.name }}</option>
+        {% endfor %}
+    </select>
+    <br>
+
+    <input type="radio" id="tran-abs-rad" name="adv-tran-opt" value="abs">
+    <label for="tran-abs-rad">Force song to show in</label>
+    <select id="tran-abs-sel" name="absolute-force-index">
+    {% for key in keys %}
+        <option value="{{ forloop.counter0 }}">{{ key }}</option>
+    {% endfor %}
+    </select>
+</form>
