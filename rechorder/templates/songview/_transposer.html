@@ -42,7 +42,7 @@
                 break;
             case 'ti':
                 $('#tran-ti-rad').prop('checked', true);
-                $('#tran-ti-cnote').val(key_details.transpose_data['tran-ti-cnote']);
+                $('#tran-ti-cnote').val(key_details.transpose_data['transposing-cnote']);
                 break;
             case 'abs':
                 $('#tran-abs-rad').prop('checked', true);
@@ -104,6 +104,12 @@
             $(this).change(transposeSettingsChanged);
         });
 
+        $('#tran-reset').click(function() {
+            $('#tran-sk-key').val({{ song.original_key }});
+            $('#tran-sk-rad').prop('checked', true);
+            transposeSettingsChanged();
+        });
+
         setTransposeUi(JSON.parse($('#init_key_details').text()));
     });
 </script>
@@ -116,7 +122,7 @@
             <option value="{{ forloop.counter0 }}">{{ key }}</option>
         {% endfor %}
         </select>
-        <button id="tran-reset">Reset to original key</button>
+        <button id="tran-reset" type="button">Reset to original key</button>
     {% else %}
     <span id="sk-read-only">{{ key_details.sounding_key_index }}</span>
     {% endif %}
