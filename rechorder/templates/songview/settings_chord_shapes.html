@@ -1,0 +1,58 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript">
+
+        function getFormData($form){
+            var unindexed_array = $form.serializeArray();
+            var indexed_array = {};
+
+            $.map(unindexed_array, function(n, i){
+                indexed_array[n['name']] = n['value'];
+            });
+
+            return indexed_array;
+        }
+
+        function update() {
+            $.ajax({
+            url: '{% url 'settings.chord_shapes' %}',
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            data: {
+                'permitted_shapes': JSON.stringify(getFormData($('#shape-selection'))),
+            },
+            success: function() {
+                console.log("success");
+            },
+        });
+        }
+
+        $(function() {
+            $('input').each(function(index) {
+                $(this).change(update);
+                $(this).prop('checked', false);
+            });
+
+            {% for index in selected_shapes %}
+                $('#check-{{ index }}').prop('checked', true);
+            {% endfor %}
+        });
+
+    </script>
+</head>
+<body>
+    Select chord shape keys you're comfortable with:
+
+    <form id="shape-selection"><ul>
+        {% for shape in possible_shapes %}
+            <li>
+                <input type="checkbox" id="check-{{ shape.index }}" name="{{ shape.index }}">
+                <label for="check-{{ shape.index }}">{{ shape.name }}</label>
+            </li>
+        {% endfor %}
+    </ul></form>
+</body>
+</html>

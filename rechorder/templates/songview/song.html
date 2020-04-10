@@ -22,7 +22,8 @@
     <p><a href="{% url 'songs' %}">Back to songs</a></p>
 
     <h1>{{ song.title }}</h1>
-    {{ song.artist }}
+    {{ song.artist }}<br>
+    Key of: <span id="key-shown"></span>. Capo: <span id="key-capo"></span>
 
     <p><a href="{% url 'song.edit' song.pk %}">Edit</a></p>
     <p><a href="{% url 'set.add_song' song.pk %}">Add to set list</a></p>

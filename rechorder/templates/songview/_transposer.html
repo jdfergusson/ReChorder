@@ -22,6 +22,11 @@
     }
 
     function setTransposeUi(key_details) {
+        /* For implementing somewhere else on the page */
+        $('#key-sk').text(key_details.sounding_key_index);
+        $('#key-shown').text(key_details.key_index);
+        $('#key-capo').text(key_details.capo_fret_number);
+
         $('#tran-sk-key').val(key_details.sounding_key_index)
         $('#tran-gc-capo').val(key_details.capo_fret_number)
         $('#tran-abs-sel').val(key_details.key_index);
@@ -33,8 +38,7 @@
                 break;
             case 'cs':
                 $('#tran-cs-rad').prop('checked', true);
-                $('#tran-cs-auto').prop('checked', true);
-                $('#tran-cs-shape').val(key_details.transpose_data['chord-shape-index']);
+                $('#tran-cs-shape').val(key_details.key_index);
                 $('#tran-cs-auto').prop('checked', key_details.transpose_data.hasOwnProperty('tran-cs-auto'));
                 break;
             case 'gc':
@@ -138,12 +142,16 @@
     <label for="tran-cs-rad">Chord shapes</label>
     <select id="tran-cs-shape" name="chord-shape-index">
         {% for shape in chord_shapes %}
-            <option value="{{ shape.index }}">{{ shape.name }} shapes</option>
+            {% if shape.index == -1 %}
+                <option disabled>──────────</option>
+            {% else %}
+                <option value="{{ shape.index }}">{{ shape.name }} shapes</option>
+            {% endif %}
         {% endfor %}
     </select>
     <input type="checkbox" id="tran-cs-auto" name="tran-cs-auto" value="auto">
     <label for="tran-cs-auto">Choose for me</label>
-    <a href="#">Auto settings</a>
+    <a href="{% url 'settings.chord_shapes' %}">Auto settings</a>
     <br>
 
     <input type="radio" id="tran-gc-rad" name="adv-tran-opt" value="gc">

@@ -13,14 +13,18 @@ from copy import deepcopy
 import json
 import datetime
 
-from songview.music_handler.interpret import KEYS, ABSOLUTE_LOOKUP
+from songview.music_handler.interpret import KEYS, ABSOLUTE_LOOKUP, interpret_absolute_chord
 
 
 from .models import Song, Set
 
 
-def _get_key_dict_key(song_id, set_id=-1):
-    return "{}:{}".format(set_id, song_id)
+def _get_selected_chord_shapes(request):
+    if 'selected_chord_shapes' not in request.session:
+        # Start with C, D, E and G
+        request.session['selected_chord_shapes'] = [3, 5, 7, 10]
+        request.session.modified = True
+    return request.session['selected_chord_shapes']
 
 
 def _get_or_create_my_set(request):
@@ -63,12 +67,14 @@ def _get_song_key_index(request, song, set_id=-1, sounding_key_index=None):
         if transpose_type == 'sk':
             key_index = sounding_key_index
         elif transpose_type == 'cs':
-            if transpose_data.get('trans-cs-auto') is None:
+            print(transpose_data)
+            if 'tran-cs-auto' not in transpose_data:
                 key_index = int(transpose_data.get('chord-shape-index'))
-                capo_fret_number = (sounding_key_index - key_index) % 12
             else:
-                pass
-                #TODO implement auto chord settings
+                permitted_shape_keys = _get_selected_chord_shapes(request) or [sounding_key_index]
+                deltas = [(i - sounding_key_index - 1) % 12 for i in permitted_shape_keys]
+                key_index = permitted_shape_keys[deltas.index(max(deltas))]
+            capo_fret_number = (sounding_key_index - key_index) % 12
         elif transpose_type == 'gc':
             capo_fret_number = int(transpose_data.get('capo-fret-number', 0))
             key_index = (sounding_key_index - capo_fret_number) % 12
@@ -95,6 +101,17 @@ def _get_key_details(request, song, set_id=-1, sounding_key_index=None):
 
 
 def _get_base_song_context_dict(request, song, set_id=-1, sounding_key_index=None):
+    chord_shapes = []
+    selected_chord_shapes = _get_selected_chord_shapes(request)
+    for shape_index in selected_chord_shapes:
+        chord_shapes.append({'index': shape_index, 'name': KEYS[shape_index]})
+    # This will put a divider in the select box if we've got selected chord shapes
+    if chord_shapes:
+        chord_shapes.append({'index': -1, 'name': ''})
+    for shape_index in range(12):
+        if shape_index not in selected_chord_shapes:
+            chord_shapes.append({'index': shape_index, 'name': KEYS[shape_index]})
+
     return {
         'keys': KEYS,
         'frets': [i for i in range(12)],
@@ -103,12 +120,7 @@ def _get_base_song_context_dict(request, song, set_id=-1, sounding_key_index=Non
             {'index': 6, 'name': 'Eb'},
             {'index': 7, 'name': 'F'},
         ],
-        'chord_shapes': [
-            {'index': 5, 'name': 'D'},
-            {'index': 10, 'name': 'G'},
-            {'index': 0, 'name': 'A'},
-            {'index': 7, 'name': 'E'},
-        ],
+        'chord_shapes': chord_shapes,
         'key_details': _get_key_details(request, song, set_id, sounding_key_index),
     }
 
@@ -260,7 +272,7 @@ def slave_to_master(request, set_id):
         context = {
             **context_base,
             'song': song,
-            'update_key': set.has_changed_count,
+            'update_token': set.has_changed_count,
             'capo_fret_number': capo_fret_number,
             **_get_base_song_context_dict(request, song, set_id, song_in_set['key_index']),
         }
@@ -268,15 +280,15 @@ def slave_to_master(request, set_id):
         context = {
             **context_base,
             'song': None,
-            'update_key': -1,
+            'update_token': -1,
         }
 
     return render(request, 'songview/song_in_set.html', context)
 
 
-def slave_get_update_key(request, set_id):
+def slave_get_update_token(request, set_id):
     set = get_object_or_404(Set, pk=set_id)
-    return JsonResponse({'update_key': set.has_changed_count})
+    return JsonResponse({'update_token': set.has_changed_count})
 
 
 def song_edit(request, song_id):
@@ -373,8 +385,6 @@ def song_transpose(request):
     return JsonResponse(json_data)
 
 
-
-
 def songs(request):
     songs = Song.objects.order_by('title')
     context = {
@@ -395,3 +405,18 @@ def song(request, song_id):
         **_get_base_song_context_dict(request, song),
     }
     return render(request, 'songview/song.html', context)
+
+
+def settings_chord_shapes(request):
+    if request.POST:
+        request.session['selected_chord_shapes'] = \
+            [int(i) for i in json.loads(request.POST.get('permitted_shapes', ''))]
+        request.session.modified = True
+        return JsonResponse({'success': True})
+    else:
+        context = {
+            'selected_shapes': _get_selected_chord_shapes(request),
+            'possible_shapes': [{'name': i, 'index': interpret_absolute_chord(i)[0]} for i in KEYS],
+        }
+        print(context)
+        return render(request, 'songview/settings_chord_shapes.html', context)

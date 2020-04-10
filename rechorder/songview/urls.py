@@ -13,11 +13,12 @@ urlpatterns = [
     url(r'^song/transpose$', views.song_transpose, name='song.transpose'),
     url(r'^set/addsong/(?P<song_id>[0-9]+)$', views.set_add_song, name='set.add_song'),
     url(r'^set/$', views.set, name='set'),
-    url(r'^set/update/$', views.set_update, name='set.update'),
-    url(r'^set/clear/$', views.set_clear, name='set.clear'),
-    url(r'^set/rename/$', views.set_rename, name='set.rename'),
+    url(r'^set/update$', views.set_update, name='set.update'),
+    url(r'^set/clear$', views.set_clear, name='set.clear'),
+    url(r'^set/rename$', views.set_rename, name='set.rename'),
     url(r'^set/song/(?P<song_index>[0-9]+)$', views.set_show_song, name='set.song'),
     url(r'^slave/$', views.get_beam_masters, name='slave'),
     url(r'^slave/(?P<set_id>[0-9]+)$', views.slave_to_master, name='slave_to'),
-    url(r'^slave/(?P<set_id>[0-9]+)/key$', views.slave_get_update_key, name='slave_key'),
+    url(r'^slave/(?P<set_id>[0-9]+)/token$', views.slave_get_update_token, name='slave_token'),
+    url(r'^settings/shapes$', views.settings_chord_shapes, name='settings.chord_shapes')
 ]
