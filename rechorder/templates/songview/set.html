@@ -131,6 +131,8 @@
 
     {% if set_songs %}
         <button id="btn-clear-set-list">Clear set list</button>
+        <br>
+        <a href="{% url 'set.print' set.pk %}">Print set</a>
     {% else %}
         Set list currently empty. Why not add some <a href="{% url 'songs' %}">songs</a>?
     {% endif %}

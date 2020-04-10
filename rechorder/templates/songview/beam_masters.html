@@ -4,7 +4,9 @@
 
 <ul>
     {% for set in sets %}
-    <li><a href="{% url 'slave_to' set.pk %}">"{{ set.name }}" - last used {{ set.last_updated|naturaltime }}</a></li>
+    <li><a href="{% url 'slave_to' set.pk %}">"{{ set.name }}" -
+        last used {{ set.last_updated|naturaltime }}</a> -
+        <a href="{% url 'set.print' set.pk %}">Print</a></li>
     {% endfor %}
 </ul>
 

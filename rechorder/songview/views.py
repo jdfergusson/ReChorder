@@ -67,7 +67,6 @@ def _get_song_key_index(request, song, set_id=-1, sounding_key_index=None):
         if transpose_type == 'sk':
             key_index = sounding_key_index
         elif transpose_type == 'cs':
-            print(transpose_data)
             if 'tran-cs-auto' not in transpose_data:
                 key_index = int(transpose_data.get('chord-shape-index'))
             else:
@@ -238,6 +237,39 @@ def set_show_song(request, song_index):
         **_get_base_song_context_dict(request, song, set.pk, song_in_set['key_index']),
     }
     return render(request, 'songview/song_in_set.html', context)
+
+
+def set_print(request, set_id):
+
+    set = get_object_or_404(Set, pk=set_id)
+    set.check_list_integrity()
+
+    songs = []
+    for song_in_set in set.song_list:
+        song = Song.objects.get(pk=song_in_set['id'])
+        request.GET.get('no_personal_keys', False)
+        if request.GET.get('no_personal_keys', False):
+            key_index =  song_in_set['key_index']
+            capo_fret_number = 0
+        else:
+            key_index, capo_fret_number = _get_song_key_index(request, song, set.pk, song_in_set['key_index'])
+
+        songs.append({
+            'song': song,
+            'sounding_key_index': song_in_set['key_index'],
+            'key_index': key_index,
+            'capo_fret_number': capo_fret_number,
+        })
+
+    context = {
+        'songs': songs,
+        'set_id': set.pk,
+    }
+
+    if request.GET.get('no_personal_keys', False):
+       context['no_personal_keys'] = True
+
+    return render(request, 'songview/print_set.html', context)
 
 
 def get_beam_masters(request):
@@ -418,5 +450,4 @@ def settings_chord_shapes(request):
             'selected_shapes': _get_selected_chord_shapes(request),
             'possible_shapes': [{'name': i, 'index': interpret_absolute_chord(i)[0]} for i in KEYS],
         }
-        print(context)
         return render(request, 'songview/settings_chord_shapes.html', context)
