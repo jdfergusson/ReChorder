@@ -1,8 +1,22 @@
+{% load static %}
+
+
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
+    body, html {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    body a {
+        color: #626262;
+        font-variant: small-caps;
+    }
+
     .block {
       color: maroon;
       float: none;
@@ -12,30 +26,143 @@
         display: flex;
         justify-content: flex-start;
     }
+
+    #div-header {
+        padding: 0px;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: #bec1e6;
+        z-index: 100;
+    }
+
+    #div-header-images {
+        margin: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    #div-header img {
+        min-width: 2em;
+        max-width: 15vw;
+    }
+
+    #div-content {
+        padding-top: 3em;
+        padding-left: 0;
+    }
+
+    #div-song-info {
+        width: 100%;
+        padding: 5px;
+        margin: 0;
+        background-color: #bed5e6;
+    }
+
+    #ul-add-actions, #transposer {
+        list-style-type: none;
+        padding: 5px;
+        background-color: #bec1e6;
+        margin-top: 0;
+    }
+
+    #ul-add-actions li {
+        padding-bottom: 5px;
+    }
+
+    .img-actions {
+        min-width: 2em;
+    }
+    .img-action-selected {
+        background-color: #bec1e6;
+    }
+
+    .song-title {
+        font-weight: bold;
+        font-size: x-large;
+        font-variant: small-caps;
+    }
+
+    .song-artist {
+        font-variant: small-caps;
+    }
     </style>
 
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
 
+    <script type="text/javascript">
+        function toggleAdd() {
+            $('#transposer').hide();
+            $('#btn-toggle-transposer').removeClass('img-action-selected');
+
+            $('#ul-add-actions').toggle();
+            $('#btn-add-to-set').toggleClass('img-action-selected');
+        }
+
+        function toggleTransposer() {
+            $('#ul-add-actions').hide();
+            $('#btn-add-to-set').removeClass('img-action-selected');
+
+            $('#transposer').toggle();
+            $('#btn-toggle-transposer').toggleClass('img-action-selected');
+        }
+
+        $(function() {
+           $('#ul-add-actions').hide()
+           $('#btn-add-to-set').click(toggleAdd);
+
+           $('#transposer').hide()
+           $('#btn-toggle-transposer').click(toggleTransposer);
+        });
+
+    </script>
+
 
 </head>
 <body>
-    <p><a href="{% url 'songs' %}">Back to songs</a></p>
-
-    <h1>{{ song.title }}</h1>
-    {{ song.artist }}<br>
-    Key of: <span id="key-shown"></span>. Capo: <span id="key-capo"></span>
-
-    <p><a href="{% url 'song.edit' song.pk %}">Edit</a></p>
-    <p><a href="{% url 'set.add_song' song.pk %}">Add to set list</a></p>
-    <p><a href="{% url 'set.add_song' song.pk %}?golive=1">Add song and go live</a></p>
-
-
-    {% include "songview/_transposer.html" with sk_editable='true' %}
+    <div id="div-header">
+        <div id="div-header-images">
+            <img id="img-header-back" src="{% static 'songview/icons/mdi-chevron-left-box-outline.svg' %}">
+            <img id="img-header-songs" src="{% static 'songview/icons/mdi-format-list-bulleted-square.svg' %}">
+            <img id="img-header-set" src="{% static 'songview/icons/mdi-playlist-music-outline.svg' %}">
+            <img id="img-header-receive" src="{% static 'songview/icons/mdi-cellphone-text.svg' %}">
+            <img id="img-header-settings" src="{% static 'songview/icons/mdi-cog-outline.svg' %}">
+        </div>
+    </div>
 
 
-    <span id="song">
-        {% include "songview/_print_song.html" %}
-    </span>
+    <div id="div-content">
 
+        <div id="div-song-info">
+
+            <span class="song-title">{{ song.title }}</span>
+            <br>
+            <span class="song-artist">{{ song.artist }}</span>
+            <br>
+            <div class="song-key-info">
+                Key of: <span id="key-shown"></span>. Capo: <span id="key-capo"></span>
+            </div>
+
+            <img class="img-actions" id='btn-add-to-set' src="{% static 'songview/icons/mdi-playlist-plus.svg' %}"><img class="img-actions" id="btn-toggle-transposer" src="{% static 'songview/icons/mdi-music-accidental-natural.svg' %}"><a href="{% url 'song.edit' song.pk %}"><img class='img-actions' src="{% static 'songview/icons/mdi-pencil-outline.svg' %}"></a>
+
+            <ul id="ul-add-actions">
+                <li><a href="{% url 'set.add_song' song.pk %}">Add to set list</a></li>
+                <li><a href="{% url 'set.add_song' song.pk %}?golive=1">Add and go live</a></li>
+            </ul>
+
+            {% include "songview/_transposer.html" with sk_editable='true' %}
+
+        </div>
+
+
+
+
+
+        <span id="song">
+            {% include "songview/_print_song.html" %}
+        </span>
+
+    </div>
 </body>
 </html>

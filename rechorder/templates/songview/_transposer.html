@@ -126,7 +126,7 @@
             <option value="{{ forloop.counter0 }}">{{ key }}</option>
         {% endfor %}
         </select>
-        <button id="tran-reset" type="button">Reset to original key</button>
+        <button id="tran-reset" type="button">Reset to {{ song.original_key }}</button>
     {% else %}
     <span id="sk-read-only">{{ key_details.sounding_key_index }}</span>
     {% endif %}
@@ -139,19 +139,23 @@
     <br>
 
     <input type="radio" id="tran-cs-rad" name="adv-tran-opt" value="cs">
-    <label for="tran-cs-rad">Chord shapes</label>
-    <select id="tran-cs-shape" name="chord-shape-index">
-        {% for shape in chord_shapes %}
-            {% if shape.index == -1 %}
-                <option disabled>──────────</option>
-            {% else %}
-                <option value="{{ shape.index }}">{{ shape.name }} shapes</option>
-            {% endif %}
-        {% endfor %}
-    </select>
-    <input type="checkbox" id="tran-cs-auto" name="tran-cs-auto" value="auto">
-    <label for="tran-cs-auto">Choose for me</label>
-    <a href="{% url 'settings.chord_shapes' %}">Auto settings</a>
+    <label for="tran-cs-rad">
+        Chord shapes
+        <select id="tran-cs-shape" name="chord-shape-index">
+            {% for shape in chord_shapes %}
+                {% if shape.index == -1 %}
+                    <option disabled>──────────</option>
+                {% else %}
+                    <option value="{{ shape.index }}">{{ shape.name }} shapes</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+        <br>
+        <input type="checkbox" id="tran-cs-auto" name="tran-cs-auto" value="auto">
+        <label for="tran-cs-auto">Choose for me</label>
+        <a href="{% url 'settings.chord_shapes' %}">Auto settings</a>
+    </label>
+
     <br>
 
     <input type="radio" id="tran-gc-rad" name="adv-tran-opt" value="gc">
