@@ -139,55 +139,55 @@
     {% endif %}
     <br>
 
-    <input type="radio" id="tran-sk-rad" name="adv-tran-opt" value="sk">
-    <label for="tran-sk-rad">
-        Display in sounded key
-    </label>
-    <br>
 
-    <input type="radio" id="tran-cs-rad" name="adv-tran-opt" value="cs">
-    <label for="tran-cs-rad">Chord shapes</label>
-    <select id="tran-cs-shape" name="chord-shape-index">
-        {% for shape in chord_shapes %}
-            {% if shape.index == -1 %}
-                <option disabled>──────────</option>
-            {% else %}
-                <option value="{{ shape.index }}">{{ shape.name }} shapes</option>
-            {% endif %}
-        {% endfor %}
-    </select>
-    <br>
-
-    <input type="radio" id="tran-acs-rad" name="adv-tran-opt" value="acs">
-    <label for="tran-acs-rad">Auto chord shapes</label>
-    <a href="{% url 'settings.chord_shapes' %}">
-        <img src="{% static 'songview/icons/mdi-cog-outline.svg' %}">
-    </a>
-    <br>
-
-    <input type="radio" id="tran-gc-rad" name="adv-tran-opt" value="gc">
-    <label for="tran-gc-rad">I'm putting my capo on fret</label>
-    <select id="tran-gc-capo" name="capo-fret-number">
-        {% for fret in frets %}
-            <option value="{{ fret }}">{{ fret }}</option>
-        {% endfor %}
-    </select>
-    <br>
-
-    <input type="radio" id="tran-ti-rad" name="adv-tran-opt" value="ti">
-    <label for="tran-ti-rad">Transposing instrument in</label>
-    <select id="tran-ti-cnote" name="transposing-cnote">
-        {% for cnote in cnotes %}
-            <option value="{{ cnote.index }}">{{ cnote.name }}</option>
-        {% endfor %}
-    </select>
-    <br>
-
-    <input type="radio" id="tran-abs-rad" name="adv-tran-opt" value="abs">
-    <label for="tran-abs-rad">Force song to show in</label>
-    <select id="tran-abs-sel" name="absolute-force-index">
-    {% for key in keys %}
-        <option value="{{ forloop.counter0 }}">{{ key }}</option>
-    {% endfor %}
-    </select>
+    <ul>
+        <li>
+            <input type="radio" id="tran-sk-rad" name="adv-tran-opt" value="sk" class="tran-rad">
+            <label for="tran-sk-rad" class="tran-rad-label">Display in sounded key</label>
+        </li>
+        <li>
+            <input type="radio" id="tran-acs-rad" name="adv-tran-opt" value="acs" class="tran-rad">
+            <label for="tran-acs-rad" class="tran-rad-label">Auto chord shapes</label>
+        </li>
+        <li>
+            <input type="radio" id="tran-cs-rad" name="adv-tran-opt" value="cs" class="tran-rad">
+            <label for="tran-cs-rad" class="tran-rad-label">Chord shapes</label>
+            <select id="tran-cs-shape" name="chord-shape-index">
+                {% for shape in chord_shapes %}
+                    {% if shape.index == -1 %}
+                        <option disabled>──────────</option>
+                    {% else %}
+                        <option value="{{ shape.index }}">{{ shape.name }} shapes</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </li>
+        <li>
+            <input type="radio" id="tran-gc-rad" name="adv-tran-opt" value="gc" class="tran-rad">
+            <label for="tran-gc-rad" class="tran-rad-label">I'm putting my capo on fret</label>
+            <select id="tran-gc-capo" name="capo-fret-number">
+                {% for fret in frets %}
+                    <option value="{{ fret }}">{{ fret }}</option>
+                {% endfor %}
+            </select>
+        </li>
+        <li>
+            <input type="radio" id="tran-ti-rad" name="adv-tran-opt" value="ti" class="tran-rad">
+            <label for="tran-ti-rad" class="tran-rad-label">Transposing instrument in</label>
+            <select id="tran-ti-cnote" name="transposing-cnote">
+                {% for cnote in cnotes %}
+                    <option value="{{ cnote.index }}">{{ cnote.name }}</option>
+                {% endfor %}
+            </select>
+        </li>
+        <li>
+            <input type="radio" id="tran-abs-rad" name="adv-tran-opt" value="abs" class="tran-rad">
+            <label for="tran-abs-rad" class="tran-rad-label">Force song to show in</label>
+            <select id="tran-abs-sel" name="absolute-force-index">
+            {% for key in keys %}
+                <option value="{{ forloop.counter0 }}">{{ key }}</option>
+            {% endfor %}
+            </select>
+        </li>
+    </ul>
 </form>

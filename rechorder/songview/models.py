@@ -89,6 +89,8 @@ class Song(models.Model):
             else:
                 chord = ''
                 lyric = block
+            if not lyric.strip() and not chord.strip():
+                continue
             lyric = lyric.replace(' ', '&nbsp;').replace('\n','')
             blocks.append({'chord': Chord(chord, self), 'lyric': lyric})
         return blocks
