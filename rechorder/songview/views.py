@@ -67,12 +67,12 @@ def _get_song_key_index(request, song, set_id=-1, sounding_key_index=None):
         if transpose_type == 'sk':
             key_index = sounding_key_index
         elif transpose_type == 'cs':
-            if 'tran-cs-auto' not in transpose_data:
-                key_index = int(transpose_data.get('chord-shape-index'))
-            else:
-                permitted_shape_keys = _get_selected_chord_shapes(request) or [sounding_key_index]
-                deltas = [(i - sounding_key_index - 1) % 12 for i in permitted_shape_keys]
-                key_index = permitted_shape_keys[deltas.index(max(deltas))]
+            key_index = int(transpose_data.get('chord-shape-index'))
+            capo_fret_number = (sounding_key_index - key_index) % 12
+        elif transpose_type == 'acs':
+            permitted_shape_keys = _get_selected_chord_shapes(request) or [sounding_key_index]
+            deltas = [(i - sounding_key_index - 1) % 12 for i in permitted_shape_keys]
+            key_index = permitted_shape_keys[deltas.index(max(deltas))]
             capo_fret_number = (sounding_key_index - key_index) % 12
         elif transpose_type == 'gc':
             capo_fret_number = int(transpose_data.get('capo-fret-number', 0))
