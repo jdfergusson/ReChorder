@@ -20,6 +20,8 @@
         /* Data should contain object with song_html and key_index */
         $('#song').html(data.song_html);
         setTransposeUi(data.key_details);
+        $('#song-title').text(data.song_meta.title);
+        $('#song-artist').text(data.song_meta.artist);
     }
 
     function setTransposeUi(key_details) {

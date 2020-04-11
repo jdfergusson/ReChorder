@@ -123,6 +123,17 @@ def _get_base_song_context_dict(request, song, set_id=-1, sounding_key_index=Non
         'key_details': _get_key_details(request, song, set_id, sounding_key_index),
     }
 
+
+def _get_update_song_data(request, song, set_id=-1):
+    return {
+        'song_html': render_to_string('songview/_print_song.html', {'song': song}),
+        'key_details': _get_key_details(request, song, set_id),
+        'song_meta': {
+            'title': song.title,
+            'artist': song.artist,
+        },
+    }
+
 ###########################
 # VIEWS
 ###########################
@@ -323,21 +334,12 @@ def slave_get_update_token(request, set_id):
     return JsonResponse({'update_token': set.has_changed_count})
 
 
-def song_edit(request, song_id):
-    song = get_object_or_404(Song, pk=song_id)
-    context = {
-        'song': song,
-        'keys': KEYS,
-    }
-    return render(request, 'songview/song_edit.html', context)
-
-
-def song_change_data(request, song_id):
+def song_update(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
 
     title = request.POST.get('title')
     artist = request.POST.get('artist')
-    original_key = request.POST.get('original_key')
+    original_key = int(request.POST.get('original_key'))
     content = request.POST.get('content')
 
     if None not in (title, artist, original_key, content):
@@ -347,7 +349,7 @@ def song_change_data(request, song_id):
         song.raw = content
         song.save()
 
-        return JsonResponse({'success': True})
+        return JsonResponse(_get_update_song_data(request, song))
     return HttpResponseBadRequest('Invalid POST data')
 
 
@@ -410,11 +412,7 @@ def song_transpose(request):
     key_index, capo_fret_number = _get_song_key_index(request, song, set_id, sounding_key_index)
     song.transpose(key_index)
 
-    json_data = {
-        'song_html': render_to_string('songview/_print_song.html', {'song': song}),
-        'key_details': _get_key_details(request, song, set_id),
-    }
-    return JsonResponse(json_data)
+    return JsonResponse(_get_update_song_data(request, song, set_id))
 
 
 def songs(request):
