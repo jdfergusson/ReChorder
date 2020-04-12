@@ -17,6 +17,7 @@
     }
 
     function updateSong(data) {
+        console.log(data);
         /* Data should contain object with song_html and key_index */
         $('#song').html(data.song_html);
         setTransposeUi(data.key_details);

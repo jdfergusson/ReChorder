@@ -1,0 +1,272 @@
+body, html {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+div, span {
+    box-sizing: border-box;
+}
+
+a {
+    text-decoration: none;
+}
+
+#div-header {
+    padding: 0px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #bec1e6;
+    z-index: 100;
+}
+
+#div-header-images {
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+#div-header img {
+    padding: 10px;
+    min-height: 2em;
+    min-width: 2em;
+    max-width: 15vw;
+    transition: 0.3s;
+}
+
+#div-header img:hover {
+    background-color: #bed5e6;
+}
+
+#div-header .selected {
+    background-image: linear-gradient(#bed5e600, #bed5e6ff);
+}
+
+#div-content {
+    padding-top: 3em;
+    padding-left: 0;
+}
+
+#div-title {
+    width: 100%;
+    padding: 5px;
+    margin: 0;
+    background-color: #bed5e6;
+    overflow: hidden;
+}
+
+#add-actions ul, #transposer ul, #editor ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#add-actions, #transposer, #editor {
+    background-color: #bec1e6;
+    margin: 0;
+    padding: 5px;
+}
+
+#add-actions li:not(:last-child) {
+    margin-bottom: 5px;
+}
+
+.tran-rad-label {
+
+    color: #626262;
+}
+
+.tran-rad:checked ~ label {
+    color: black;
+}
+
+button, select {
+    font-size: large;
+    color: #626262;
+    font-variant: small-caps;
+    text-decoration: none;
+    border: 2px solid #626262;
+    background-color: white;
+    padding: 5px;
+    transition: 0.2s;
+}
+
+@media (hover:hover) {
+    button:hover, select:hover {
+        background-color: #cee0ec;
+    }
+}
+
+
+button:selected, select:selected {
+    border: 2px solid #303539;
+    color: #303539;
+    background-color: #ced1ec;
+}
+
+button:disabled, select:disabled {
+    border: 2px solid #c4c4c4;
+    color: #c4c4c4;
+    background-color: #d6e5ef;
+}
+
+#editor-song-content {
+    width: 100%;
+    height: 40vh;
+}
+
+.img-actions {
+    min-width: 2.5em;
+    transition-duration: 0.4s;
+}
+
+.img-actions:hover {
+    background-image: linear-gradient(#bec1e600, #bec1e6ff);
+}
+
+.img-action-selected {
+    background-color: #bec1e6;
+}
+
+h1 {
+    font-weight: bold;
+    font-size: x-large;
+    font-variant: small-caps;
+    display: inline;
+    margin: 0;
+}
+
+h2 {
+    font-size: large;
+    font-weight: normal;
+    font-variant: small-caps;
+    display: inline;
+    margin: 0;
+    color: #626262;
+}
+
+h3 {
+    font-size: medium;
+    display: inline;
+    margin: 0;
+    font-weight: normal;
+}
+
+#editor-song-content {
+    margin-bottom: 5px;
+}
+
+#editor-buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+#song {
+    padding: 5px;
+}
+
+
+.block {
+  float: none;
+  padding-bottom: 0.2em;
+}
+
+.container {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.section-title {
+    font-size: large;
+    font-weight: bold;
+    padding-top: 0.8em;
+    padding-bottom: 0.3em;
+    display: block;
+}
+
+.block-chord {
+    font-weight: bold;
+    margin-right: 1em;
+    padding: 2px;
+    margin-bottom: 2px;
+    height: 1em;
+    min-width: 0;
+}
+
+mark {
+    background-color: #c1e6be;
+}
+
+.block-lyric {
+    padding-top: 2px;
+}
+
+#img-add-song {
+    float: right;
+}
+
+#key-filter-list {
+    display: flex;
+    flex-flow: row wrap;
+
+}
+
+.key-filter-button {
+    width: 3em;
+    margin: 2px;
+}
+
+/* Horrible hack to get around my inability to get CSS media queries' hover to work properly */
+.key-filter-button:hover {
+    background-color: white;
+    color: black;
+}
+
+.key-filter-button-selected, .key-filter-button-selected:hover {
+    background-color: #ced1ec;
+}
+
+
+#songlist {
+    list-style-type: none;
+    padding: 5px;;
+    margin: 0;
+}
+
+.song-in-list .name {
+    font-size: large;
+    font-weight: bold;
+    font-variant: small-caps;
+    color: black;
+}
+
+.song-in-list .artist {
+    font-size: normal;
+    font-weight: normal;
+    font-variant: small-caps;
+    color: #626262;
+}
+
+.song-in-list .key {
+    font-size: small;
+    font-weight: normal;
+    font-variant: small-caps;
+    color: #626262;
+}
+
+.song-in-list {
+    border-left: 4px solid;
+    padding-left: 1em;
+    margin-bottom: 5px;
+    border-bottom: 1px solid;
+    border-color: #626262;
+}
+
+.song-in-list:hover {
+    border-color:#bed5e6;
+}

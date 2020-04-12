@@ -1,49 +1,53 @@
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends 'songview/_base.html' %}
 
-    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-    <script type="text/javascript">
+{% block javascript %}
+    function getFormData($form){
+        var unindexed_array = $form.serializeArray();
+        var indexed_array = {};
 
-        function getFormData($form){
-            var unindexed_array = $form.serializeArray();
-            var indexed_array = {};
-
-            $.map(unindexed_array, function(n, i){
-                indexed_array[n['name']] = n['value'];
-            });
-
-            return indexed_array;
-        }
-
-        function update() {
-            $.ajax({
-            url: '{% url 'settings.chord_shapes' %}',
-            type: 'POST',
-            headers: { "X-CSRFToken": '{{ csrf_token }}' },
-            data: {
-                'permitted_shapes': JSON.stringify(getFormData($('#shape-selection'))),
-            },
-            success: function() {
-                console.log("success");
-            },
-        });
-        }
-
-        $(function() {
-            $('input').each(function(index) {
-                $(this).change(update);
-                $(this).prop('checked', false);
-            });
-
-            {% for index in selected_shapes %}
-                $('#check-{{ index }}').prop('checked', true);
-            {% endfor %}
+        $.map(unindexed_array, function(n, i){
+            indexed_array[n['name']] = n['value'];
         });
 
-    </script>
-</head>
-<body>
+        return indexed_array;
+    }
+
+    function update() {
+        $.ajax({
+        url: '{% url 'settings.chord_shapes' %}',
+        type: 'POST',
+        headers: { "X-CSRFToken": '{{ csrf_token }}' },
+        data: {
+            'permitted_shapes': JSON.stringify(getFormData($('#shape-selection'))),
+        },
+        success: function() {
+            console.log("success");
+        },
+    });
+    }
+
+    $(function() {
+        $('input').each(function(index) {
+            $(this).change(update);
+            $(this).prop('checked', false);
+        });
+
+        {% for index in selected_shapes %}
+            $('#check-{{ index }}').prop('checked', true);
+        {% endfor %}
+    });
+{% endblock %}
+
+{% block header %}
+    {% include 'songview/_header.html' with selected="settings" %}
+{% endblock %}
+
+{% block title %}
+    <h1>Settings</h1>
+{% endblock %}
+
+{% block content %}
+    <h3>Auto Chord Shapes</h3>
     Select chord shape keys you're comfortable with:
 
     <form id="shape-selection"><ul>
@@ -54,5 +58,6 @@
             </li>
         {% endfor %}
     </ul></form>
-</body>
-</html>
+{% endblock %}
+
+

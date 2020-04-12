@@ -1,3 +1,90 @@
+{% extends 'songview/_base.html' %}
+{% load static %}
+
+{% block javascript %}
+    function saveSong() {
+        $('#areyousure').hide();
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url 'song.create' %}',
+            data: {
+                'title': $('#song-title').val(),
+                'artist':  $('#song-artist').val(),
+                'original_key':  $('#original-key').val(),
+                'content':  $('#song-content').val(),
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data.success == true) {
+                    window.location = data.new_song_url;
+                }
+            },
+        });
+    }
+
+    function cancelEdit() {
+        $('#areyousure-message').text(
+            "Are you sure you want to cancel? This will lose any changes you had made."
+        );
+
+        $('#btn-ays-yes').click(function() {
+            window.location = "{% url 'songs' %}";
+        });
+        $('#btn-ays-no').click(function () {
+            $('#areyousure').hide();
+        });
+        $('#areyousure').show();
+    }
+
+    $(function() {
+        $('#btn-create').click(saveSong);
+        $('#btn-cancel').click(cancelEdit);
+
+        $('#areyousure').hide();
+        $('#success').hide();
+    });
+{% endblock %}
+
+{% block header %}
+    {% include 'songview/_header.html' with selected="songs" %}
+{% endblock %}
+
+{% block title %}
+    <h1>Create Song</h1>
+{% endblock %}
+
+{% block content %}
+    <span id="areyousure">
+        Are you sure you want to cancel creation? This will lose any changes you had made.
+        <button id="btn-ays-yes">Yes</button>
+        <button id="btn-ays-no">No</button>
+    </span>
+
+    <br>
+    <button id="btn-create">Create</button>
+    <button id="btn-cancel">Cancel</button>
+
+    <br>
+
+    <input id="song-title">
+    <input id="song-artist">
+    <select id="original-key">
+        {% for key in keys %}
+            <option value="{{ forloop.counter0 }}">{{ key }}</option>
+        {% endfor %}
+    </select>
+
+    <br>
+    <textarea id="song-content"></textarea>
+{% endblock %}
+
+
+
+
+
+
+
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

@@ -1,13 +1,23 @@
+{% extends 'songview/_base.html' %}
+{% load static %}
 {% load humanize %}
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<h1>Currently or recently beaming</h1>
 
-<ul>
-    {% for set in sets %}
-    <li><a href="{% url 'slave_to' set.pk %}">"{{ set.name }}" -
-        last used {{ set.last_updated|naturaltime }}</a> -
-        <a href="{% url 'set.print' set.pk %}">Print</a></li>
-    {% endfor %}
-</ul>
+{% block header %}
+    {% include 'songview/_header.html' with selected="receive" %}
+{% endblock %}
 
-<a href="javascript:history.go(0)">Refresh list</a>
+{% block title %}
+    <h1>Currently or recently beaming</h1>
+{% endblock %}
+
+{% block content %}
+    <ul>
+        {% for set in sets %}
+        <li><a href="{% url 'slave_to' set.pk %}">"{{ set.name }}" -
+            last used {{ set.last_updated|naturaltime }}</a> -
+            <a href="{% url 'set.print' set.pk %}">Print</a></li>
+        {% endfor %}
+    </ul>
+
+    <a href="javascript:history.go(0)">Refresh list</a>
+{% endblock %}

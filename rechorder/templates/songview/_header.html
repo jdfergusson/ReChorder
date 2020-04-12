@@ -1,0 +1,52 @@
+{% load static %}
+
+<div id="div-header">
+    <div id="div-header-images">
+        <a href="{{ header_link_back }}">
+            <img
+                    id="img-header-back"
+                    src="{% static 'songview/icons/mdi-chevron-left-box-outline.svg' %}"
+            >
+        </a>
+
+        <a href="{{ header_link_songs }}">
+            <img
+                    id="img-header-songs"
+                    src="{% static 'songview/icons/mdi-format-list-bulleted-square.svg' %}"
+                    {% if selected == 'songs' %}
+                        class="selected"
+                    {% endif %}
+            >
+        </a>
+
+        <a href="{{ header_link_set }}">
+            <img
+                    id="img-header-set"
+                    src="{% static 'songview/icons/mdi-playlist-music-outline.svg' %}"
+                    {% if selected == 'set' %}
+                        class="selected"
+                    {% endif %}
+            >
+        </a>
+
+        <a href="{{ header_link_receive }}">
+            <img
+                    id="img-header-receive"
+                    src="{% static 'songview/icons/mdi-cellphone-text.svg' %}"
+                    {% if selected == 'receive' %}
+                        class="selected"
+                    {% endif %}
+            >
+        </a>
+
+        <a href="{{ header_link_settings }}">
+            <img
+                    id="img-header-settings"
+                    src="{% static 'songview/icons/mdi-cog-outline.svg' %}"
+                    {% if selected == 'settings' %}
+                        class="selected"
+                    {% endif %}
+            >
+        </a>
+    </div>
+</div>

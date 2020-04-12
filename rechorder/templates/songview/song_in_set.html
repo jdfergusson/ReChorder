@@ -1,39 +1,29 @@
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends 'songview/_base.html' %}
+{% load static %}
 
-    <style>
-    .block {
-      color: maroon;
-      float: none;
-    }
-
-    .container {
-        display: flex;
-        justify-content: flex-start;
-    }
-    </style>
-
-
-    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-    <script type="text/javascript">
-        {% if not am_i_master %}
-            function checkForUpdates() {
-                $.ajax({
-                    url: '{% url 'slave_token' set_id %}',
-                    success: function (data)
+{% block javascript %}
+    {% if not am_i_master %}
+        function checkForUpdates() {
+            $.ajax({
+                url: '{% url 'slave_token' set_id %}',
+                success: function (data)
+                {
+                    if (data.update_token != {{ update_token }})
                     {
-                        if (data.update_token != {{ update_token }})
-                        {
-                            location.reload();
-                        }
+                        location.reload();
                     }
-                });
-            }
-        {% endif %}
+                }
+            });
+        }
+
+        $(function() {
+            /* Check for an update every second */
+            window.setInterval(checkForUpdates, 1000);
+        });
+    {% endif %}
 
 
-        {% if am_i_master %}
+    {% if am_i_master %}
         function processKeyPress(e) {
             e = e || window.event;
 
@@ -55,46 +45,49 @@
             }
             {% endif %}
         }
-        {% endif %}
-
 
         $(function() {
-            /* Check for an update every second */
-            {% if not am_i_master %}
-                window.setInterval(checkForUpdates, 1000);
-            {% endif %}
-
-            {% if am_i_master %}
-                document.onkeydown = processKeyPress;
-            {% endif %}
+            document.onkeydown = processKeyPress;
         });
-
-    </script>
-
-
-</head>
-<body>
-<p>
-
-{% if song %}
-    <h1>{{ song.title }}</h1>
-    {{ song.artist }}<br>
-    Key of: <span id="key-shown"></span>. Capo: <span id="key-capo"></span>
-
-    <p>
-        {% include "songview/_transposer.html" %}
-    </p>
-    {% if am_i_master %}
-        {% if current_index > 0 %}<a href="{% url 'set.song' current_index|add:'-1' %}">Previous</a>{% endif %}
-        {% if current_index < max_index %}<a href="{% url 'set.song' current_index|add:'1' %}">Next</a>{% endif %}
     {% endif %}
 
-    <span id="song">
-        {% include "songview/_print_song.html" %}
-    </span>
+    function toggleTransposer() {
+        $('#transposer').toggle();
+        $('#btn-toggle-transposer').toggleClass('img-action-selected');
+    }
+
+    $(function() {
+        $('#transposer').hide();
+        $('#btn-toggle-transposer').click(toggleTransposer);
+    });
+{% endblock %}
+
+{% block header %}
+    {% include 'songview/_header.html' with selected="set" %}
+{% endblock %}
+
+{% block title %}
+{% if song %}
+    <span class="song-title" id="song-title">{{ song.title }}</span>
+    <br>
+    <span class="song-artist" id="song-artist">{{ song.artist }}</span>
+    <br>
+    <div class="song-key-info">
+        Key of: <span id="key-shown"></span>. Capo: <span id="key-capo"></span>
+    </div>
+
+    <img class="img-actions" id="btn-toggle-transposer" src="{% static 'songview/icons/mdi-music-accidental-natural.svg' %}">
+
+    {% include 'songview/_transposer.html' with sk_editable='false' %}
 {% else %}
     <h1>No song. Waiting for beaming to start...</h1>
 {% endif %}
+{% endblock %}
 
-</body>
-</html>
+{% block content %}
+{% if song %}
+    <span id="song">
+        {% include "songview/_print_song.html" %}
+    </span>
+{% endif %}
+{% endblock %}

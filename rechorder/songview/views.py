@@ -1,5 +1,9 @@
-from django.http import HttpResponseNotFound, HttpResponseBadRequest, JsonResponse
-from django.core.serializers.json import DjangoJSONEncoder
+from django.http import (
+    HttpResponseNotFound,
+    HttpResponseBadRequest,
+    JsonResponse,
+)
+from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import (
     render,
@@ -47,10 +51,36 @@ def _get_or_create_my_set(request):
     return set
 
 
+def _get_header_links(request, **overrides):
+    if 'last_visited_song' in request.session:
+        songs_link = reverse('song', args=[request.session['last_visited_song']])
+    else:
+        songs_link = reverse('songs')
+
+    if 'last_song_in_set' in request.session:
+        set_link = reverse('set.song', args=[request.session['last_song_in_set']])
+    else:
+        set_link = reverse('set')
+
+    links = {
+        'header_link_back': '#',
+        'header_link_songs': songs_link,
+        'header_link_set': set_link,
+        'header_link_receive': reverse('slave'),
+        'header_link_settings': reverse('settings.chord_shapes')
+    }
+
+    for override in overrides:
+        links[override] = overrides[override]
+
+    return links
+
+
 def _get_sounding_key_index(request, song, sounding_key_index=None):
     song_key_data = request.session.get('keys', {}).get('{}'.format(song.pk), {})
     return int(song_key_data.get('sounding_key_index', song.original_key)
                if sounding_key_index is None else sounding_key_index)
+
 
 def _get_song_key_index(request, song, set_id=-1, sounding_key_index=None):
     sounding_key_index = _get_sounding_key_index(request, song, sounding_key_index)
@@ -67,7 +97,7 @@ def _get_song_key_index(request, song, set_id=-1, sounding_key_index=None):
         if transpose_type == 'sk':
             key_index = sounding_key_index
         elif transpose_type == 'cs':
-            key_index = int(transpose_data.get('chord-shape-index'))
+            key_index = int(transpose_data.get('chord-shape-index', '0'))
             capo_fret_number = (sounding_key_index - key_index) % 12
         elif transpose_type == 'acs':
             permitted_shape_keys = _get_selected_chord_shapes(request) or [sounding_key_index]
@@ -190,6 +220,12 @@ def set(request):
     set = _get_or_create_my_set(request)
     set_songs = []
 
+    try:
+        request.session.pop('last_song_in_set')
+        request.session.modified = True
+    except KeyError:
+        pass
+
     for song in set.song_list:
         s = Song.objects.get(pk=song['id'])
         set_song = {
@@ -203,6 +239,7 @@ def set(request):
         'set_songs': set_songs,
         'set': set,
         'keys': KEYS,
+        **_get_header_links(request),
     })
 
 
@@ -222,6 +259,9 @@ def set_rename(request):
 
 def set_show_song(request, song_index):
     set = _get_or_create_my_set(request)
+
+    request.session['last_song_in_set'] = song_index
+    request.session.modified = True
 
     try:
         # We'll never get negative numbers if the URL doesn't allow it
@@ -246,6 +286,7 @@ def set_show_song(request, song_index):
         'max_index': len(set.song_list) - 1,
         'set_id': set.pk,
         **_get_base_song_context_dict(request, song, set.pk, song_in_set['key_index']),
+        **_get_header_links(request, header_link_back=reverse('set'), header_link_set=reverse('set')),
     }
     return render(request, 'songview/song_in_set.html', context)
 
@@ -291,6 +332,7 @@ def get_beam_masters(request):
             beamed_song_index__isnull=False,
             last_updated__gte=update_time_cutoff,
         ).order_by('-last_updated'),
+        **_get_header_links(request),
     }
     return render(request, 'songview/beam_masters.html', context)
 
@@ -302,6 +344,7 @@ def slave_to_master(request, set_id):
         'set_id': set_id,
         'am_i_master': False,
         'capo_fret_number': 0,
+        **_get_header_links(request, header_link_back=reverse('slave')),
     }
 
     if set.beamed_song_index is not None and \
@@ -374,7 +417,11 @@ def song_create(request):
         })
 
     else:
-        return render(request, 'songview/song_create.html', {'keys': KEYS})
+        context = {
+            'keys': KEYS,
+            **_get_header_links(request, header_link_back=reverse('songs')),
+        }
+        return render(request, 'songview/song_create.html', context)
 
 
 def song_transpose(request):
@@ -417,9 +464,17 @@ def song_transpose(request):
 
 def songs(request):
     songs = Song.objects.order_by('title')
+
+    try:
+        request.session.pop('last_visited_song')
+        request.session.modified = True
+    except KeyError:
+        pass
+
     context = {
         'songs': songs,
         'keys': KEYS,
+        **_get_header_links(request, header_link_songs=reverse('songs'))
     }
     return render(request, 'songview/songs.html', context)
 
@@ -427,13 +482,23 @@ def songs(request):
 def song(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
 
+    request.session['last_visited_song'] = song_id
+    request.session.modified = True
+
     key_index, capo_fret_number = _get_song_key_index(request, song)
     song.transpose(key_index)
 
     context = {
         'song': song,
         **_get_base_song_context_dict(request, song),
+        **_get_header_links(
+            request,
+            header_link_songs=reverse('songs'),
+            header_link_back=reverse('songs'),
+        ),
     }
+
+    print(context)
     return render(request, 'songview/song.html', context)
 
 
@@ -447,5 +512,6 @@ def settings_chord_shapes(request):
         context = {
             'selected_shapes': _get_selected_chord_shapes(request),
             'possible_shapes': [{'name': i, 'index': interpret_absolute_chord(i)[0]} for i in KEYS],
+            **_get_header_links(request),
         }
         return render(request, 'songview/settings_chord_shapes.html', context)
