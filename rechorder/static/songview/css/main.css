@@ -14,6 +14,16 @@ a {
     text-decoration: none;
 }
 
+.right-aligned-img {
+    float: right;
+    min-width: 2em;
+    transition-duration: 0.4s;
+}
+
+.right-aligned-img:hover {
+    background-image: linear-gradient(#bec1e600, #bec1e6ff);
+}
+
 #div-header {
     padding: 0px;
     width: 100%;
@@ -39,21 +49,21 @@ a {
 }
 
 #div-header img:hover {
-    background-color: #bed5e6;
-}
-
-#div-header .selected {
     background-image: linear-gradient(#bed5e600, #bed5e6ff);
 }
 
+#div-header .selected {
+    background-color: #bed5e6;
+}
+
 #div-content {
-    padding-top: 3em;
-    padding-left: 0;
+    padding: 5px;
 }
 
 #div-title {
     width: 100%;
     padding: 5px;
+    padding-top: 3.5em;
     margin: 0;
     background-color: #bed5e6;
     overflow: hidden;
@@ -165,9 +175,69 @@ h3 {
     justify-content: space-between;
 }
 
-#song {
-    padding: 5px;
+/**********************************************************
+ * Lists
+ **********************************************************/
+
+.main-content-list .list-primary {
+    font-size: large;
+    font-weight: bold;
+    font-variant: small-caps;
+    color: black;
 }
+
+.main-content-list .list-secondary {
+    font-size: normal;
+    font-weight: normal;
+    font-variant: small-caps;
+    color: #626262;
+}
+
+.main-content-list .list-tertiary {
+    font-size: small;
+    font-weight: normal;
+    font-variant: small-caps;
+    color: #626262;
+}
+
+.main-content-list li {
+    border-left: 4px solid;
+    padding-left: 1em;
+    padding-bottom: 2px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid;
+    border-color: #626262;
+    display: flex;
+    align-items: center;
+}
+
+.main-content-list li:hover {
+    border-color:#bed5e6;
+}
+
+.main-content-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.main-content-list img {
+    height: 2em;
+    vertical-align: middle;
+}
+
+.main-content-list .list-expander {
+    flex-grow: 10;
+}
+
+.main-content-list a {
+    color: black;
+}
+
+
+/**********************************************************
+ * Song display
+ **********************************************************/
 
 
 .block {
@@ -206,9 +276,10 @@ mark {
     padding-top: 2px;
 }
 
-#img-add-song {
-    float: right;
-}
+
+/**********************************************************
+ * Songs
+ **********************************************************/
 
 #key-filter-list {
     display: flex;
@@ -231,11 +302,14 @@ mark {
     background-color: #ced1ec;
 }
 
+/**********************************************************
+ * Song list
+ **********************************************************/
 
 #songlist {
     list-style-type: none;
-    padding: 5px;;
     margin: 0;
+    padding: 0;
 }
 
 .song-in-list .name {
@@ -259,9 +333,10 @@ mark {
     color: #626262;
 }
 
-.song-in-list {
+.song-in-list,  {
     border-left: 4px solid;
     padding-left: 1em;
+    padding-bottom: 2px;
     margin-bottom: 5px;
     border-bottom: 1px solid;
     border-color: #626262;
@@ -269,4 +344,12 @@ mark {
 
 .song-in-list:hover {
     border-color:#bed5e6;
+}
+
+/**********************************************************
+ * Set list
+ **********************************************************/
+
+#set-list li {
+    padding-left: 0;
 }

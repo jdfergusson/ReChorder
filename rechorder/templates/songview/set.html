@@ -21,7 +21,7 @@
 
     function onListChange()
     {
-        var idsInOrder = $("#list-sortable").sortable("toArray");
+        var idsInOrder = $("#set-list").sortable("toArray");
 
         var new_set = [];
         for (let i = 0; i < idsInOrder.length; i++)
@@ -61,12 +61,12 @@
 
     $( function() {
         /* Set up sortable list */
-        $("#list-sortable").sortable({
+        $("#set-list").sortable({
             update: onListChange,
-            handle: '.handle'
+            handle: '.sortable-list-handle'
         });
-        $("#list-sortable").disableSelection();
-        $("#list-sortable .set-item-delete").click(function() {$(this).parent().remove(); onListChange()});
+        $("#set-list").disableSelection();
+        $("#set-list .set-item-delete").click(function() {$(this).parent().remove(); onListChange()});
 
         $("#btn-clear-set-list").click(clearList);
 
@@ -75,8 +75,8 @@
             $("#target-key_" + i).change(onListChange);
         }
 
-        $('#name-read-only').text("{{ set.name }}");
-        $('#input-set-name').val("{{ set.name }}");
+        $('#name-read-only').text("{{ set.name|escapejs }}");
+        $('#input-set-name').val("{{ set.name|escapejs }}");
         $('#name-edit').hide();
         $('#btn-rename').click(function() {
             $('#name-edit').show()
@@ -107,27 +107,50 @@
 {% endblock %}
 
 {% block title %}
-    <h1>Set list{% if set_songs %} - <a href="{% url 'set.song' 0 %}">Go</a>{% endif %}</h1>
 
-    <p>
-        <span id="name-edit"><input id="input-set-name"><button id="btn-name-edit-done">Done</button></span>
-        <span id="name-show"><span id="name-read-only"></span><button id="btn-rename">Rename</button></span>
-    </p>
+    {% if set_songs %}
+        <a href="{% url 'set.song' 0 %}">
+            <img class="img-actions right-aligned-img"
+                 src="{% static 'songview/icons/mdi-chevron-right-box-outline.svg' %}">
+        </a>
+{% endif %}
+
+    <h1>Set list</h1>
+
+
+
+    <div id="set-name">
+        <span id="name-edit">
+            <input id="input-set-name">
+            <img id="btn-name-edit-done" src="{% static 'songview/icons/mdi-content-save-outline.svg' %}">
+        </span>
+        <span id="name-show">
+            <span id="name-read-only"></span>
+            <img id="btn-rename" src="{% static 'songview/icons/mdi-pencil-outline.svg' %}">
+        </span>
+    </div>
 {% endblock %}
 
 {% block content %}
-     <ul id="list-sortable">
+     <ul id="set-list" class="main-content-list">
         {% for song in set_songs %}
             <li id="set-item_{{ forloop.counter0 }}_{{ song.id }}">
-                <span class="handle">HANDLE</span>
-                <button class="set-item-delete">X</button>
-                <a href="{% url 'song' song.id %}">{{ song.title }}</a> in
-
-                <select id="target-key_{{ forloop.counter0 }}">
-                {% for key in keys %}
-                    <option value="{{ forloop.counter0 }}">{{ key }}</option>
-                {% endfor %}
-                </select>
+                    <div>
+                        <img class="sortable-list-handle" src="{% static 'songview/icons/mdi-drag.svg' %}">
+                    </div>
+                    <div class="list-expander">
+                        <span class="list-primary"><a href="{% url 'song' song.id %}">{{ song.title }}</a></span>
+                    </div>
+                    <div>
+                        <select id="target-key_{{ forloop.counter0 }}">
+                        {% for key in keys %}
+                            <option value="{{ forloop.counter0 }}">{{ key }}</option>
+                        {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <img class="set-item-delete" src="{% static 'songview/icons/mdi-delete-outline.svg' %}">
+                    </div>
 
             </li>
         {% endfor %}
@@ -135,8 +158,7 @@
 
     {% if set_songs %}
         <button id="btn-clear-set-list">Clear set list</button>
-        <br>
-        <a href="{% url 'set.print' set.pk %}">Print set</a>
+        <a href="{% url 'set.print' set.pk %}"><img class="right-aligned-img" src="{% static 'songview/icons/mdi-printer.svg' %}"></a>
     {% else %}
         Set list currently empty. Why not add some <a href="{% url 'songs' %}">songs</a>?
     {% endif %}

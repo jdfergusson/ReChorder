@@ -45,6 +45,7 @@ def _get_or_create_my_set(request):
     if set is None:
         set = Set()
         set.song_list = []
+        set.name = "My set"
         set.save()
         request.session['my_set_id'] = set.pk
         request.session.modified = True

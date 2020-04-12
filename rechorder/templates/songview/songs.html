@@ -63,7 +63,7 @@
 {% block title %}
 
     <a href="{% url 'song.create' %}">
-        <img class="img-actions" id="img-add-song" src="{% static 'songview/icons/mdi-file-plus-outline.svg' %}">
+        <img class="img-actions right-aligned-img" src="{% static 'songview/icons/mdi-file-plus-outline.svg' %}">
     </a>
 
     <h1>Songs</h1><br>
@@ -90,14 +90,14 @@
 
 {% block content %}
 
-    <ul id="songlist">
+    <ul id="songlist" class="main-content-list">
         {% for song in songs %}
         <li>
             <a href="{% url 'song' song.id %}">
                 <div class="song-in-list">
-                    <span class="name">{{ song }}</span><br>
-                    <span class="artist">{{ song.artist }}</span><br>
-                    <span class="key">Original key: {{ song.original_key }}</span>
+                    <span class="list-primary">{{ song }}</span><br>
+                    <span class="list-secondary">{{ song.artist }}</span><br>
+                    <span class="list-tertiary">Original key: {{ song.original_key }}</span>
                     <span class="song-key-index" style="display: none">{{ song.original_key }}</span>
                 </div>
             </a>

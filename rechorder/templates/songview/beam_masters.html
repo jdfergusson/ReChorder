@@ -7,17 +7,27 @@
 {% endblock %}
 
 {% block title %}
-    <h1>Currently or recently beaming</h1>
+    <h1>Beaming sets</h1>
 {% endblock %}
 
 {% block content %}
-    <ul>
+    <ul class="main-content-list">
         {% for set in sets %}
-        <li><a href="{% url 'slave_to' set.pk %}">"{{ set.name }}" -
-            last used {{ set.last_updated|naturaltime }}</a> -
-            <a href="{% url 'set.print' set.pk %}">Print</a></li>
+            <li id="song-in-list">
+                <div class="list-expander">
+                    <a href="{% url 'slave_to' set.pk %}">
+                        <span class="list-primary">{{ set.name }}</span><br>
+                        <span class="list-secondary">last used {{ set.last_updated|naturaltime }}</span>
+                    </a>
+                </div>
+                <div>
+                    <a href="{% url 'set.print' set.pk %}">
+                        <img src="{% static 'songview/icons/mdi-printer.svg' %}">
+                    </a>
+                </div>
+            </li>
         {% endfor %}
     </ul>
 
-    <a href="javascript:history.go(0)">Refresh list</a>
+    <button onclick="history.go(0);">Refresh list</button>
 {% endblock %}
