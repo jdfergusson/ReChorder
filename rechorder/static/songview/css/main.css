@@ -209,6 +209,7 @@ h3 {
     border-color: #626262;
     display: flex;
     align-items: center;
+    background-color: white;
 }
 
 .main-content-list li:hover {

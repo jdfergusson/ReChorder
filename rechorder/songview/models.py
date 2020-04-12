@@ -116,6 +116,11 @@ class Set(models.Model):
             if not 0 <= self.beamed_song_index < len(self.song_list):
                 self.beamed_song_index = None
         self.has_changed_count = self.has_changed_count + 1 % 10000
+
+        # Let's make sure the set has a name while we're here
+        if not self.name.strip():
+            self.name = "Unnamed set"
+
         super().save(*args, **kwargs)
 
     def check_list_integrity(self):
