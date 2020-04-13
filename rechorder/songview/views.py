@@ -503,8 +503,6 @@ def song(request, song_id):
             header_link_back=reverse('songs'),
         ),
     }
-
-    print(context)
     return render(request, 'songview/song.html', context)
 
 

@@ -57,7 +57,6 @@
         });
     }
 
-
     $( function() {
         /* Set up sortable list */
         $("#set-list").sortable({
@@ -121,7 +120,7 @@
 
     {% if set_songs %}
         <a href="{% url 'set.song' 0 %}">
-            <img class="img-btn right-aligned-img"
+            <img class="img-btn right-aligned-img" id="img-set-display"
                  src="{% static 'songview/icons/mdi-chevron-right-box-outline.svg' %}">
         </a>
 {% endif %}
@@ -129,18 +128,17 @@
     <h1>Set list</h1>
 
     <div id="set-name">
-        <span id="name-edit">
-            <input id="input-set-name">
-
-            <button id="btn-name-edit-done" class="img-btn">
-                <img src="{% static 'songview/icons/mdi-content-save-outline.svg' %}">
-            </button>
-        </span>
         <span id="name-show">
-            <span id="name-read-only"></span>
-            <button id="btn-rename" class="img-btn">
+            <button id="btn-rename" class="img-btn-header">
                 <img src="{% static 'songview/icons/mdi-pencil-outline.svg' %}">
             </button>
+            <h2><span id="name-read-only"></span></h2>
+        </span>
+        <span id="name-edit">
+            <button id="btn-name-edit-done" class="img-btn-header">
+                <img src="{% static 'songview/icons/mdi-content-save-outline.svg' %}">
+            </button>
+            <input id="input-set-name">
         </span>
     </div>
 {% endblock %}

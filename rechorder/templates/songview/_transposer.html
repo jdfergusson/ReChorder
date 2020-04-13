@@ -97,7 +97,7 @@
     }
 
     function transposeSettingsChanged() {
-        enableAndDisableTransposeFields($('input[name=adv-tran-opt]:checked', '#transposer').val());
+        enableAndDisableTransposeFields($('input[name=adv-tran-opt]:checked', '#transposer-form').val());
 
         $.ajax({
             url: '{% url 'song.transpose' %}',
@@ -109,14 +109,14 @@
                 'sounding_key_index': "{{ key_details.sounding_key_index }}",
                 'set_id': "{{ set_id }}",
                 {% endif %}
-                'transpose_data': JSON.stringify(getFormData($('#transposer'))),
+                'transpose_data': JSON.stringify(getFormData($('#transposer-form'))),
             },
             success: updateSong,
         });
     }
 
     $(function() {
-        $('#transposer input, #transposer select').each(function(index) {
+        $('#transposer-form input, #transposer-form select').each(function(index) {
             $(this).change(transposeSettingsChanged);
         });
 
@@ -130,7 +130,8 @@
     });
 </script>
 
-<form id="transposer">
+
+<form id="transposer-form">
     Sounded key:
     {% if sk_editable == 'true' %}
         <select id="tran-sk-key" name="sounding-key">
@@ -195,4 +196,4 @@
             </select>
         </li>
     </ul>
-</form>
+    </form>

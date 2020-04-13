@@ -51,14 +51,27 @@
         });
     {% endif %}
 
-    function toggleTransposer() {
-        $('#transposer').toggle();
-        $('#btn-toggle-transposer').toggleClass('img-action-selected');
+    function toggleTab(tab) {
+        if (tab != 'transposer') {
+            $('#transposer').hide();
+            $('#btn-toggle-transposer').removeClass('img-action-selected');
+        }
+
+        if (tab != 'font-resizer') {
+            $('#font-resizer').hide();
+            $('#btn-toggle-font-resizer').removeClass('img-action-selected');
+        }
+
+        $('#' + tab).toggle();
+        $('#btn-toggle-' + tab).toggleClass('img-action-selected');
     }
 
     $(function() {
         $('#transposer').hide();
-        $('#btn-toggle-transposer').click(toggleTransposer);
+        $('#btn-toggle-transposer').click(function() {toggleTab('transposer');});
+
+        $('#font-resizer').hide();
+        $('#btn-toggle-font-resizer').click(function() {toggleTab('font-resizer');});
     });
 {% endblock %}
 
@@ -68,13 +81,24 @@
 
 {% block title %}
 {% if song %}
-    <h1 id="song-title">{{ song.title }}</h1><br>
+   <h1 id="song-title">{{ song.title }}</h1><br>
     <h2 id="song-artist">{{ song.artist }}</h2><br>
     <h3>Key of: <span id="key-shown"></span>. Capo: <span id="key-capo"></span></h3><br>
 
-    <img class="img-actions" id="btn-toggle-transposer" src="{% static 'songview/icons/mdi-music-accidental-natural.svg' %}">
+    <ul class="tab-list">
+        <li><img class="img-actions"
+                    id="btn-toggle-transposer" src="{% static 'songview/icons/mdi-music-accidental-natural.svg' %}">
+        </li><li>
+            <img class='img-actions' id="btn-toggle-font-resizer" src="{% static 'songview/icons/mdi-format-font.svg' %}">
+        </li>
+    </ul>
 
-    {% include 'songview/_transposer.html' with sk_editable='false' %}
+    <div class="tab-container" id="transposer">
+        {% include 'songview/_transposer.html' with sk_editable='false' %}
+    </div>
+    <div class="tab-container" id="font-resizer">
+    {% include 'songview/_font_resizer.html' %}
+    </div>
 {% else %}
     <h1>No song. Waiting for beaming to start...</h1>
 {% endif %}

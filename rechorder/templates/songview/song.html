@@ -1,46 +1,8 @@
 {% extends 'songview/_base.html' %}
 {% load static %}
 
+
 {% block javascript %}
-    function toggleAdd() {
-        $('#btn-song-add-to-set').removeClass('btn-successful');
-        $('#add-actions-success').hide();
-
-        $('#transposer').hide();
-        $('#btn-toggle-transposer').removeClass('img-action-selected');
-        $('#editor').hide();
-        $('#btn-toggle-editor').removeClass('img-action-selected');
-
-        $('#add-actions').toggle();
-        $('#btn-add-to-set').toggleClass('img-action-selected');
-    }
-
-    function toggleTransposer() {
-        $('#btn-song-add-to-set').removeClass('btn-successful');
-        $('#add-actions-success').hide();
-
-        $('#add-actions').hide();
-        $('#btn-add-to-set').removeClass('img-action-selected');
-        $('#editor').hide();
-        $('#btn-toggle-editor').removeClass('img-action-selected');
-
-        $('#transposer').toggle();
-        $('#btn-toggle-transposer').toggleClass('img-action-selected');
-    }
-
-    function toggleEditor() {
-        $('#btn-song-add-to-set').removeClass('btn-successful');
-        $('#add-actions-success').hide();
-
-        $('#add-actions').hide();
-        $('#btn-add-to-set').removeClass('img-action-selected');
-        $('#transposer').hide();
-        $('#btn-toggle-transposer').removeClass('img-action-selected');
-
-        $('#editor').toggle();
-        $('#btn-toggle-editor').toggleClass('img-action-selected');
-    }
-
     function addSongToSet(go_live) {
         var data = {'song_id': {{ song.pk }}};
         if (go_live) {
@@ -59,21 +21,52 @@
                 }
                 else {
                     $('#btn-song-add-to-set').addClass('btn-successful');
-                    $('#add-actions-success').show();
+                    $('#btn-song-add-to-set').text('Song added');
                 }
             }
         });
     }
 
+    function toggleTab(tab) {
+        $('#btn-song-add-to-set').removeClass('btn-successful');
+        $('#btn-song-add-to-set').text('Add to set list');
+
+        if (tab != 'transposer') {
+            $('#transposer').hide();
+            $('#btn-toggle-transposer').removeClass('img-action-selected');
+        }
+
+        if (tab != 'editor') {
+            $('#editor').hide();
+            $('#btn-toggle-editor').removeClass('img-action-selected');
+        }
+
+        if (tab != 'adder') {
+            $('#adder').hide();
+            $('#btn-toggle-adder').removeClass('img-action-selected');
+        }
+
+        if (tab != 'font-resizer') {
+            $('#font-resizer').hide();
+            $('#btn-toggle-font-resizer').removeClass('img-action-selected');
+        }
+
+        $('#' + tab).toggle();
+        $('#btn-toggle-' + tab).toggleClass('img-action-selected');
+    }
+
     $(function() {
-        $('#add-actions').hide();
-        $('#btn-add-to-set').click(toggleAdd);
+        $('#adder').hide();
+        $('#btn-toggle-adder').click(function() {toggleTab('adder');});
 
         $('#editor').hide();
-        $('#btn-toggle-editor').click(toggleEditor);
+        $('#btn-toggle-editor').click(function() {toggleTab('editor');});
 
         $('#transposer').hide();
-        $('#btn-toggle-transposer').click(toggleTransposer);
+        $('#btn-toggle-transposer').click(function() {toggleTab('transposer');});
+
+        $('#font-resizer').hide();
+        $('#btn-toggle-font-resizer').click(function() {toggleTab('font-resizer');});
 
         $('#btn-song-add-to-set').click(function() {addSongToSet(false);});
         $('#btn-song-add-and-go').click(function() {addSongToSet(true);});
@@ -90,26 +83,43 @@
     <h2 id="song-artist">{{ song.artist }}</h2><br>
     <h3>Key of: <span id="key-shown"></span>. Capo: <span id="key-capo"></span></h3><br>
 
-    <img class="img-actions" id='btn-add-to-set' src="{% static 'songview/icons/mdi-playlist-plus.svg' %}"><img class="img-actions" id="btn-toggle-transposer" src="{% static 'songview/icons/mdi-music-accidental-natural.svg' %}"><img class='img-actions' id="btn-toggle-editor" src="{% static 'songview/icons/mdi-pencil-outline.svg' %}">
+    <ul class="tab-list">
+        <li>
+            <img class="img-actions" id='btn-toggle-adder' src="{% static 'songview/icons/mdi-playlist-plus.svg' %}">
+        </li><li><img class="img-actions"
+                    id="btn-toggle-transposer" src="{% static 'songview/icons/mdi-music-accidental-natural.svg' %}">
+        </li><li>
+            <img class='img-actions' id="btn-toggle-editor" src="{% static 'songview/icons/mdi-pencil-outline.svg' %}">
+        </li><li>
+            <img class='img-actions' id="btn-toggle-font-resizer" src="{% static 'songview/icons/mdi-format-font.svg' %}">
+        </li>
+    </ul>
 
-    <div id="add-actions">
+    <div class="tab-container" id="adder">
         <ul>
             <li>
                 <button id="btn-song-add-to-set">Add to set list</button>
-                <img id="add-actions-success" src="{% static 'songview/icons/mdi-check-box-outline.svg' %}">
             </li>
             <li><button id="btn-song-add-and-go">Add and go live</button></li>
         </ul>
 
     </div>
 
-    {% include 'songview/_transposer.html' with sk_editable='true' %}
+    <div class="tab-container" id="transposer">
+        {% include 'songview/_transposer.html' with sk_editable='true' %}
+    </div>
 
-    {% include 'songview/_song_edit.html' %}
+    <div class="tab-container" id="editor">
+        {% include 'songview/_song_edit.html' %}
+    </div>
+
+    <div class="tab-container" id="font-resizer">
+    {% include 'songview/_font_resizer.html' %}
+    </div>
 {% endblock %}
 
 {% block content %}
-        <div id="song">
-            {% include 'songview/_print_song.html' %}
-        </div>
+    <div id="song">
+        {% include 'songview/_print_song.html' %}
+    </div>
 {% endblock %}

@@ -14,6 +14,11 @@ a {
     text-decoration: none;
 }
 
+form {
+    margin: 0;
+    padding: 0;
+}
+
 .right-aligned-img {
     float: right;
     min-width: 2em;
@@ -65,26 +70,13 @@ a {
     overflow: hidden;
 }
 
-#add-actions ul, #transposer ul, #editor ul {
+#adder ul, #transposer ul, #editor ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
 }
 
-#add-actions, #transposer, #editor {
-    background-color: #bec1e6;
-    margin: 0;
-    padding: 5px;
-}
-
-#add-actions li:not(:last-child) {
-    margin-bottom: 5px;
-}
-
-#add-actions-success {
-    min-height: 2em;
-    background-color: #c1e6be;
-    vertical-align: middle;
+#adder li:not(:last-child) {
     margin-bottom: 5px;
 }
 
@@ -181,6 +173,10 @@ h3 {
     justify-content: space-between;
 }
 
+/**********************************************************
+ * Image buttons
+ *********************************************************/
+
 .img-btn {
     padding: 0;
     margin: 0;
@@ -190,6 +186,51 @@ h3 {
 
 .img-btn:hover {
     background-color: #cee0ec;
+}
+
+.img-btn img {
+    min-width: 2em;
+}
+
+.img-btn-header {
+    padding: 0;
+    margin: 0;
+    background: white;
+}
+
+
+.img-btn-header img {
+    min-width: 2em;
+    vertical-align: middle;
+}
+
+/**********************************************************
+ * Tab list
+ *********************************************************/
+
+.tab-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tab-list li {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+}
+
+.tab-list img {
+    display: inline;
+    padding: 0;
+    margin: 0;
+    vertical-align: bottom;
+}
+
+.tab-container {
+    background-color: #bec1e6;
+    margin: 0;
+    padding: 5px;
 }
 
 /**********************************************************
@@ -252,7 +293,6 @@ h3 {
 .main-content-list a {
     color: black;
 }
-
 
 /**********************************************************
  * Song display
@@ -368,6 +408,10 @@ mark {
 /**********************************************************
  * Set list
  **********************************************************/
+
+#img-set-display {
+    width: 3em;
+}
 
 #set-list li {
     padding-left: 0;
