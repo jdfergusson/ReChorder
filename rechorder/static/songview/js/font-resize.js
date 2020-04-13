@@ -50,6 +50,11 @@ var _fs_lyrics_opt = {
     cookieName:     "font-size-lyrics",
 }
 
+function fsGo() {
+    _fsRender(_fs_chord_opt,  Cookies.get(_fs_chord_opt.cookieName, {path: "/"}) || _fs_chord_opt.sizeDefault);
+    _fsRender(_fs_lyrics_opt,  Cookies.get(_fs_lyrics_opt.cookieName, {path: "/"}) || _fs_lyrics_opt.sizeDefault);
+}
+
 $(function() {
     // Initialize
     $(_fs_chord_opt.buttonIncrease).click(function() {_fsIncrease(_fs_chord_opt);});
@@ -60,6 +65,5 @@ $(function() {
     $(_fs_lyrics_opt.buttonDecrease).click(function() {_fsDecrease(_fs_lyrics_opt);});
     $(_fs_lyrics_opt.buttonReset).click(function() {_fsReset(_fs_lyrics_opt);});
 
-    _fsRender(_fs_chord_opt,  Cookies.get(_fs_chord_opt.cookieName, {path: "/"}) || _fs_chord_opt.sizeDefault);
-    _fsRender(_fs_lyrics_opt,  Cookies.get(_fs_lyrics_opt.cookieName, {path: "/"}) || _fs_lyrics_opt.sizeDefault);
+    fsGo();
 });
