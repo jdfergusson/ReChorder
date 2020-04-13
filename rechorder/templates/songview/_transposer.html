@@ -28,11 +28,11 @@
 
     function setTransposeUi(key_details) {
         /* For implementing somewhere else on the page */
-        $('#key-sk').text(key_details.sounding_key_index);
-        $('#key-shown').text(key_details.key_index);
+        $('#key-sk').text(n2c(key_details.sounding_key_index));
+        $('#key-shown').text(n2c(key_details.key_index));
         $('#key-capo').text(key_details.capo_fret_number);
 
-        $('#tran-reset').text('Reset to ' + key_details.original_key_index);
+        $('#tran-reset').text('Reset to ' + n2c(key_details.original_key_index));
         original_key = key_details.original_key_index;
 
         $('#tran-sk-key').val(key_details.sounding_key_index)

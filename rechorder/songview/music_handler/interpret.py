@@ -24,7 +24,7 @@ ABSOLUTE_LOOKUP = {
     'ab': 11
 }
 
-KEYS = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#']
+KEYS = ['A', 'B\u266d', 'B', 'C', 'C\u266f', 'D', 'E\u266d', 'E', 'F', 'F\u266f', 'G', 'A\u266d']
 
 def interpret_absolute_chord(string):
     # Remove any surrounding brackets

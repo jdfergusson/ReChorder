@@ -515,7 +515,7 @@ def settings_chord_shapes(request):
     else:
         context = {
             'selected_shapes': _get_selected_chord_shapes(request),
-            'possible_shapes': [{'name': i, 'index': interpret_absolute_chord(i)[0]} for i in KEYS],
+            'possible_shapes': [{'name': KEYS[i], 'index': i} for i in range(12)],
             **_get_header_links(request),
         }
         return render(request, 'songview/settings_chord_shapes.html', context)

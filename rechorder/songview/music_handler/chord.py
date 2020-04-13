@@ -1,13 +1,44 @@
 from .interpret import interpret_absolute_chord
 
-CHORD_NAMES = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#']
+CHORD_NAMES_BASE = ['A', 'B\u266d', 'B', 'C', 'C\u266f', 'D', 'E\u266d', 'E', 'F', 'F\u266f', 'G', 'G\u266f']
+CHORD_NAMES_SLIGHTLY_FLAT = ['A', 'B\u266d', 'B', 'C', 'C\u266f', 'D', 'E\u266d', 'E', 'F', 'F\u266f', 'G', 'A\u266d']
+CHORD_NAMES_SHARPS = ['A', 'A\u266f', 'B', 'C', 'C\u266f', 'D', 'D\u266f', 'E', 'F', 'F\u266f', 'G', 'G\u266f']
+CHORD_NAMES_FLATS = ['A', 'B\u266d', 'B', 'C', 'D\u266d', 'D', 'E\u266d', 'E', 'F', 'G\u266d', 'G', 'A\u266d']
 
+# This is a rough attempt at improving the key choice. Is a key traditionally though of in flats or sharps?
+# Sadly we're assuming here that the key is major. Definitely room for improvement
+KEY_NAMES_LOOKUP = [
+    # A major: 3#, A minor, none
+    CHORD_NAMES_BASE,
+    # Bb major: 2b, Bb minor: 5b, A# minor 7#,
+    CHORD_NAMES_FLATS,
+    # B major: 5#. B minor: 2#
+    CHORD_NAMES_SHARPS,
+    # C major: none, C minor: 3b
+    CHORD_NAMES_SLIGHTLY_FLAT,
+    # C# major: 7#, C# minor: 4#, Db minor 5b,
+    CHORD_NAMES_SHARPS,
+    # D major: 2#, D minor: 1 flat
+    CHORD_NAMES_BASE,
+    # Eb major: 3b, Eb minor: 6b
+    CHORD_NAMES_FLATS,
+    # E major: 4#, E minor: 1#
+    CHORD_NAMES_SHARPS,
+    # F major: 1b, F minor: 4b
+    CHORD_NAMES_FLATS,
+    # F# major: 6#, F# minor: 3#, Gb major: 6b
+    CHORD_NAMES_SHARPS,
+    # G major: 1#, G minor: 2b
+    CHORD_NAMES_SLIGHTLY_FLAT,
+    # Ab major: 4b, Ab minor, 7b, G# minor 5#
+    CHORD_NAMES_FLATS,
+]
 
 class Chord:
     def __init__(self, string, key_ref=None):
         """
         :param string: String that indicates the chord
-        :param song: Object with a "key" and "original_key" properties that returns an integer of the key
+        :param key_ref: Object with a "key" and "original_key" properties that returns an integer of the key
         """
 
         self._key_ref = key_ref
@@ -40,11 +71,11 @@ class Chord:
             return ''
 
         chord = '{}{}'.format(
-            CHORD_NAMES[(self.index + self._key_index) % 12],
+            KEY_NAMES_LOOKUP[self._key_ref.key][(self.index + self._key_index) % 12],
             self.qualification)
 
         if self.bass_index is not None:
-            chord += '/{}'.format(CHORD_NAMES[(self.bass_index + self._key_index) % 12])
+            chord += '/{}'.format(KEY_NAMES_LOOKUP[self._key_ref.key][(self.bass_index + self._key_index) % 12])
 
         return chord
 
