@@ -290,7 +290,11 @@ def set_show_song(request, song_index):
         'max_index': len(set.song_list) - 1,
         'set_id': set.pk,
         **_get_base_song_context_dict(request, song, set.pk, song_in_set['key_index']),
-        **_get_header_links(request, header_link_back=reverse('set'), header_link_set=reverse('set')),
+        **_get_header_links(
+            request,
+            header_link_back=reverse('set'),
+            header_link_set=reverse('set'),
+            header_link_songs=reverse('songs')),
     }
     return render(request, 'songview/song_in_set.html', context)
 

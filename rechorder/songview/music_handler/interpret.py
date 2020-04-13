@@ -41,7 +41,7 @@ def interpret_absolute_chord(string):
         qualification = ''
     else:
         note = s[:qualifier_search.start()]
-        qualification = s[qualifier_search.start():].strip()
+        qualification = s[qualifier_search.start():].strip().replace('b', '\u266d').replace('#', '\u266f')
 
     try:
         index = ABSOLUTE_LOOKUP[note.strip().lower()]

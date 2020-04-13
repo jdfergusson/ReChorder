@@ -332,7 +332,7 @@ mark {
 }
 
 .block-lyric {
-    padding-top: 2px;
+    padding-top: 0.3em;
 }
 
 
@@ -416,6 +416,24 @@ mark {
 #set-list li {
     padding-left: 0;
 }
+
+/**********************************************************
+ * Song in set specifics
+ **********************************************************/
+
+#set-nav-btns {
+    position: fixed;
+    bottom: 0;
+    z-index: 10;
+    width: 100%;
+}
+
+#set-nav-btns img {
+    min-width: 45vw;
+    max-height: 45vh;
+    opacity: 0.1;
+}
+
 
 /**********************************************************
  * Chord shape checkboxes

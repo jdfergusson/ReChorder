@@ -23,7 +23,7 @@ function _fsRender(opt, size) {
     $(opt.buttonIncrease).prop( "disabled", (size >= opt.sizeMaximum) );
     $(opt.buttonDecrease).prop( "disabled", size <= opt.sizeMinimum );
     $(opt.buttonReset).prop( "disabled", (size == opt.sizeDefault) );
-    $.cookie(opt.cookieName, size);
+    Cookies.set(opt.cookieName, size, {path: "/"});
 }
 
 var _fs_chord_opt = {
@@ -60,6 +60,6 @@ $(function() {
     $(_fs_lyrics_opt.buttonDecrease).click(function() {_fsDecrease(_fs_lyrics_opt);});
     $(_fs_lyrics_opt.buttonReset).click(function() {_fsReset(_fs_lyrics_opt);});
 
-    _fsRender(_fs_chord_opt,  $.cookie(_fs_chord_opt.cookieName) || _fs_chord_opt.sizeDefault);
-    _fsRender(_fs_lyrics_opt,  $.cookie(_fs_lyrics_opt.cookieName) || _fs_lyrics_opt.sizeDefault);
+    _fsRender(_fs_chord_opt,  Cookies.get(_fs_chord_opt.cookieName, {path: "/"}) || _fs_chord_opt.sizeDefault);
+    _fsRender(_fs_lyrics_opt,  Cookies.get(_fs_lyrics_opt.cookieName, {path: "/"}) || _fs_lyrics_opt.sizeDefault);
 });

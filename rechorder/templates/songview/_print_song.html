@@ -4,7 +4,7 @@
         <div class="container">
         {% for block in line %}
             <div class="block">
-                <span class="block-chord"><mark>{{ block.chord }}</mark></span><br><span class="block-lyric">{{ block.lyric | safe}}</span></div>
+                <div class="block-chord"><mark>{{ block.chord }}</mark></div><div class="block-lyric">{{ block.lyric | safe}}</div></div>
         {% endfor %}
         </div>
     {% endfor %}
