@@ -3,6 +3,9 @@
 
 {% block javascript %}
     function toggleAdd() {
+        $('#btn-song-add-to-set').removeClass('btn-successful');
+        $('#add-actions-success').hide();
+
         $('#transposer').hide();
         $('#btn-toggle-transposer').removeClass('img-action-selected');
         $('#editor').hide();
@@ -13,6 +16,9 @@
     }
 
     function toggleTransposer() {
+        $('#btn-song-add-to-set').removeClass('btn-successful');
+        $('#add-actions-success').hide();
+
         $('#add-actions').hide();
         $('#btn-add-to-set').removeClass('img-action-selected');
         $('#editor').hide();
@@ -23,6 +29,9 @@
     }
 
     function toggleEditor() {
+        $('#btn-song-add-to-set').removeClass('btn-successful');
+        $('#add-actions-success').hide();
+
         $('#add-actions').hide();
         $('#btn-add-to-set').removeClass('img-action-selected');
         $('#transposer').hide();
@@ -30,6 +39,30 @@
 
         $('#editor').toggle();
         $('#btn-toggle-editor').toggleClass('img-action-selected');
+    }
+
+    function addSongToSet(go_live) {
+        var data = {'song_id': {{ song.pk }}};
+        if (go_live) {
+            data.go_live = true;
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url 'set.add_song' %}',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            data: data,
+            dataType: 'json',
+            success: function(data) {
+                if (data.redirect) {
+                    window.location = data.redirect;
+                }
+                else {
+                    $('#btn-song-add-to-set').addClass('btn-successful');
+                    $('#add-actions-success').show();
+                }
+            }
+        });
     }
 
     $(function() {
@@ -41,6 +74,10 @@
 
         $('#transposer').hide();
         $('#btn-toggle-transposer').click(toggleTransposer);
+
+        $('#btn-song-add-to-set').click(function() {addSongToSet(false);});
+        $('#btn-song-add-and-go').click(function() {addSongToSet(true);});
+        $('#add-actions-success').hide();
     });
 {% endblock %}
 
@@ -57,9 +94,13 @@
 
     <div id="add-actions">
         <ul>
-            <li><button>Add to set list</button></li>
-            <li><button>Add and go live</button></li>
+            <li>
+                <button id="btn-song-add-to-set">Add to set list</button>
+                <img id="add-actions-success" src="{% static 'songview/icons/mdi-check-box-outline.svg' %}">
+            </li>
+            <li><button id="btn-song-add-and-go">Add and go live</button></li>
         </ul>
+
     </div>
 
     {% include 'songview/_transposer.html' with sk_editable='true' %}

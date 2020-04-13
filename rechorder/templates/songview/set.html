@@ -46,7 +46,6 @@
 
 
     function clearList() {
-        console.log("Clearing list");
         $.ajax({
             url: '{% url 'set.clear' %}',
             /* It seems ajax requires some data for it to work correctly */
@@ -66,7 +65,19 @@
             handle: '.sortable-list-handle'
         });
         $("#set-list").disableSelection();
-        $("#set-list .set-item-delete").click(function() {$(this).parent().remove(); onListChange()});
+        $("#set-list .set-item-delete").click(function() {
+            var obj = $(this).parent();
+            while (true) {
+                if (obj.is('li')) {
+                    obj.remove();
+                    break;
+                }
+                else {
+                    obj = obj.parent();
+                }
+            }
+            onListChange();
+        });
 
         $("#btn-clear-set-list").click(clearList);
 
@@ -110,23 +121,26 @@
 
     {% if set_songs %}
         <a href="{% url 'set.song' 0 %}">
-            <img class="img-actions right-aligned-img"
+            <img class="img-btn right-aligned-img"
                  src="{% static 'songview/icons/mdi-chevron-right-box-outline.svg' %}">
         </a>
 {% endif %}
 
     <h1>Set list</h1>
 
-
-
     <div id="set-name">
         <span id="name-edit">
             <input id="input-set-name">
-            <img id="btn-name-edit-done" src="{% static 'songview/icons/mdi-content-save-outline.svg' %}">
+
+            <button id="btn-name-edit-done" class="img-btn">
+                <img src="{% static 'songview/icons/mdi-content-save-outline.svg' %}">
+            </button>
         </span>
         <span id="name-show">
             <span id="name-read-only"></span>
-            <img id="btn-rename" src="{% static 'songview/icons/mdi-pencil-outline.svg' %}">
+            <button id="btn-rename" class="img-btn">
+                <img src="{% static 'songview/icons/mdi-pencil-outline.svg' %}">
+            </button>
         </span>
     </div>
 {% endblock %}
@@ -149,7 +163,9 @@
                         </select>
                     </div>
                     <div>
-                        <img class="set-item-delete" src="{% static 'songview/icons/mdi-delete-outline.svg' %}">
+                        <button class="img-btn set-item-delete">
+                            <img src="{% static 'songview/icons/mdi-delete-outline.svg' %}">
+                        </button>
                     </div>
 
             </li>
@@ -158,7 +174,7 @@
 
     {% if set_songs %}
         <button id="btn-clear-set-list">Clear set list</button>
-        <a href="{% url 'set.print' set.pk %}"><img class="right-aligned-img" src="{% static 'songview/icons/mdi-printer.svg' %}"></a>
+        <a href="{% url 'set.print' set.pk %}"><img class="img-btn right-aligned-img" src="{% static 'songview/icons/mdi-printer.svg' %}"></a>
     {% else %}
         Set list currently empty. Why not add some <a href="{% url 'songs' %}">songs</a>?
     {% endif %}

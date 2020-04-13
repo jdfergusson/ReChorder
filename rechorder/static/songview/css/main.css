@@ -20,10 +20,6 @@ a {
     transition-duration: 0.4s;
 }
 
-.right-aligned-img:hover {
-    background-image: linear-gradient(#bec1e600, #bec1e6ff);
-}
-
 #div-header {
     padding: 0px;
     width: 100%;
@@ -37,7 +33,7 @@ a {
 #div-header-images {
     margin: 0;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
 }
 
 #div-header img {
@@ -85,6 +81,13 @@ a {
     margin-bottom: 5px;
 }
 
+#add-actions-success {
+    min-height: 2em;
+    background-color: #c1e6be;
+    vertical-align: middle;
+    margin-bottom: 5px;
+}
+
 .tran-rad-label {
 
     color: #626262;
@@ -105,12 +108,15 @@ button, select {
     transition: 0.2s;
 }
 
+.btn-successful {
+    background-color: #c1e6be;
+}
+
 @media (hover:hover) {
-    button:hover, select:hover {
+    button:hover, select:hover, a:hover {
         background-color: #cee0ec;
     }
 }
-
 
 button:selected, select:selected {
     border: 2px solid #303539;
@@ -175,6 +181,17 @@ h3 {
     justify-content: space-between;
 }
 
+.img-btn {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: none;
+}
+
+.img-btn:hover {
+    background-color: #cee0ec;
+}
+
 /**********************************************************
  * Lists
  **********************************************************/
@@ -210,6 +227,7 @@ h3 {
     display: flex;
     align-items: center;
     background-color: white;
+    transition: 0.2s;
 }
 
 .main-content-list li:hover {
@@ -353,4 +371,46 @@ mark {
 
 #set-list li {
     padding-left: 0;
+}
+
+/**********************************************************
+ * Chord shape checkboxes
+ **********************************************************/
+
+#shape-selection ul {
+    display: flex;
+    list-style: None;
+    flex-wrap: wrap;
+    padding-left: 0;
+    justify-content: center;
+}
+
+.key-label {
+    width: 3em;
+    display: inline-block;
+    text-align: center;
+}
+
+.yes-no-selection input[type=checkbox] {
+    position: absolute;
+    left: -9999px;
+}
+
+.yes-no-selection input[type=checkbox] + label {
+    font-size: large;
+    color: #626262;
+    font-variant: small-caps;
+    text-decoration: none;
+    border: 2px solid #626262;
+    background-color: #e6bec1;
+    padding: 5px;
+    transition: 0.2s;
+}
+
+.yes-no-selection input[type=checkbox]:checked + label {
+    background-color: #c1e6be;
+}
+
+.yes-no-selection li {
+    margin: 2.5px;
 }

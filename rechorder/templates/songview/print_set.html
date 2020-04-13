@@ -3,15 +3,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
-    .block {
-      color: maroon;
-      float: none;
-    }
 
-    .container {
-        display: flex;
-        justify-content: flex-start;
-    }
+.block {
+  float: none;
+  padding-bottom: 0.2em;
+}
+
+.container {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.section-title {
+    font-size: large;
+    font-weight: bold;
+    padding-top: 0.8em;
+    padding-bottom: 0.3em;
+    display: block;
+}
+
+.block-chord {
+    font-weight: bold;
+    margin-right: 1em;
+    padding: 2px;
+    margin-bottom: 2px;
+    height: 1em;
+    min-width: 0;
+}
+
+mark {
+    background-color: #c1e6be;
+}
+
+.block-lyric {
+    padding-top: 2px;
+}
 
     @media print
     {

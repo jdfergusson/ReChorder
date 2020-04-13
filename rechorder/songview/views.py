@@ -127,6 +127,7 @@ def _get_key_details(request, song, set_id=-1, sounding_key_index=None):
         # Default to displaying in sounding key
         'adv-tran-opt': 'sk'
     })
+    key_details['original_key_index'] = song.original_key
     return key_details
 
 
@@ -165,6 +166,7 @@ def _get_update_song_data(request, song, set_id=-1):
         },
     }
 
+
 ###########################
 # VIEWS
 ###########################
@@ -173,8 +175,9 @@ def index(request):
     return render(request, 'songview/index.html')
 
 
-def set_add_song(request, song_id):
-    song = Song.objects.get(pk=song_id)
+def set_add_song(request):
+
+    song = Song.objects.get(pk=int(request.POST.get('song_id')))
 
     set = _get_or_create_my_set(request)
 
@@ -183,7 +186,7 @@ def set_add_song(request, song_id):
     sounding_key_index = int(song_key_data.get('sounding_key_index', song.original_key))
 
     song_in_set = {
-        'id': song_id,
+        'id': song.pk,
         'key_index': sounding_key_index,
     }
 
@@ -192,7 +195,7 @@ def set_add_song(request, song_id):
         song_key_data['{}'.format(set.id)] = deepcopy(song_key_data['-1'])
         request.session.modified = True
 
-    if request.GET.get('golive'):
+    if request.POST.get('go_live', False):
         if set.beamed_song_index is None:
             song_in_set_index = len(set.song_list)
         else:
@@ -201,12 +204,12 @@ def set_add_song(request, song_id):
         set.song_list.insert(song_in_set_index, song_in_set)
         set.save()
 
-        return redirect('set.song', song_index=song_in_set_index)
+        redirect_url = reverse('set.song', args=[song_in_set_index])
+        return JsonResponse({'success': True, 'redirect': redirect_url})
     else:
         set.song_list.append(song_in_set)
         set.save()
-
-        return render(request, 'songview/set_added_song.html', {'song': song_in_set})
+        return JsonResponse({'success': True})
 
 
 def set_clear(request):
@@ -306,6 +309,8 @@ def set_print(request, set_id):
             capo_fret_number = 0
         else:
             key_index, capo_fret_number = _get_song_key_index(request, song, set.pk, song_in_set['key_index'])
+
+        song.transpose(key_index)
 
         songs.append({
             'song': song,

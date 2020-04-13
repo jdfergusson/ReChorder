@@ -20,9 +20,6 @@
         data: {
             'permitted_shapes': JSON.stringify(getFormData($('#shape-selection'))),
         },
-        success: function() {
-            console.log("success");
-        },
     });
     }
 
@@ -47,17 +44,19 @@
 {% endblock %}
 
 {% block content %}
-    <h3>Auto Chord Shapes</h3>
+    <h2>Auto Chord Shapes</h2><br>
     Select chord shape keys you're comfortable with:
 
-    <form id="shape-selection"><ul>
-        {% for shape in possible_shapes %}
-            <li>
-                <input type="checkbox" id="check-{{ shape.index }}" name="{{ shape.index }}">
-                <label for="check-{{ shape.index }}">{{ shape.name }}</label>
-            </li>
-        {% endfor %}
-    </ul></form>
+    <form id="shape-selection">
+        <ul class="yes-no-selection">
+            {% for shape in possible_shapes %}
+                <li>
+                    <input type="checkbox" id="check-{{ shape.index }}" name="{{ shape.index }}">
+                    <label for="check-{{ shape.index }}" class="key-label">{{ shape.name }}</label>
+                </li>
+            {% endfor %}
+        </ul>
+    </form>
 {% endblock %}
 
 

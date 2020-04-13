@@ -5,6 +5,8 @@
 {{ key_details|json_script:"init_key_details" }}
 
 <script type="text/javascript">
+    var original_key = {{ song.original_key }};
+
     function getFormData($form){
         var unindexed_array = $form.serializeArray();
         var indexed_array = {};
@@ -17,7 +19,6 @@
     }
 
     function updateSong(data) {
-        console.log(data);
         /* Data should contain object with song_html and key_index */
         $('#song').html(data.song_html);
         setTransposeUi(data.key_details);
@@ -30,6 +31,9 @@
         $('#key-sk').text(key_details.sounding_key_index);
         $('#key-shown').text(key_details.key_index);
         $('#key-capo').text(key_details.capo_fret_number);
+
+        $('#tran-reset').text('Reset to ' + key_details.original_key_index);
+        original_key = key_details.original_key_index;
 
         $('#tran-sk-key').val(key_details.sounding_key_index)
         $('#tran-gc-capo').val(key_details.capo_fret_number)
@@ -117,7 +121,7 @@
         });
 
         $('#tran-reset').click(function() {
-            $('#tran-sk-key').val({{ song.original_key }});
+            $('#tran-sk-key').val(original_key);
             $('#tran-sk-rad').prop('checked', true);
             transposeSettingsChanged();
         });
@@ -134,7 +138,7 @@
             <option value="{{ forloop.counter0 }}">{{ key }}</option>
         {% endfor %}
         </select>
-        <button id="tran-reset" type="button">Reset to {{ song.original_key }}</button>
+        <button id="tran-reset" type="button"></button>
     {% else %}
     <span id="sk-read-only">{{ key_details.sounding_key_index }}</span>
     {% endif %}
