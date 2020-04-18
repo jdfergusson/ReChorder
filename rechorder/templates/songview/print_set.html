@@ -1,4 +1,5 @@
 {% load static %}
+{% load songview_tags %}
 
 <html>
 <head>
@@ -37,8 +38,8 @@
     <h1>{{ song_details.song.title }}</h1><br>
     <h2>{{ song_details.song.artist }}</h2><br>
     <h3>
-        Sounding key: {{ song_details.sounding_key_index }}.<br>
-        Shown in {{ song_details.key_index }} Capo: {{ song_details.capo_fret_number}}
+        Sounding key: {{ song_details.sounding_key_index|num2chord }}<br>
+        Shown in {{ song_details.key_index|num2chord }} Capo: {{ song_details.capo_fret_number}}
     </h3>
 
     <span id="song">

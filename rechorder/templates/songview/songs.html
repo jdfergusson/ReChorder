@@ -1,5 +1,6 @@
 {% extends 'songview/_base.html' %}
 {% load static %}
+{% load songview_tags %}
 
 {% block javascript %}
     var current_key_filter = -1;
@@ -97,7 +98,7 @@
                 <div class="song-in-list">
                     <span class="list-primary">{{ song }}</span><br>
                     <span class="list-secondary">{{ song.artist }}</span><br>
-                    <span class="list-tertiary">Original key: {{ song.original_key }}</span>
+                    <span class="list-tertiary">Original key: {{ song.original_key|num2chord }}</span>
                     <span class="song-key-index" style="display: none">{{ song.original_key }}</span>
                 </div>
             </a>
