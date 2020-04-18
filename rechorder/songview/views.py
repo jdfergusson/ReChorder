@@ -413,6 +413,30 @@ def song_delete(request, song_id):
     return JsonResponse({'success': True})
 
 
+def song_print(request, song_id):
+    song = get_object_or_404(Song, pk=song_id)
+    key_index, capo_fret_number = _get_song_key_index(request, song)
+    song.transpose(key_index)
+
+    songs = [{
+        'song': song,
+        'sounding_key_index': (key_index + capo_fret_number) % 12,
+        'key_index': key_index,
+        'capo_fret_number': capo_fret_number,
+    }]
+
+    context = {
+        'songs': songs,
+    }
+
+    if request.GET.get('no_personal_keys', False):
+       context['no_personal_keys'] = True
+
+    return render(request, 'songview/print_set.html', context)
+
+    return JsonResponse({'success': True})
+
+
 def song_create(request):
     if request.POST:
         song = Song(

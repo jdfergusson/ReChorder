@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^song/(?P<song_id>[0-9]+)$', views.song, name='song'),
     url(r'^song/(?P<song_id>[0-9]+)/update$', views.song_update, name='song.update'),
     url(r'^song/(?P<song_id>[0-9]+)/delete$', views.song_delete, name='song.delete'),
+    url(r'^song/(?P<song_id>[0-9]+)/print$', views.song_print, name='song.print'),
     url(r'^song/create', views.song_create, name='song.create'),
     url(r'^song/transpose$', views.song_transpose, name='song.transpose'),
     url(r'^set/addsong$', views.set_add_song, name='set.add_song'),

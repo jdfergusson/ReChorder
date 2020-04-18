@@ -478,3 +478,13 @@ mark {
 .yes-no-selection li {
     margin: 2.5px;
 }
+
+/**********************************************************
+ * Printing
+ **********************************************************/
+
+@media print {
+    .no-print, .no-print * {
+        display: none !important;
+    }
+}

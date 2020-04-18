@@ -1,79 +1,49 @@
+{% load static %}
+
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
+    <link rel="stylesheet" type="text/css" href="{% static 'songview/css/main.css' %}">
 
-.block {
-  float: none;
-  padding-bottom: 0.2em;
-}
-
-.container {
-    display: flex;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-}
-
-.section-title {
-    font-size: large;
-    font-weight: bold;
-    padding-top: 0.8em;
-    padding-bottom: 0.3em;
-    display: block;
-}
-
-.block-chord {
-    font-weight: bold;
-    margin-right: 1em;
-    padding: 2px;
-    margin-bottom: 2px;
-    height: 1em;
-    min-width: 0;
-}
-
-mark {
-    background-color: #c1e6be;
-}
-
-.block-lyric {
-    padding-top: 2px;
-}
-
-    @media print
-    {
-        .no-print, .no-print *
-        {
-            display: none !important;
-        }
-    }
-    </style>
-
+    <script src="{% static 'songview/js/jquery-3.1.0.min.js' %}"></script>
+    <script src="{% static 'songview/js/common.js' %}"></script>
 
 </head>
 <body>
-<p>
 
     <div class="no-print">
-        <button onclick="window.print(); return false;">Print</button>
-        {% if no_personal_keys %}
-            <a href="?">Use personal key choices</a>
-        {% else %}
-            <a href="?no_personal_keys=true">Use only sounding keys</a>
+        <a href="javascript:history.back()">Back</a><br>
+        <a href="javascript:window.print()">Print</a>
+        {% if set_id %}
+            {% if no_personal_keys %}
+                <a href="?">Use personal key choices</a>
+            {% else %}
+                <a href="?no_personal_keys=true">Use only sounding keys</a>
+            {% endif %}
         {% endif %}
+
+        <div>
+            {% include 'songview/_font_resizer.html' %}
+        </div>
+
+        <hr class="no-print" />
+
     </div>
-
 {% for song_details in songs %}
-        Song {{ forloop.counter }} of {{ song_details|length }}
-        <h1>{{ song_details.song.title }}</h1>
-        {{ song_details.song.artist }}<br>
-        Sounding key: {{ song_details.sounding_key_index }}.
+    {% if songs|length > 1 %}
+        Song {{ forloop.counter }} of {{ songs|length }}<br>
+    {% endif %}
+    <h1>{{ song_details.song.title }}</h1><br>
+    <h2>{{ song_details.song.artist }}</h2><br>
+    <h3>
+        Sounding key: {{ song_details.sounding_key_index }}.<br>
         Shown in {{ song_details.key_index }} Capo: {{ song_details.capo_fret_number}}
+    </h3>
 
-        <span id="song">
-            {% include "songview/_print_song.html" with song=song_details.song %}
-        </span>
-    <hr class="no-print" />
+    <span id="song">
+        {% include "songview/_print_song.html" with song=song_details.song %}
+    </span>
     <p style="page-break-after: always"></p>
 {% endfor %}
 
