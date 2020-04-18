@@ -1,5 +1,23 @@
+@font-face {
+    font-family: "GothicA1";
+    src:
+        url("../fonts/GothicA1/GothicA1-Regular.woff2") format("woff2"),
+        url("../fonts/GothicA1/GothicA1-Regular.woff") format("woff"),
+        url("../fonts/GothicA1/GothicA1-Regular.ttf") format("truetype");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "GothicA1";
+    src:
+        url("../fonts/GothicA1/GothicA1-Bold.woff2") format("woff2"),
+        url("../fonts/GothicA1/GothicA1-Bold.woff") format("woff"),
+        url("../fonts/GothicA1/GothicA1-Bold.ttf") format("truetype");
+    font-weight: 700;
+}
+
 body, html {
-    font-family: sans-serif;
+    font-family: 'GothicA1', sans-serif;
     margin: 0;
     padding: 0;
     width: 100%;
