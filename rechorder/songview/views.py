@@ -288,8 +288,9 @@ def set_show_song(request, song_index):
         'song': song,
         'am_i_master': True,
         'current_index': song_index,
-        'max_index': len(set.song_list) - 1,
         'set_id': set.pk,
+        'set_length': len(set.song_list),
+        'max_index': len(set.song_list) - 1,
         **_get_base_song_context_dict(request, song, set.pk, song_in_set['key_index']),
         **_get_header_links(
             request,
@@ -301,7 +302,6 @@ def set_show_song(request, song_index):
 
 
 def set_print(request, set_id):
-
     set = get_object_or_404(Set, pk=set_id)
     set.check_list_integrity()
 
@@ -371,6 +371,8 @@ def slave_to_master(request, set_id):
             'song': song,
             'update_token': set.has_changed_count,
             'capo_fret_number': capo_fret_number,
+            'set_length': len(set.song_list),
+            'current_index': set.beamed_song_index,
             **_get_base_song_context_dict(request, song, set_id, song_in_set['key_index']),
         }
     else:
