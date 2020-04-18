@@ -147,9 +147,10 @@ def _get_base_song_context_dict(request, song, set_id=-1, sounding_key_index=Non
         'keys': KEYS,
         'frets': [i for i in range(12)],
         'cnotes': [
-            {'index': 1, 'name': 'Bb'},
-            {'index': 6, 'name': 'Eb'},
+            {'index': 1, 'name': 'B\u266d'},
+            {'index': 6, 'name': 'E\u266d'},
             {'index': 7, 'name': 'F'},
+            {'index': 0, 'name': 'A'},
         ],
         'chord_shapes': chord_shapes,
         'key_details': _get_key_details(request, song, set_id, sounding_key_index),
