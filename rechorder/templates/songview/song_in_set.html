@@ -97,11 +97,6 @@
             xDown = null;
             yDown = null;
         };
-
-
-
-
-
     {% endif %}
 
     function toggleTab(tab) {
@@ -129,7 +124,11 @@
 {% endblock %}
 
 {% block header %}
-    {% include 'songview/_header.html' with selected='set' %}
+    {% if am_i_master %}
+        {% include 'songview/_header.html' with selected='set' %}
+    {% else %}
+        {% include 'songview/_header.html' with selected='receive' %}
+    {% endif %}
 {% endblock %}
 
 {% block title %}
