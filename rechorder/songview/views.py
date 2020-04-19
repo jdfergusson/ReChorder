@@ -16,8 +16,10 @@ from copy import deepcopy
 
 import json
 import datetime
+import zipfile
+import os
 
-from songview.music_handler.interpret import KEYS, ABSOLUTE_LOOKUP, interpret_absolute_chord
+from songview.music_handler.interpret import KEYS, ABSOLUTE_LOOKUP, interpret_absolute_chord, song_from_onsong_text
 
 
 from .models import Song, Set
@@ -173,7 +175,7 @@ def _get_update_song_data(request, song, set_id=-1):
 ###########################
 
 def index(request):
-    return render(request, 'songview/index.html')
+    return redirect(reverse('songs'))
 
 
 def set_add_song(request):
@@ -440,7 +442,7 @@ def song_print(request, song_id):
 
 
 def song_create(request):
-    if request.POST:
+    if request.method == 'POST':
         song = Song(
             title=request.POST.get('title'),
             artist=request.POST.get('artist'),
@@ -531,14 +533,14 @@ def song(request, song_id):
         **_get_header_links(
             request,
             header_link_songs=reverse('songs'),
-            header_link_back=reverse('songs'),
+            header_link_back='{}#song{}'.format(reverse('songs'), song.id),
         ),
     }
     return render(request, 'songview/song.html', context)
 
 
 def settings_chord_shapes(request):
-    if request.POST:
+    if request.method == 'POST':
         request.session['selected_chord_shapes'] = \
             [int(i) for i in json.loads(request.POST.get('permitted_shapes', ''))]
         request.session.modified = True
@@ -550,3 +552,30 @@ def settings_chord_shapes(request):
             **_get_header_links(request),
         }
         return render(request, 'songview/settings_chord_shapes.html', context)
+
+
+def upload(request):
+    if request.method == 'POST':
+        with zipfile.ZipFile(request.FILES['zipfile']) as zip_file:
+            file_names = zip_file.namelist()
+            for name in file_names:
+                if os.path.splitext(name)[1].lower() != '.onsong':
+                    continue
+
+                try:
+                    with zip_file.open(name, 'r') as f:
+                        data = f.read().decode('utf-8', errors='ignore')
+
+                    song_data = song_from_onsong_text(data)
+                    if song_data is not None:
+                        song = Song(**song_data)
+                        song.save()
+                        print('Added song "{}"'.format(song.title))
+                except Exception as e:
+                    print('{} failed:'.format(name))
+                    print(e)
+                    continue
+
+        return render(request, 'songview/upload.html')
+    else:
+        return render(request, 'songview/upload.html')

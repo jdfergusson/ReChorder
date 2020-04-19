@@ -21,5 +21,8 @@ urlpatterns = [
     url(r'^slave/$', views.get_beam_masters, name='slave'),
     url(r'^slave/(?P<set_id>[0-9]+)$', views.slave_to_master, name='slave_to'),
     url(r'^slave/(?P<set_id>[0-9]+)/token$', views.slave_get_update_token, name='slave_token'),
-    url(r'^settings/shapes$', views.settings_chord_shapes, name='settings.chord_shapes')
+    url(r'^settings/shapes$', views.settings_chord_shapes, name='settings.chord_shapes'),
+
+    # These aren't so user facing...
+    url(r'^upload$', views.upload, name='_upload')
 ]

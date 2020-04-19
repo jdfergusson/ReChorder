@@ -338,7 +338,7 @@ h3 {
 
 .block-chord {
     font-weight: bold;
-    margin-right: 1em;
+    margin-right: 0.2em;
     padding: 2px;
     margin-bottom: 2px;
     height: 1em;
@@ -421,6 +421,11 @@ mark {
 
 .song-in-list:hover {
     border-color:#bed5e6;
+}
+
+.song-anchor {
+    position: absolute;
+    transform: translateY(-30vh);
 }
 
 /**********************************************************

@@ -94,6 +94,7 @@
     <ul id="songlist" class="main-content-list">
         {% for song in songs %}
         <li>
+            <span class="song-anchor"><a name="song{{ song.id }}"></a></span>
             <a href="{% url 'song' song.id %}">
                 <div class="song-in-list">
                     <span class="list-primary">{{ song }}</span><br>

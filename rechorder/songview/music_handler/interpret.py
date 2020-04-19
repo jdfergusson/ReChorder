@@ -26,6 +26,7 @@ ABSOLUTE_LOOKUP = {
 
 KEYS = ['A', 'B\u266d', 'B', 'C', 'C\u266f', 'D', 'E\u266d', 'E', 'F', 'F\u266f', 'G', 'A\u266d']
 
+
 def interpret_absolute_chord(string):
     # Remove any surrounding brackets
     string = string.replace('[', '').replace(']', '')
@@ -56,3 +57,88 @@ def interpret_absolute_chord(string):
         bass_index = None
 
     return (index, qualification, bass_index)
+
+
+def _extract_keyword(keyword, text):
+    try:
+        return re.search(r'^{}: (.*)'.format(keyword), text, re.IGNORECASE | re.MULTILINE).group(1)
+    except AttributeError:
+        return None
+
+
+def song_from_onsong_text(text):
+    ret_dict = {}
+
+    # line breaks
+    text = text.replace('\r', '')
+
+    # strip comments
+    lines = text.split('\n')
+    text = '\n'.join([line for line in lines if not line.strip().startswith('#')])
+
+    split = re.split(r'\n[ \t]*\n', text, maxsplit=1)
+
+    header = split[0]
+    body = split[1]
+
+    metadata_keywords = [
+        'title',
+        'artist',
+        'author',
+        'key',
+        'transposedkey',
+        'in',
+        'capo',
+        'tempo',
+        'time',
+        'duration',
+        'book',
+        'number',
+        'flow',
+        'midi',
+        'midi-index',
+        'keywords',
+        'index',
+        'copyright',
+        'footer',
+        'ccli',
+        'restrictions',
+        'pitch',
+        'subdivision',
+        'beat',
+        'transpose',
+        'scene',
+    ]
+
+    metadata = {}
+
+    for word in metadata_keywords:
+        metadata[word] = _extract_keyword(word, header)
+
+    ret_dict['title'] = metadata.get('title')
+    if ret_dict['title'] is None:
+        ret_dict['title'] = header.split('\n')[0]
+
+    ret_dict['artist'] = metadata.get('artist')
+    if ret_dict['artist'] is None:
+        ret_dict['artist'] = metadata.get('author')
+    if ret_dict['artist'] is None:
+        ret_dict['artist'] = header.split('\n')[1]
+
+
+    # Extract key
+    key_text = metadata.get('key')
+    if key_text is None:
+        key_text = metadata.get('in')
+    if key_text is None:
+        try:
+            # Extract the first chord of the song (just a guess!)
+            key_text = body.split('[')[1].split(']')[0]
+        except IndexError:
+            # Failing that, it's in C. This shouldn't matter as we've established it has no chords anyway!
+            key_text = 'C'
+
+    ret_dict['original_key'] = int(interpret_absolute_chord(key_text)[0])
+    ret_dict['raw'] = body
+
+    return ret_dict
