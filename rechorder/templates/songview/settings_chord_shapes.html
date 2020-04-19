@@ -1,0 +1,62 @@
+{% extends 'songview/_base.html' %}
+
+{% block javascript %}
+    function getFormData($form){
+        var unindexed_array = $form.serializeArray();
+        var indexed_array = {};
+
+        $.map(unindexed_array, function(n, i){
+            indexed_array[n['name']] = n['value'];
+        });
+
+        return indexed_array;
+    }
+
+    function update() {
+        $.ajax({
+        url: '{% url 'settings.chord_shapes' %}',
+        type: 'POST',
+        headers: { "X-CSRFToken": '{{ csrf_token }}' },
+        data: {
+            'permitted_shapes': JSON.stringify(getFormData($('#shape-selection'))),
+        },
+    });
+    }
+
+    $(function() {
+        $('input').each(function(index) {
+            $(this).change(update);
+            $(this).prop('checked', false);
+        });
+
+        {% for index in selected_shapes %}
+            $('#check-{{ index }}').prop('checked', true);
+        {% endfor %}
+    });
+{% endblock %}
+
+{% block header %}
+    {% include 'songview/_header.html' with selected="settings" %}
+{% endblock %}
+
+{% block title %}
+    <h1>Settings</h1>
+{% endblock %}
+
+{% block content %}
+    <h2>Auto Chord Shapes</h2><br>
+    Select chord shape keys you're comfortable with:
+
+    <form id="shape-selection">
+        <ul class="yes-no-selection">
+            {% for shape in possible_shapes %}
+                <li>
+                    <input type="checkbox" id="check-{{ shape.index }}" name="{{ shape.index }}">
+                    <label for="check-{{ shape.index }}" class="key-label">{{ shape.name }}</label>
+                </li>
+            {% endfor %}
+        </ul>
+    </form>
+{% endblock %}
+
+

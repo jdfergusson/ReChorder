@@ -1,0 +1,52 @@
+{% load static %}
+{% load songview_tags %}
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'songview/css/main.css' %}">
+
+    <script src="{% static 'songview/js/jquery-3.1.0.min.js' %}"></script>
+    <script src="{% static 'songview/js/common.js' %}"></script>
+
+</head>
+<body>
+
+    <div class="no-print">
+        <a href="javascript:history.back()">Back</a><br>
+        <a href="javascript:window.print()">Print</a>
+        {% if set_id %}
+            {% if no_personal_keys %}
+                <a href="?">Use personal key choices</a>
+            {% else %}
+                <a href="?no_personal_keys=true">Use only sounding keys</a>
+            {% endif %}
+        {% endif %}
+
+        <div>
+            {% include 'songview/_font_resizer.html' %}
+        </div>
+
+        <hr class="no-print" />
+
+    </div>
+{% for song_details in songs %}
+    {% if songs|length > 1 %}
+        Song {{ forloop.counter }} of {{ songs|length }}<br>
+    {% endif %}
+    <h1>{{ song_details.song.title }}</h1><br>
+    <h2>{{ song_details.song.artist }}</h2><br>
+    <h3>
+        Sounding key: {{ song_details.sounding_key_index|num2chord }}<br>
+        Shown in {{ song_details.key_index|num2chord }} Capo: {{ song_details.capo_fret_number}}
+    </h3>
+
+    <span id="song">
+        {% include "songview/_print_song.html" with song=song_details.song %}
+    </span>
+    <p style="page-break-after: always"></p>
+{% endfor %}
+
+</body>
+</html>

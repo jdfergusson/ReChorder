@@ -1,54 +1,130 @@
-<html>
-<head>
-<style>
-.block {
-  color: maroon;
-  float: none;
-}
-
-.container {
-    display: flex;
-    justify-content: flex-start;
-}
-</style>
-</head>
-<p>
-
-<h1>{{ song.title }}</h1>
-{{ song.artist }}
-
-Current key: {{ song.key.index }}, {{ song.key }},
-
-<p>
-    <form action="{% url 'song' song_id %}" method="get">
-        <select name="target_key">
-        {% for key in keys %}
-            <option
-                    value="{{ forloop.counter0 }}"
-                    {% if forloop.counter0 == song.key.index %}selected{% endif %}>
-                {{ key }}
-            </option>
-        {% endfor %}
-        </select>
-
-        <input type="submit" value="Go" />
-    </form>
-</p>
-
-{% for section in song.sections %}
-    <h3>{{ section.title }}</h3>
-    {% for line in section.lines %}
-        <div class="container">
-        {% for block in line %}
-            <div class="block">
-                <b>{{ block.chord }}&nbsp;&nbsp;</b><br>
-                {{ block.lyric | safe}}
-            </div>
-        {% endfor %}
-        </div>
-    {% endfor %}
-{% endfor %}
+{% extends 'songview/_base.html' %}
+{% load static %}
 
 
-</body>
-</html>
+{% block javascript %}
+    function addSongToSet(go_live) {
+        var data = {'song_id': {{ song.pk }}};
+        if (go_live) {
+            data.go_live = true;
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url 'set.add_song' %}',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            data: data,
+            dataType: 'json',
+            success: function(data) {
+                if (data.redirect) {
+                    window.location = data.redirect;
+                }
+                else {
+                    $('#btn-song-add-to-set').addClass('btn-successful');
+                    $('#btn-song-add-to-set').text('Song added');
+                }
+            }
+        });
+    }
+
+    function toggleTab(tab) {
+        $('#btn-song-add-to-set').removeClass('btn-successful');
+        $('#btn-song-add-to-set').text('Add to set list');
+
+        if (tab != 'transposer') {
+            $('#transposer').hide();
+            $('#btn-toggle-transposer').removeClass('img-action-selected');
+        }
+
+        if (tab != 'editor') {
+            $('#editor').hide();
+            $('#btn-toggle-editor').removeClass('img-action-selected');
+        }
+
+        if (tab != 'adder') {
+            $('#adder').hide();
+            $('#btn-toggle-adder').removeClass('img-action-selected');
+        }
+
+        if (tab != 'font-resizer') {
+            $('#font-resizer').hide();
+            $('#btn-toggle-font-resizer').removeClass('img-action-selected');
+        }
+
+        $('#' + tab).toggle();
+        $('#btn-toggle-' + tab).toggleClass('img-action-selected');
+    }
+
+    $(function() {
+        $('#adder').hide();
+        $('#btn-toggle-adder').click(function() {toggleTab('adder');});
+
+        $('#editor').hide();
+        $('#btn-toggle-editor').click(function() {toggleTab('editor');});
+
+        $('#transposer').hide();
+        $('#btn-toggle-transposer').click(function() {toggleTab('transposer');});
+
+        $('#font-resizer').hide();
+        $('#btn-toggle-font-resizer').click(function() {toggleTab('font-resizer');});
+
+        $('#btn-song-add-to-set').click(function() {addSongToSet(false);});
+        $('#btn-song-add-and-go').click(function() {addSongToSet(true);});
+        $('#add-actions-success').hide();
+    });
+{% endblock %}
+
+{% block header %}
+    {% include 'songview/_header.html' with selected="songs" %}
+{% endblock %}
+
+{% block title %}
+    <a href="{% url 'song.print' song.id %}">
+        <img class="img-btn right-aligned-img"
+             src="{% static 'songview/icons/mdi-printer.svg' %}">
+    </a>
+
+    <h1 id="song-title">{{ song.title }}</h1><br>
+    <h2 id="song-artist">{{ song.artist }}</h2><br>
+    <h3>Key of: <span id="key-shown"></span> Capo: <span id="key-capo"></span></h3><br>
+
+    <ul class="tab-list">
+        <li>
+            <img class="img-actions" id='btn-toggle-adder' src="{% static 'songview/icons/mdi-playlist-plus.svg' %}">
+        </li><li><img class="img-actions"
+                    id="btn-toggle-transposer" src="{% static 'songview/icons/mdi-music-accidental-natural.svg' %}">
+        </li><li>
+            <img class='img-actions' id="btn-toggle-editor" src="{% static 'songview/icons/mdi-pencil-outline.svg' %}">
+        </li><li>
+            <img class='img-actions' id="btn-toggle-font-resizer" src="{% static 'songview/icons/mdi-format-font.svg' %}">
+        </li>
+    </ul>
+
+    <div class="tab-container" id="adder">
+        <ul>
+            <li>
+                <button id="btn-song-add-to-set">Add to set list</button>
+            </li>
+            <li><button id="btn-song-add-and-go">Add and go live</button></li>
+        </ul>
+
+    </div>
+
+    <div class="tab-container" id="transposer">
+        {% include 'songview/_transposer.html' with sk_editable='true' %}
+    </div>
+
+    <div class="tab-container" id="editor">
+        {% include 'songview/_song_edit.html' %}
+    </div>
+
+    <div class="tab-container" id="font-resizer">
+    {% include 'songview/_font_resizer.html' %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div id="song">
+        {% include 'songview/_print_song.html' %}
+    </div>
+{% endblock %}

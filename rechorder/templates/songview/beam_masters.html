@@ -1,0 +1,33 @@
+{% extends 'songview/_base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block header %}
+    {% include 'songview/_header.html' with selected="receive" %}
+{% endblock %}
+
+{% block title %}
+    <h1>Beaming sets</h1>
+{% endblock %}
+
+{% block content %}
+    <ul class="main-content-list">
+        {% for set in sets %}
+            <li id="song-in-list">
+                <div class="list-expander">
+                    <a href="{% url 'slave_to' set.pk %}">
+                        <span class="list-primary">{{ set.name }}</span><br>
+                        <span class="list-secondary">last used {{ set.last_updated|naturaltime }}</span>
+                    </a>
+                </div>
+                <div>
+                    <a href="{% url 'set.print' set.pk %}">
+                        <img class="img-btn" src="{% static 'songview/icons/mdi-printer.svg' %}">
+                    </a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <button onclick="history.go(0);">Refresh list</button>
+{% endblock %}

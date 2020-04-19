@@ -1,0 +1,181 @@
+{% extends 'songview/_base.html' %}
+{% load static %}
+
+{% block javascript %}
+    {% if not am_i_master %}
+        function checkForUpdates() {
+            $.ajax({
+                url: '{% url 'slave_token' set_id %}',
+                success: function (data)
+                {
+                    if (data.update_token != {{ update_token }})
+                    {
+                        location.reload();
+                    }
+                }
+            });
+        }
+
+        $(function() {
+            /* Check for an update every second */
+            window.setInterval(checkForUpdates, 1000);
+        });
+    {% endif %}
+
+
+    {% if am_i_master %}
+        function next() {
+            {% if current_index < max_index %}
+                window.location.href = "{% url 'set.song' current_index|add:'1' %}";
+            {% endif %}
+        }
+
+        function prev() {
+            {% if current_index > 0 %}
+                window.location.href = "{% url 'set.song' current_index|add:'-1' %}";
+            {% endif %}
+        }
+
+        function processKeyPress(e) {
+            e = e || window.event;
+
+
+            if (e.key == 'PageUp') {
+                if (window.scrollY <= 0)
+                {
+                    prev();
+                }
+            }
+            else if (e.key == 'PageDown') {
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight)
+                {
+                    next();
+                }
+            }
+        }
+
+        $(function() {
+            document.onkeydown = processKeyPress;
+            document.addEventListener('touchstart', handleTouchStart, false);
+            document.addEventListener('touchmove', handleTouchMove, false);
+        });
+
+        var xDown = null;
+        var yDown = null;
+
+        function getTouches(evt) {
+          return evt.touches ||             // browser API
+                 evt.originalEvent.touches; // jQuery
+        }
+
+        function handleTouchStart(evt) {
+            const firstTouch = getTouches(evt)[0];
+            xDown = firstTouch.clientX;
+            yDown = firstTouch.clientY;
+        };
+
+        function handleTouchMove(evt) {
+            if ( ! xDown || ! yDown ) {
+                return;
+            }
+
+            var xUp = evt.touches[0].clientX;
+            var yUp = evt.touches[0].clientY;
+
+            var xDiff = xDown - xUp;
+            var yDiff = yDown - yUp;
+
+            if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
+                if ( xDiff > 0 ) {
+                    next();
+                } else {
+                    prev();
+                }
+            }
+
+            /* reset values */
+            xDown = null;
+            yDown = null;
+        };
+
+
+
+
+
+    {% endif %}
+
+    function toggleTab(tab) {
+        if (tab != 'transposer') {
+            $('#transposer').hide();
+            $('#btn-toggle-transposer').removeClass('img-action-selected');
+        }
+
+        if (tab != 'font-resizer') {
+            $('#font-resizer').hide();
+            $('#btn-toggle-font-resizer').removeClass('img-action-selected');
+        }
+
+        $('#' + tab).toggle();
+        $('#btn-toggle-' + tab).toggleClass('img-action-selected');
+    }
+
+    $(function() {
+        $('#transposer').hide();
+        $('#btn-toggle-transposer').click(function() {toggleTab('transposer');});
+
+        $('#font-resizer').hide();
+        $('#btn-toggle-font-resizer').click(function() {toggleTab('font-resizer');});
+    });
+{% endblock %}
+
+{% block header %}
+    {% include 'songview/_header.html' with selected='set' %}
+{% endblock %}
+
+{% block title %}
+{% if song %}
+   <h1 id="song-title">{{ song.title }}</h1><br>
+    <h2 id="song-artist">{{ song.artist }} - {{ current_index|add:'1' }} of {{ set_length }}</h2><br>
+    <h3>Key of: <span id="key-shown"></span> Capo: <span id="key-capo"></span></h3><br>
+
+    <ul class="tab-list">
+        <li><img class="img-actions"
+                    id="btn-toggle-transposer" src="{% static 'songview/icons/mdi-music-accidental-natural.svg' %}">
+        </li><li>
+            <img class='img-actions' id="btn-toggle-font-resizer" src="{% static 'songview/icons/mdi-format-font.svg' %}">
+        </li>
+    </ul>
+
+    <div class="tab-container" id="transposer">
+        {% include 'songview/_transposer.html' with sk_editable='false' %}
+    </div>
+    <div class="tab-container" id="font-resizer">
+    {% include 'songview/_font_resizer.html' %}
+    </div>
+{% else %}
+    <h1>No song. Waiting for beaming to start...</h1>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if song %}
+    <span id="song">
+        {% include 'songview/_print_song.html' %}
+    </span>
+
+    <div id="set-nav-btns">
+        {% if current_index > 0 %}
+            <a href="{% url 'set.song' current_index|add:'-1' %}">
+                <img src="{% static 'songview/icons/mdi-chevron-left-box-outline.svg' %}">
+            </a>
+        {% endif %}
+
+
+        {% if current_index < max_index %}
+            <a href="{% url 'set.song' current_index|add:'1' %}">
+                <img class="right-aligned-img" src="{% static 'songview/icons/mdi-chevron-right-box-outline.svg' %}">
+            </a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

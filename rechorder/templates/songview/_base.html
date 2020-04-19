@@ -1,0 +1,38 @@
+{% load static %}
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'songview/css/main.css' %}">
+
+    <script src="{% static 'songview/js/jquery-3.1.0.min.js' %}"></script>
+    <script src="{% static 'songview/js/common.js' %}"></script>
+
+    {% block extrahead %}
+    {% endblock %}
+
+    <script type="text/javascript">
+        {% block javascript %}
+        {% endblock %}
+    </script>
+
+
+</head>
+<body>
+    <div id="header">
+        {% block header %}
+        {% endblock %}
+    </div>
+
+    <div id="div-title">
+        {% block title %}
+        {% endblock %}
+    </div>
+
+    <div id="div-content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+</body>
+</html>

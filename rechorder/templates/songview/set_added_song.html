@@ -1,0 +1,10 @@
+{% load static %}
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+{{ song.title }} in {{ song.key_index }} added to set.
+
+<p>
+    <a href="{% url 'song' song.id %}">Back to song</a>
+    <a href="{% url 'set' %}">Go to set list</a>
+</p>

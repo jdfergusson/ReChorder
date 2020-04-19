@@ -1,0 +1,180 @@
+{% extends 'songview/_base.html' %}
+{% load static %}
+
+{% block extrahead %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <!-- (Start) Add jQuery UI Touch Punch -->
+    <script>!function(a){function f(a,b){if(!(a.originalEvent.touches.length>1)){a.preventDefault();var c=a.originalEvent.changedTouches[0],d=document.createEvent("MouseEvents");d.initMouseEvent(b,!0,!0,window,1,c.screenX,c.screenY,c.clientX,c.clientY,!1,!1,!1,!1,0,null),a.target.dispatchEvent(d)}}if(a.support.touch="ontouchend"in document,a.support.touch){var e,b=a.ui.mouse.prototype,c=b._mouseInit,d=b._mouseDestroy;b._touchStart=function(a){var b=this;!e&&b._mouseCapture(a.originalEvent.changedTouches[0])&&(e=!0,b._touchMoved=!1,f(a,"mouseover"),f(a,"mousemove"),f(a,"mousedown"))},b._touchMove=function(a){e&&(this._touchMoved=!0,f(a,"mousemove"))},b._touchEnd=function(a){e&&(f(a,"mouseup"),f(a,"mouseout"),this._touchMoved||f(a,"click"),e=!1)},b._mouseInit=function(){var b=this;b.element.bind({touchstart:a.proxy(b,"_touchStart"),touchmove:a.proxy(b,"_touchMove"),touchend:a.proxy(b,"_touchEnd")}),c.call(b)},b._mouseDestroy=function(){var b=this;b.element.unbind({touchstart:a.proxy(b,"_touchStart"),touchmove:a.proxy(b,"_touchMove"),touchend:a.proxy(b,"_touchEnd")}),d.call(b)}}}(jQuery);</script>
+{% endblock %}
+
+{% block javascript %}
+    var initial_set_list = [
+        {% for song in set_songs %}
+            {
+                song_id: {{ song.id }},
+                key_index: {{ song.key_index }}
+            },
+        {% endfor %}
+    ];
+
+
+    function onListChange()
+    {
+        var idsInOrder = $("#set-list").sortable("toArray");
+
+        var new_set = [];
+        for (let i = 0; i < idsInOrder.length; i++)
+        {
+            song_id = idsInOrder[i].split("_")[2];
+            index = idsInOrder[i].split("_")[1];
+
+            new_set.push({
+                id: parseInt(song_id),
+                key_index: parseInt($("#target-key_" + index)[0].value)
+            });
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url 'set.update' %}',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            data: {new_set: JSON.stringify(new_set)},
+            dataType: 'json'
+        });
+    }
+
+
+    function clearList() {
+        $.ajax({
+            url: '{% url 'set.clear' %}',
+            /* It seems ajax requires some data for it to work correctly */
+            data: {clear: true},
+            dataType: 'json',
+            success: function (data) {
+                location.reload();
+            }
+        });
+    }
+
+    $( function() {
+        /* Set up sortable list */
+        $("#set-list").sortable({
+            update: onListChange,
+            handle: '.sortable-list-handle'
+        });
+        $("#set-list").disableSelection();
+        $("#set-list .set-item-delete").click(function() {
+            var obj = $(this).parent();
+            while (true) {
+                if (obj.is('li')) {
+                    obj.remove();
+                    break;
+                }
+                else {
+                    obj = obj.parent();
+                }
+            }
+            onListChange();
+        });
+
+        $("#btn-clear-set-list").click(clearList);
+
+        for (let i = 0; i < initial_set_list.length; i++) {
+            $("#target-key_" + i)[0].value = initial_set_list[i].key_index;
+            $("#target-key_" + i).change(onListChange);
+        }
+
+        $('#name-read-only').text("{{ set.name|escapejs }}");
+        $('#input-set-name').val("{{ set.name|escapejs }}");
+        $('#name-edit').hide();
+        $('#btn-rename').click(function() {
+            $('#name-edit').show()
+            $('#name-show').hide()
+        });
+        $('#btn-name-edit-done').click(function() {
+            $.ajax({
+                type: 'POST',
+                url: '{% url 'set.rename' %}',
+                headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                data: {
+                    'name': $('#input-set-name').val(),
+                },
+                dataType: 'json',
+                success: function(data) {
+                    $('#name-read-only').text(data.new_name);
+                    $('#input-set-name').val(data.new_name);
+                    $('#name-edit').hide()
+                    $('#name-show').show()
+                }
+            });
+        });
+    });
+{% endblock %}
+
+{% block header %}
+    {% include 'songview/_header.html' with selected="set" %}
+{% endblock %}
+
+{% block title %}
+
+    {% if set_songs %}
+        <a href="{% url 'set.song' 0 %}">
+            <img class="img-btn right-aligned-img" id="img-set-display"
+                 src="{% static 'songview/icons/mdi-chevron-right-box-outline.svg' %}">
+        </a>
+{% endif %}
+
+    <h1>Set list</h1>
+
+    <div id="set-name">
+        <span id="name-show">
+            <button id="btn-rename" class="img-btn-header">
+                <img src="{% static 'songview/icons/mdi-pencil-outline.svg' %}">
+            </button>
+            <h2><span id="name-read-only"></span></h2>
+        </span>
+        <span id="name-edit">
+            <button id="btn-name-edit-done" class="img-btn-header">
+                <img src="{% static 'songview/icons/mdi-content-save-outline.svg' %}">
+            </button>
+            <input id="input-set-name">
+        </span>
+    </div>
+{% endblock %}
+
+{% block content %}
+     <ul id="set-list" class="main-content-list">
+        {% for song in set_songs %}
+            <li id="set-item_{{ forloop.counter0 }}_{{ song.id }}">
+                    <div>
+                        <img class="sortable-list-handle" src="{% static 'songview/icons/mdi-drag.svg' %}">
+                    </div>
+                    <div class="list-expander">
+                        <span class="list-primary"><a href="{% url 'song' song.id %}">{{ song.title }}</a></span>
+                    </div>
+                    <div>
+                        <select id="target-key_{{ forloop.counter0 }}">
+                        {% for key in keys %}
+                            <option value="{{ forloop.counter0 }}">{{ key }}</option>
+                        {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <button class="img-btn set-item-delete">
+                            <img src="{% static 'songview/icons/mdi-delete-outline.svg' %}">
+                        </button>
+                    </div>
+
+            </li>
+        {% endfor %}
+    </ul>
+
+    {% if set_songs %}
+        <button id="btn-clear-set-list">Clear set list</button>
+        <a href="{% url 'set.print' set.pk %}"><img class="img-btn right-aligned-img" src="{% static 'songview/icons/mdi-printer.svg' %}"></a>
+    {% else %}
+        Set list currently empty. Why not add some <a href="{% url 'songs' %}">songs</a>?
+    {% endif %}
+{% endblock %}
+

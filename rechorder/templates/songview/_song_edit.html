@@ -1,0 +1,95 @@
+
+<script type="text/javascript">
+    function saveSong() {
+        $('#areyousure').hide();
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url 'song.update' song.id %}',
+            data: {
+                'title': $('#editor-song-title').val(),
+                'artist':  $('#editor-song-artist').val(),
+                'original_key':  $('#editor-original-key').val(),
+                'content':  $('#editor-song-content').val(),
+            },
+            dataType: 'json',
+            success: function(data) {
+                $('#success').show();
+                updateSong(data);
+            },
+        });
+    }
+
+    function deleteSong() {
+        $('#areyousure-message').text(
+            "Are you sure you want to delete this song? This is non-reversible."
+        );
+
+        $('#btn-ays-yes').click(function() {
+            $.ajax({
+                type: 'POST',
+                headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                url: '{% url 'song.delete' song.id %}',
+                dataType: 'json',
+                success: function() {
+                    window.location = "{% url 'songs' %}";
+                },
+            });
+        });
+        $('#btn-ays-no').click(function () {
+            $('#areyousure').hide();
+        });
+        $('#areyousure').show();
+    }
+
+    function onEdit() {
+        $('#areyousure').hide();
+        $('#success').hide();
+    }
+
+    $(function() {
+        $('#editor-song-title').val("{{ song.title|escapejs }}");
+        $('#editor-song-artist').val("{{ song.artist|escapejs }}");
+        $('#editor-original-key').val("{{ song.original_key }}");
+        $('#editor-song-content').val("{{ song.raw|escapejs }}");
+
+        $('#btn-editor-save').click(saveSong);
+        $('#btn-editor-delete').click(deleteSong);
+
+        $('#areyousure').hide();
+        $('#success').hide();
+
+        $('#editor-song-title').focus(onEdit);
+        $('#editor-song-artist').focus(onEdit);
+        $('#editor-original-key').focus(onEdit);
+        $('#editor-song-content').focus(onEdit);
+    });
+</script>
+
+
+<form>
+    <table>
+        <tr><td>Title: </td><td><input id="editor-song-title"></td></tr>
+        <tr><td>Artist: </td><td><input id="editor-song-artist"></td></tr>
+            <tr><td>Original Key:</td>
+        <td><select id="editor-original-key">
+            {% for key in keys %}
+                <option value="{{ forloop.counter0 }}">{{ key }}</option>
+            {% endfor %}
+        </select></td>
+    </table>
+    <textarea class="song-content-edit" id="editor-song-content"></textarea>
+    <br>
+
+    <div id="editor-buttons">
+        <button id="btn-editor-save" type="button">Save</button>
+        <button id="btn-editor-delete" type="button">Delete</button>
+    </div>
+
+    <span id="success">Song updated successfully</span>
+    <span id="areyousure">
+        <span id="areyousure-message"></span>
+        <button id="btn-ays-yes" type="button">Yes</button>
+        <button id="btn-ays-no" type="button">No</button>
+    </span>
+</form>

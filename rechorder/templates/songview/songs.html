@@ -1,7 +1,118 @@
-<h1>Songs</h1>
+{% extends 'songview/_base.html' %}
+{% load static %}
+{% load songview_tags %}
 
-<ul>
-    {% for song in songs %}
-    <li><a href="{% url 'song' song.id %}">{{ song }}</a></li>
-    {% endfor %}
-</ul>
+{% block javascript %}
+    var current_key_filter = -1;
+
+    function setUpAlphabetIndex() {
+        var previous = "";
+
+        $("#songlist li").each(function() {
+            var current = $(this).text()[0];
+            if (current != previous) {
+                $(this).attr("id", "first_letter_" + current);
+                previous = current;
+                $("#alphabet").append("<a href='#first_letter_" + current + "'>" + current + "</a>&nbsp;");
+            }
+        });
+    }
+
+    function filterByKey(key, btn) {
+        for (let i = 0; i < 12; i++)
+        {
+            $('#filterByKey' + i).removeClass("key-filter-button-selected");
+        }
+
+        if (key == current_key_filter) {
+            current_key_filter = -1;
+            $("#songlist li").filter(function() {
+                $(this).toggle(true);
+            });
+        }
+        else {
+            current_key_filter = key;
+            btn.addClass("key-filter-button-selected");
+            $("#songlist li").filter(function() {
+                $(this).toggle($(this).find('.song-key-index').text() == key)
+            });
+        }
+    }
+
+    $(document).ready(function(){
+        $("#filtertext").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#songlist li").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+
+        setUpAlphabetIndex();
+
+        /* Set up key filters */
+        for (let i = 0; i < 12; i++)
+        {
+            $('#filterByKey' + i).click(function() {filterByKey(i, $(this));});
+        }
+    });
+{% endblock %}
+
+{% block header %}
+    {% include 'songview/_header.html' with selected="songs" %}
+{% endblock %}
+
+{% block title %}
+
+    <a href="{% url 'song.create' %}">
+        <img class="img-actions right-aligned-img" src="{% static 'songview/icons/mdi-file-plus-outline.svg' %}">
+    </a>
+
+    <h1>Songs</h1><br>
+    <h2>Filters</h2><br>
+    <table>
+        <tr>
+            <td><h3>Title:</h3></td><td><input id="filtertext" /></td>
+        </tr>
+        <tr>
+            <td>
+                <h3>Key Filter:</h3>
+            </td>
+            <td>
+                <div id="key-filter-list">
+                    {% for key in keys %}
+                        <!-- TODO: Re-implement this with radio buttons! -->
+                        <button class="key-filter-button" id="filterByKey{{ forloop.counter0 }}">{{ key }}</button>
+                    {% endfor %}
+                </div>
+            </td>
+        </tr>
+    </table>
+{% endblock %}
+
+{% block content %}
+
+    <ul id="songlist" class="main-content-list">
+        {% for song in songs %}
+        <li>
+            <span class="song-anchor"><a name="song{{ song.id }}"></a></span>
+            <a href="{% url 'song' song.id %}">
+                <div class="song-in-list">
+                    <span class="list-primary">{{ song }}</span><br>
+                    <span class="list-secondary">{{ song.artist }}</span><br>
+                    <span class="list-tertiary">Original key: {{ song.original_key|num2chord }}</span>
+                    <span class="song-key-index" style="display: none">{{ song.original_key }}</span>
+                </div>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+
+
+
+
+
+
+
+
+
