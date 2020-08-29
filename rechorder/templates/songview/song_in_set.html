@@ -176,19 +176,21 @@
         {% include 'songview/_print_song.html' %}
     </span>
 
-    <div id="set-nav-btns">
-        {% if current_index > 0 %}
-            <a href="{% url 'set.song' current_index|add:'-1' %}">
-                <img src="{% static 'songview/icons/mdi-chevron-left-box-outline.svg' %}">
-            </a>
-        {% endif %}
+    {% if am_i_master %}
+        <div id="set-nav-btns">
+            {% if current_index > 0 %}
+                <a href="{% url 'set.song' current_index|add:'-1' %}">
+                    <img src="{% static 'songview/icons/mdi-chevron-left-box-outline.svg' %}">
+                </a>
+            {% endif %}
 
 
-        {% if current_index < max_index %}
-            <a href="{% url 'set.song' current_index|add:'1' %}">
-                <img class="right-aligned-img" src="{% static 'songview/icons/mdi-chevron-right-box-outline.svg' %}">
-            </a>
-        {% endif %}
-    </div>
+            {% if current_index < max_index %}
+                <a href="{% url 'set.song' current_index|add:'1' %}">
+                    <img class="right-aligned-img" src="{% static 'songview/icons/mdi-chevron-right-box-outline.svg' %}">
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
 {% endif %}
 {% endblock %}
