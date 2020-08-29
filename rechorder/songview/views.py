@@ -151,7 +151,7 @@ def _get_base_song_context_dict(request, song, set_id=-1, sounding_key_index=Non
         'cnotes': [
             {'index': 1, 'name': 'B\u266d'},
             {'index': 6, 'name': 'E\u266d'},
-            {'index': 7, 'name': 'F'},
+            {'index': 8, 'name': 'F'},
             {'index': 0, 'name': 'A'},
         ],
         'chord_shapes': chord_shapes,
