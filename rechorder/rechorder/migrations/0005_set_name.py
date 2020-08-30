@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('songview', '0004_auto_20200407_1140'),
+        ('rechorder', '0004_auto_20200407_1140'),
     ]
 
     operations = [

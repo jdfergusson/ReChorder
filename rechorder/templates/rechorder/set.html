@@ -1,4 +1,4 @@
-{% extends 'songview/_base.html' %}
+{% extends 'rechorder/_base.html' %}
 {% load static %}
 
 {% block extrahead %}
@@ -130,7 +130,7 @@
 {% endblock %}
 
 {% block header %}
-    {% include 'songview/_header.html' with selected="set" %}
+    {% include 'rechorder/_header.html' with selected="set" %}
 {% endblock %}
 
 {% block title %}
@@ -138,7 +138,7 @@
     {% if set_songs %}
         <a href="{% url 'set.song' 0 %}">
             <img class="img-btn right-aligned-img" id="img-set-display"
-                 src="{% static 'songview/icons/mdi-chevron-right-box-outline.svg' %}">
+                 src="{% static 'rechorder/icons/mdi-chevron-right-box-outline.svg' %}">
         </a>
     {% endif %}
 
@@ -147,13 +147,13 @@
     <div id="set-name">
         <span id="name-show">
             <button id="btn-rename" class="img-btn-header">
-                <img src="{% static 'songview/icons/mdi-pencil-outline.svg' %}">
+                <img src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
             </button>
             <h2><span id="name-read-only"></span></h2>
         </span>
         <span id="name-edit">
             <button id="btn-name-edit-done" class="img-btn-header">
-                <img src="{% static 'songview/icons/mdi-content-save-outline.svg' %}">
+                <img src="{% static 'rechorder/icons/mdi-content-save-outline.svg' %}">
             </button>
             <input id="input-set-name">
         </span>
@@ -165,7 +165,7 @@
         {% for song in set_songs %}
             <li id="set-item_{{ forloop.counter0 }}_{{ song.id }}">
                     <div>
-                        <img class="sortable-list-handle" src="{% static 'songview/icons/mdi-drag.svg' %}">
+                        <img class="sortable-list-handle" src="{% static 'rechorder/icons/mdi-drag.svg' %}">
                     </div>
                     <div class="list-expander">
                         <span class="list-primary"><a class="song-in-set-link" href="#">{{ song.title }}</a></span>
@@ -179,7 +179,7 @@
                     </div>
                     <div>
                         <button class="img-btn set-item-delete">
-                            <img src="{% static 'songview/icons/mdi-delete-outline.svg' %}">
+                            <img src="{% static 'rechorder/icons/mdi-delete-outline.svg' %}">
                         </button>
                     </div>
 
@@ -189,7 +189,7 @@
 
     {% if set_songs %}
         <button id="btn-clear-set-list">Clear set list</button>
-        <a href="{% url 'set.print' set.pk %}"><img class="img-btn right-aligned-img" src="{% static 'songview/icons/mdi-printer.svg' %}"></a>
+        <a href="{% url 'set.print' set.pk %}"><img class="img-btn right-aligned-img" src="{% static 'rechorder/icons/mdi-printer.svg' %}"></a>
     {% else %}
         Set list currently empty. Why not add some <a href="{% url 'songs' %}">songs</a>?
     {% endif %}

@@ -1,14 +1,14 @@
 {% load static %}
-{% load songview_tags %}
+{% load rechorder_tags %}
 
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" type="text/css" href="{% static 'songview/css/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'rechorder/css/main.css' %}">
 
-    <script src="{% static 'songview/js/jquery-3.1.0.min.js' %}"></script>
-    <script src="{% static 'songview/js/common.js' %}"></script>
+    <script src="{% static 'rechorder/js/jquery-3.1.0.min.js' %}"></script>
+    <script src="{% static 'rechorder/js/common.js' %}"></script>
 
 </head>
 <body>
@@ -25,7 +25,7 @@
         {% endif %}
 
         <div>
-            {% include 'songview/_font_resizer.html' %}
+            {% include 'rechorder/_font_resizer.html' %}
         </div>
 
         <hr class="no-print" />
@@ -43,7 +43,7 @@
     </h3>
 
     <span id="song">
-        {% include "songview/_print_song.html" with song=song_details.song %}
+        {% include "rechorder/_print_song.html" with song=song_details.song %}
     </span>
     <p style="page-break-after: always"></p>
 {% endfor %}
