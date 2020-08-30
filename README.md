@@ -33,4 +33,7 @@ python ./manage.py runserver
 
 Then navigate to `localhost:8000/songview` in a browser
 
+### Icons
+
+Icons are from the MDI series, found here: https://iconify.design/icon-sets/mdi/
 

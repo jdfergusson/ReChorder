@@ -1,3 +1,4 @@
+{% load static %}
 
 <script type="text/javascript">
     function saveSong() {
@@ -47,6 +48,22 @@
         $('#success').hide();
     }
 
+    function cancelEdit() {
+        location.reload();
+    }
+
+    function lockKey() {
+        $('#btn-key-unlocked').hide();
+        $('#btn-key-locked').show();
+        $('#editor-original-key').prop("disabled", true);
+    }
+
+    function unlockKey() {
+        $('#btn-key-locked').hide();
+        $('#btn-key-unlocked').show();
+        $('#editor-original-key').prop("disabled", false);
+    }
+
     $(function() {
         $('#editor-song-title').val("{{ song.title|escapejs }}");
         $('#editor-song-artist').val("{{ song.artist|escapejs }}");
@@ -55,6 +72,7 @@
 
         $('#btn-editor-save').click(saveSong);
         $('#btn-editor-delete').click(deleteSong);
+        $('#btn-editor-cancel').click(cancelEdit);
 
         $('#areyousure').hide();
         $('#success').hide();
@@ -63,6 +81,11 @@
         $('#editor-song-artist').focus(onEdit);
         $('#editor-original-key').focus(onEdit);
         $('#editor-song-content').focus(onEdit);
+
+        $('#editor-original-key').prop("disabled", true);
+        $('#btn-key-unlocked').hide();
+        $('#btn-key-unlocked').click(lockKey);
+        $('#btn-key-locked').click(unlockKey);
     });
 </script>
 
@@ -71,18 +94,31 @@
     <table>
         <tr><td>Title: </td><td><input id="editor-song-title"></td></tr>
         <tr><td>Artist: </td><td><input id="editor-song-artist"></td></tr>
-            <tr><td>Original Key:</td>
-        <td><select id="editor-original-key">
-            {% for key in keys %}
-                <option value="{{ forloop.counter0 }}">{{ key }}</option>
-            {% endfor %}
-        </select></td>
+        <tr>
+            <td>Original Key:</td>
+            <td>
+                <select id="editor-original-key">
+                    {% for key in keys %}
+                        <option value="{{ forloop.counter0 }}">{{ key }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" id="btn-key-locked" class="img-btn-header">
+                    <img src="{% static 'songview/icons/mdi-lock.svg' %}">
+                </button>
+                <button type="button" id="btn-key-unlocked" class="img-btn-header">
+                    <img src="{% static 'songview/icons/mdi-lock-open-variant.svg' %}">
+                </button>
+            </td>
+        </tr>
     </table>
     <textarea class="song-content-edit" id="editor-song-content"></textarea>
     <br>
 
     <div id="editor-buttons">
-        <button id="btn-editor-save" type="button">Save</button>
+        <div>
+            <button id="btn-editor-save" type="button">Save</button>
+            <button id="btn-editor-cancel" type="button">Cancel</button>
+        </div>
         <button id="btn-editor-delete" type="button">Delete</button>
     </div>
 
