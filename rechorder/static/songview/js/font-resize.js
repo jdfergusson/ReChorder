@@ -23,7 +23,7 @@ function _fsRender(opt, size) {
     $(opt.buttonIncrease).prop( "disabled", (size >= opt.sizeMaximum) );
     $(opt.buttonDecrease).prop( "disabled", size <= opt.sizeMinimum );
     $(opt.buttonReset).prop( "disabled", (size == opt.sizeDefault) );
-    Cookies.set(opt.cookieName, size, {path: "/"});
+    localStorage.setItem(opt.cookieName, size);
 }
 
 var _fs_chord_opt = {
@@ -51,8 +51,8 @@ var _fs_lyrics_opt = {
 }
 
 function fsGo() {
-    _fsRender(_fs_chord_opt,  Cookies.get(_fs_chord_opt.cookieName, {path: "/"}) || _fs_chord_opt.sizeDefault);
-    _fsRender(_fs_lyrics_opt,  Cookies.get(_fs_lyrics_opt.cookieName, {path: "/"}) || _fs_lyrics_opt.sizeDefault);
+    _fsRender(_fs_chord_opt, localStorage.getItem(_fs_chord_opt.cookieName) || _fs_chord_opt.sizeDefault);
+    _fsRender(_fs_lyrics_opt,  localStorage.getItem(_fs_lyrics_opt.cookieName) || _fs_lyrics_opt.sizeDefault);
 }
 
 $(function() {
