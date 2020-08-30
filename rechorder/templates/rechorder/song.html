@@ -1,4 +1,4 @@
-{% extends 'songview/_base.html' %}
+{% extends 'rechorder/_base.html' %}
 {% load static %}
 
 
@@ -75,13 +75,13 @@
 {% endblock %}
 
 {% block header %}
-    {% include 'songview/_header.html' with selected="songs" %}
+    {% include 'rechorder/_header.html' with selected="songs" %}
 {% endblock %}
 
 {% block title %}
     <a href="{% url 'song.print' song.id %}">
         <img class="img-btn right-aligned-img"
-             src="{% static 'songview/icons/mdi-printer.svg' %}">
+             src="{% static 'rechorder/icons/mdi-printer.svg' %}">
     </a>
 
     <h1 id="song-title">{{ song.title }}</h1><br>
@@ -90,13 +90,13 @@
 
     <ul class="tab-list">
         <li>
-            <img class="img-actions" id='btn-toggle-adder' src="{% static 'songview/icons/mdi-playlist-plus.svg' %}">
+            <img class="img-actions" id='btn-toggle-adder' src="{% static 'rechorder/icons/mdi-playlist-plus.svg' %}">
         </li><li><img class="img-actions"
-                    id="btn-toggle-transposer" src="{% static 'songview/icons/mdi-music-accidental-natural.svg' %}">
+                    id="btn-toggle-transposer" src="{% static 'rechorder/icons/mdi-music-accidental-natural.svg' %}">
         </li><li>
-            <img class='img-actions' id="btn-toggle-font-resizer" src="{% static 'songview/icons/mdi-format-font.svg' %}">
+            <img class='img-actions' id="btn-toggle-font-resizer" src="{% static 'rechorder/icons/mdi-format-font.svg' %}">
         </li><li>
-            <img class='img-actions' id="btn-toggle-editor" src="{% static 'songview/icons/mdi-pencil-outline.svg' %}">
+            <img class='img-actions' id="btn-toggle-editor" src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
         </li>
     </ul>
 
@@ -111,20 +111,20 @@
     </div>
 
     <div class="tab-container" id="transposer">
-        {% include 'songview/_transposer.html' with sk_editable='true' %}
+        {% include 'rechorder/_transposer.html' with sk_editable='true' %}
     </div>
 
     <div class="tab-container" id="editor">
-        {% include 'songview/_song_edit.html' %}
+        {% include 'rechorder/_song_edit.html' %}
     </div>
 
     <div class="tab-container" id="font-resizer">
-    {% include 'songview/_font_resizer.html' %}
+    {% include 'rechorder/_font_resizer.html' %}
     </div>
 {% endblock %}
 
 {% block content %}
     <div id="song">
-        {% include 'songview/_print_song.html' %}
+        {% include 'rechorder/_print_song.html' %}
     </div>
 {% endblock %}

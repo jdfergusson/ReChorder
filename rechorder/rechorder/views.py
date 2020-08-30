@@ -19,7 +19,7 @@ import datetime
 import zipfile
 import os
 
-from songview.music_handler.interpret import KEYS, ABSOLUTE_LOOKUP, interpret_absolute_chord, song_from_onsong_text
+from rechorder.music_handler.interpret import KEYS, ABSOLUTE_LOOKUP, interpret_absolute_chord, song_from_onsong_text
 
 
 from .models import Song, Set
@@ -161,7 +161,7 @@ def _get_base_song_context_dict(request, song, set_id=-1, sounding_key_index=Non
 
 def _get_update_song_data(request, song, set_id=-1):
     return {
-        'song_html': render_to_string('songview/_print_song.html', {'song': song}),
+        'song_html': render_to_string('rechorder/_print_song.html', {'song': song}),
         'key_details': _get_key_details(request, song, set_id),
         'song_meta': {
             'title': song.title,
@@ -242,7 +242,7 @@ def set(request):
         }
         set_songs.append(set_song)
 
-    return render(request, 'songview/set.html', {
+    return render(request, 'rechorder/set.html', {
         'set_songs': set_songs,
         'set': set,
         'keys': KEYS,
@@ -300,7 +300,7 @@ def set_show_song(request, song_index):
             header_link_set=reverse('set'),
             header_link_songs=reverse('songs')),
     }
-    return render(request, 'songview/song_in_set.html', context)
+    return render(request, 'rechorder/song_in_set.html', context)
 
 
 def set_print(request, set_id):
@@ -334,7 +334,7 @@ def set_print(request, set_id):
     if request.GET.get('no_personal_keys', False):
        context['no_personal_keys'] = True
 
-    return render(request, 'songview/print_set.html', context)
+    return render(request, 'rechorder/print_set.html', context)
 
 
 def get_beam_masters(request):
@@ -347,7 +347,7 @@ def get_beam_masters(request):
         ).order_by('-last_updated'),
         **_get_header_links(request),
     }
-    return render(request, 'songview/beam_masters.html', context)
+    return render(request, 'rechorder/beam_masters.html', context)
 
 
 def slave_to_master(request, set_id):
@@ -384,7 +384,7 @@ def slave_to_master(request, set_id):
             'update_token': -1,
         }
 
-    return render(request, 'songview/song_in_set.html', context)
+    return render(request, 'rechorder/song_in_set.html', context)
 
 
 def slave_get_update_token(request, set_id):
@@ -436,7 +436,7 @@ def song_print(request, song_id):
     if request.GET.get('no_personal_keys', False):
        context['no_personal_keys'] = True
 
-    return render(request, 'songview/print_set.html', context)
+    return render(request, 'rechorder/print_set.html', context)
 
     return JsonResponse({'success': True})
 
@@ -460,7 +460,7 @@ def song_create(request):
             'keys': KEYS,
             **_get_header_links(request, header_link_back=reverse('songs')),
         }
-        return render(request, 'songview/song_create.html', context)
+        return render(request, 'rechorder/song_create.html', context)
 
 
 def song_transpose(request):
@@ -515,7 +515,7 @@ def songs(request):
         'keys': KEYS,
         **_get_header_links(request, header_link_songs=reverse('songs'))
     }
-    return render(request, 'songview/songs.html', context)
+    return render(request, 'rechorder/songs.html', context)
 
 
 def song(request, song_id):
@@ -536,7 +536,7 @@ def song(request, song_id):
             header_link_back='{}#song{}'.format(reverse('songs'), song.id),
         ),
     }
-    return render(request, 'songview/song.html', context)
+    return render(request, 'rechorder/song.html', context)
 
 
 def settings_chord_shapes(request):
@@ -551,7 +551,7 @@ def settings_chord_shapes(request):
             'possible_shapes': [{'name': KEYS[i], 'index': i} for i in range(12)],
             **_get_header_links(request),
         }
-        return render(request, 'songview/settings_chord_shapes.html', context)
+        return render(request, 'rechorder/settings_chord_shapes.html', context)
 
 
 def upload(request):
@@ -576,6 +576,6 @@ def upload(request):
                     print(e)
                     continue
 
-        return render(request, 'songview/upload.html')
+        return render(request, 'rechorder/upload.html')
     else:
-        return render(request, 'songview/upload.html')
+        return render(request, 'rechorder/upload.html')

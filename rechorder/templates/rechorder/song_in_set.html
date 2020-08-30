@@ -1,4 +1,4 @@
-{% extends 'songview/_base.html' %}
+{% extends 'rechorder/_base.html' %}
 {% load static %}
 
 {% block javascript %}
@@ -139,9 +139,9 @@
 
 {% block header %}
     {% if am_i_master %}
-        {% include 'songview/_header.html' with selected='set' %}
+        {% include 'rechorder/_header.html' with selected='set' %}
     {% else %}
-        {% include 'songview/_header.html' with selected='receive' %}
+        {% include 'rechorder/_header.html' with selected='receive' %}
     {% endif %}
 {% endblock %}
 
@@ -149,7 +149,7 @@
 {% if song %}
      <a href="{% url 'song' song.id %}">
         <img class="img-btn right-aligned-img"
-             src="{% static 'songview/icons/mdi-pencil-outline.svg' %}">
+             src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
     </a>
 
    <h1 id="song-title">{{ song.title }}</h1><br>
@@ -158,17 +158,17 @@
 
     <ul class="tab-list">
         <li><img class="img-actions"
-                    id="btn-toggle-transposer" src="{% static 'songview/icons/mdi-music-accidental-natural.svg' %}">
+                    id="btn-toggle-transposer" src="{% static 'rechorder/icons/mdi-music-accidental-natural.svg' %}">
         </li><li>
-            <img class='img-actions' id="btn-toggle-font-resizer" src="{% static 'songview/icons/mdi-format-font.svg' %}">
+            <img class='img-actions' id="btn-toggle-font-resizer" src="{% static 'rechorder/icons/mdi-format-font.svg' %}">
         </li>
     </ul>
 
     <div class="tab-container" id="transposer">
-        {% include 'songview/_transposer.html' with sk_editable='false' %}
+        {% include 'rechorder/_transposer.html' with sk_editable='false' %}
     </div>
     <div class="tab-container" id="font-resizer">
-    {% include 'songview/_font_resizer.html' %}
+    {% include 'rechorder/_font_resizer.html' %}
     </div>
 {% else %}
     <h1>No song. Waiting for beaming to start...</h1>
@@ -178,21 +178,21 @@
 {% block content %}
 {% if song %}
     <span id="song">
-        {% include 'songview/_print_song.html' %}
+        {% include 'rechorder/_print_song.html' %}
     </span>
 
     {% if am_i_master %}
         <div id="set-nav-btns">
             {% if current_index > 0 %}
                 <a href="{% url 'set.song' current_index|add:'-1' %}">
-                    <img src="{% static 'songview/icons/mdi-chevron-left-box-outline.svg' %}">
+                    <img src="{% static 'rechorder/icons/mdi-chevron-left-box-outline.svg' %}">
                 </a>
             {% endif %}
 
 
             {% if current_index < max_index %}
                 <a href="{% url 'set.song' current_index|add:'1' %}">
-                    <img class="right-aligned-img" src="{% static 'songview/icons/mdi-chevron-right-box-outline.svg' %}">
+                    <img class="right-aligned-img" src="{% static 'rechorder/icons/mdi-chevron-right-box-outline.svg' %}">
                 </a>
             {% endif %}
         </div>

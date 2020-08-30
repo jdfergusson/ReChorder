@@ -31,7 +31,7 @@ python ./manage.py migrate
 python ./manage.py runserver
 ``` 
 
-Then navigate to `localhost:8000/songview` in a browser
+Then navigate to `localhost:8000/rechorder` in a browser
 
 ### Icons
 

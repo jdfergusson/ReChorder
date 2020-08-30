@@ -1,9 +1,9 @@
-{% extends 'songview/_base.html' %}
+{% extends 'rechorder/_base.html' %}
 {% load static %}
 {% load humanize %}
 
 {% block header %}
-    {% include 'songview/_header.html' with selected="receive" %}
+    {% include 'rechorder/_header.html' with selected="receive" %}
 {% endblock %}
 
 {% block title %}
@@ -23,7 +23,7 @@
                 </div>
                 <div>
                     <a href="{% url 'set.print' set.pk %}">
-                        <img class="img-btn" src="{% static 'songview/icons/mdi-printer.svg' %}">
+                        <img class="img-btn" src="{% static 'rechorder/icons/mdi-printer.svg' %}">
                     </a>
                 </div>
             </li>

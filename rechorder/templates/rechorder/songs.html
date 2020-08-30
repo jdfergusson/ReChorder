@@ -1,6 +1,6 @@
-{% extends 'songview/_base.html' %}
+{% extends 'rechorder/_base.html' %}
 {% load static %}
-{% load songview_tags %}
+{% load rechorder_tags %}
 
 {% block javascript %}
     var current_key_filter = -1;
@@ -58,13 +58,13 @@
 {% endblock %}
 
 {% block header %}
-    {% include 'songview/_header.html' with selected="songs" %}
+    {% include 'rechorder/_header.html' with selected="songs" %}
 {% endblock %}
 
 {% block title %}
 
     <a href="{% url 'song.create' %}">
-        <img class="img-actions right-aligned-img" src="{% static 'songview/icons/mdi-file-plus-outline.svg' %}">
+        <img class="img-actions right-aligned-img" src="{% static 'rechorder/icons/mdi-file-plus-outline.svg' %}">
     </a>
 
     <h1>Songs</h1><br>
