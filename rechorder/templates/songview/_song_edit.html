@@ -47,6 +47,10 @@
         $('#success').hide();
     }
 
+    function cancelEdit() {
+        location.reload();
+    }
+
     $(function() {
         $('#editor-song-title').val("{{ song.title|escapejs }}");
         $('#editor-song-artist').val("{{ song.artist|escapejs }}");
@@ -55,6 +59,7 @@
 
         $('#btn-editor-save').click(saveSong);
         $('#btn-editor-delete').click(deleteSong);
+        $('#btn-editor-cancel').click(cancelEdit);
 
         $('#areyousure').hide();
         $('#success').hide();
@@ -82,7 +87,10 @@
     <br>
 
     <div id="editor-buttons">
-        <button id="btn-editor-save" type="button">Save</button>
+        <div>
+            <button id="btn-editor-save" type="button">Save</button>
+            <button id="btn-editor-cancel" type="button">Cancel</button>
+        </div>
         <button id="btn-editor-delete" type="button">Delete</button>
     </div>
 
