@@ -147,6 +147,11 @@
 
 {% block title %}
 {% if song %}
+     <a href="{% url 'song' song.id %}">
+        <img class="img-btn right-aligned-img"
+             src="{% static 'songview/icons/mdi-pencil-outline.svg' %}">
+    </a>
+
    <h1 id="song-title">{{ song.title }}</h1><br>
     <h2 id="song-artist">{{ song.artist }} - {{ current_index|add:'1' }} of {{ set_length }}</h2><br>
     <h3>Key of: <span id="key-shown"></span> Capo: <span id="key-capo"></span></h3><br>
