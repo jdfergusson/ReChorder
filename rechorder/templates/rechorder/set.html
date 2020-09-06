@@ -36,7 +36,7 @@
 
         $.ajax({
             type: 'POST',
-            url: '{% url 'set.update' %}',
+            url: '{% url 'set.update' set.pk %}',
             headers: { "X-CSRFToken": '{{ csrf_token }}' },
             data: {new_set: JSON.stringify(new_set)},
             dataType: 'json'
@@ -46,7 +46,7 @@
 
     function clearList() {
         $.ajax({
-            url: '{% url 'set.clear' %}',
+            url: '{% url 'set.clear' set.pk %}',
             /* It seems ajax requires some data for it to work correctly */
             data: {clear: true},
             dataType: 'json',
@@ -103,7 +103,7 @@
         $('#btn-name-edit-done').click(function() {
             $.ajax({
                 type: 'POST',
-                url: '{% url 'set.rename' %}',
+                url: '{% url 'set.rename' set.pk %}',
                 headers: { "X-CSRFToken": '{{ csrf_token }}' },
                 data: {
                     'name': $('#input-set-name').val(),
@@ -122,7 +122,7 @@
 
             if (obj_in_list)
             {
-                window.location.href = "{% url 'set.song' 9999 %}".replace('9999', obj_in_list.index());
+                window.location.href = "{% url 'set.song' set.pk 9999 %}".replace('9999', obj_in_list.index());
             }
 
         });
@@ -136,7 +136,7 @@
 {% block title %}
 
     {% if set_songs %}
-        <a href="{% url 'set.song' 0 %}">
+        <a href="{% url 'set.song' set.pk 0 %}">
             <img class="img-btn right-aligned-img" id="img-set-display"
                  src="{% static 'rechorder/icons/mdi-chevron-right-box-outline.svg' %}">
         </a>

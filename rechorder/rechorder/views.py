@@ -14,10 +14,11 @@ from django.template.loader import render_to_string
 
 from copy import deepcopy
 
-import json
 import datetime
-import zipfile
+import json
 import os
+import uuid
+import zipfile
 
 from rechorder.music_handler.interpret import KEYS, ABSOLUTE_LOOKUP, interpret_absolute_chord, song_from_onsong_text
 
@@ -33,25 +34,17 @@ def _get_selected_chord_shapes(request):
     return request.session['selected_chord_shapes']
 
 
-def _get_or_create_my_set(request):
-    set = None
-    set_id = request.session.get('my_set_id')
+def _get_current_set_id(request):
+    set_id = request.session.get('current_set_id')
+    return set_id
 
-    if set_id is not None:
-        try:
-            set = Set.objects.get(pk=set_id)
-            set.check_list_integrity()
-        except ObjectDoesNotExist:
-            set = None
 
-    if set is None:
-        set = Set()
-        set.song_list = []
-        set.name = "My set"
-        set.save()
-        request.session['my_set_id'] = set.pk
-        request.session.modified = True
-    return set
+def _get_or_create_user_uuid(request):
+    user_uuid = request.session.get('user_uuid')
+    if uuid is None:
+        user_uuid = uuid.uuid4()
+        request.session['user_uuid'] = user_uuid
+    return uuid
 
 
 def _get_header_links(request, **overrides):
@@ -60,10 +53,14 @@ def _get_header_links(request, **overrides):
     else:
         songs_link = reverse('songs')
 
-    if 'last_song_in_set' in request.session:
-        set_link = reverse('set.song', args=[request.session['last_song_in_set']])
+    current_set_id = _get_current_set_id(request)
+    if current_set_id:
+        if 'last_song_in_set' in request.session:
+            set_link = reverse('set.song', args=[current_set_id, request.session['last_song_in_set']])
+        else:
+            set_link = reverse('set', args=[current_set_id])
     else:
-        set_link = reverse('set')
+        set_link = reverse('sets')
 
     links = {
         'header_link_back': '#',
@@ -156,6 +153,7 @@ def _get_base_song_context_dict(request, song, set_id=-1, sounding_key_index=Non
         ],
         'chord_shapes': chord_shapes,
         'key_details': _get_key_details(request, song, set_id, sounding_key_index),
+        'current_set_id': _get_current_set_id(request),
     }
 
 
@@ -178,11 +176,15 @@ def index(request):
     return redirect(reverse('songs'))
 
 
-def set_add_song(request):
+def sets(request):
+    pass
+
+
+def set_add_song(request, set_id):
 
     song = Song.objects.get(pk=int(request.POST.get('song_id')))
 
-    set = _get_or_create_my_set(request)
+    this_set = get_object_or_404(Set, pk=set_id)
 
     # Get sounding key from current settings
     song_key_data = request.session.get('keys', {}).get('{}'.format(song.pk), {})
@@ -195,36 +197,36 @@ def set_add_song(request):
 
     # Copy current key settings to set settings
     if '-1' in song_key_data:
-        song_key_data['{}'.format(set.id)] = deepcopy(song_key_data['-1'])
+        song_key_data['{}'.format(this_set.id)] = deepcopy(song_key_data['-1'])
         request.session.modified = True
 
     if request.POST.get('go_live', False):
-        if set.beamed_song_index is None:
-            song_in_set_index = len(set.song_list)
+        if this_set.beamed_song_index is None:
+            song_in_set_index = len(this_set.song_list)
         else:
-            song_in_set_index = set.beamed_song_index + 1
+            song_in_set_index = this_set.beamed_song_index + 1
 
-        set.song_list.insert(song_in_set_index, song_in_set)
-        set.save()
+        this_set.song_list.insert(song_in_set_index, song_in_set)
+        this_set.save()
 
-        redirect_url = reverse('set.song', args=[song_in_set_index])
+        redirect_url = reverse('set.song', args=[this_set.pk, song_in_set_index])
         return JsonResponse({'success': True, 'redirect': redirect_url})
     else:
-        set.song_list.append(song_in_set)
-        set.save()
+        this_set.song_list.append(song_in_set)
+        this_set.save()
         return JsonResponse({'success': True})
 
 
-def set_clear(request):
-    set = _get_or_create_my_set(request)
-    set.song_list = []
-    set.beamed_song_index = -1
-    set.save()
+def set_clear(request, set_id):
+    this_set = get_object_or_404(Set, pk=set_id)
+    this_set.song_list = []
+    this_set.beamed_song_index = -1
+    this_set.save()
     return JsonResponse({'success': True})
 
 
-def set(request):
-    set = _get_or_create_my_set(request)
+def set(request, set_id):
+    this_set = get_object_or_404(Set, pk=set_id)
     set_songs = []
 
     try:
@@ -233,7 +235,7 @@ def set(request):
     except KeyError:
         pass
 
-    for song in set.song_list:
+    for song in this_set.song_list:
         s = Song.objects.get(pk=song['id'])
         set_song = {
             'id': s.pk,
@@ -244,28 +246,28 @@ def set(request):
 
     return render(request, 'rechorder/set.html', {
         'set_songs': set_songs,
-        'set': set,
+        'set': this_set,
         'keys': KEYS,
         **_get_header_links(request),
     })
 
 
-def set_update(request):
-    set = _get_or_create_my_set(request)
-    set.song_list = json.loads(request.POST.get('new_set'))
-    set.save()
+def set_update(request, set_id):
+    this_set = get_object_or_404(Set, pk=set_id)
+    this_set.song_list = json.loads(request.POST.get('new_set'))
+    this_set.save()
     return JsonResponse({'success': True})
 
 
-def set_rename(request):
-    set = _get_or_create_my_set(request)
-    set.name = request.POST.get('name')[:200]
-    set.save()
-    return JsonResponse({'success': True, 'new_name': set.name})
+def set_rename(request, set_id):
+    this_set = get_object_or_404(Set, pk=set_id)
+    this_set.name = request.POST.get('name')[:200]
+    this_set.save()
+    return JsonResponse({'success': True, 'new_name': this_set.name})
 
 
-def set_show_song(request, song_index):
-    set = _get_or_create_my_set(request)
+def set_show_song(request, set_id, song_index):
+    this_set = get_object_or_404(Set, pk=set_id)
 
     request.session['last_song_in_set'] = song_index
     request.session.modified = True
@@ -273,27 +275,27 @@ def set_show_song(request, song_index):
     try:
         # We'll never get negative numbers if the URL doesn't allow it
         song_index = int(song_index)
-        song_in_set = set.song_list[song_index]
+        song_in_set = this_set.song_list[song_index]
     except (ValueError, IndexError):
         return HttpResponseNotFound('<h1>Error: Page not found</h1>')
 
     song = Song.objects.get(pk=song_in_set['id'])
 
     # Set service view in database
-    set.beamed_song_index = song_index
-    set.save()
+    this_set.beamed_song_index = song_index
+    this_set.save()
 
-    key_index, capo_fret_number = _get_song_key_index(request, song, set.pk, song_in_set['key_index'])
+    key_index, capo_fret_number = _get_song_key_index(request, song, this_set.pk, song_in_set['key_index'])
     song.transpose(key_index)
 
     context = {
         'song': song,
         'am_i_master': True,
         'current_index': song_index,
-        'set_id': set.pk,
+        'set_id': this_set.pk,
         'set_length': len(set.song_list),
         'max_index': len(set.song_list) - 1,
-        **_get_base_song_context_dict(request, song, set.pk, song_in_set['key_index']),
+        **_get_base_song_context_dict(request, song, this_set.pk, song_in_set['key_index']),
         **_get_header_links(
             request,
             header_link_back=reverse('set'),
@@ -304,18 +306,18 @@ def set_show_song(request, song_index):
 
 
 def set_print(request, set_id):
-    set = get_object_or_404(Set, pk=set_id)
-    set.check_list_integrity()
+    this_set = get_object_or_404(Set, pk=set_id)
+    this_set.check_list_integrity()
 
     songs = []
-    for song_in_set in set.song_list:
+    for song_in_set in this_set.song_list:
         song = Song.objects.get(pk=song_in_set['id'])
         request.GET.get('no_personal_keys', False)
         if request.GET.get('no_personal_keys', False):
             key_index =  song_in_set['key_index']
             capo_fret_number = 0
         else:
-            key_index, capo_fret_number = _get_song_key_index(request, song, set.pk, song_in_set['key_index'])
+            key_index, capo_fret_number = _get_song_key_index(request, song, this_set.pk, song_in_set['key_index'])
 
         song.transpose(key_index)
 
@@ -328,7 +330,7 @@ def set_print(request, set_id):
 
     context = {
         'songs': songs,
-        'set_id': set.pk,
+        'set_id': this_set.pk,
     }
 
     if request.GET.get('no_personal_keys', False):

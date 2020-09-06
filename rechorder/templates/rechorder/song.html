@@ -3,29 +3,31 @@
 
 
 {% block javascript %}
-    function addSongToSet(go_live) {
-        var data = {'song_id': {{ song.pk }}};
-        if (go_live) {
-            data.go_live = true;
-        }
-
-        $.ajax({
-            type: 'POST',
-            url: '{% url 'set.add_song' %}',
-            headers: { "X-CSRFToken": '{{ csrf_token }}' },
-            data: data,
-            dataType: 'json',
-            success: function(data) {
-                if (data.redirect) {
-                    window.location = data.redirect;
-                }
-                else {
-                    $('#btn-song-add-to-set').addClass('btn-successful');
-                    $('#btn-song-add-to-set').text('Song added');
-                }
+    {% if current_set_id is not None %}
+        function addSongToSet(go_live) {
+            var data = {'song_id': {{ song.pk }}};
+            if (go_live) {
+                data.go_live = true;
             }
-        });
-    }
+
+            $.ajax({
+                type: 'POST',
+                url: '{% url 'set.add_song' current_set_id %}',
+                headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                data: data,
+                dataType: 'json',
+                success: function(data) {
+                    if (data.redirect) {
+                        window.location = data.redirect;
+                    }
+                    else {
+                        $('#btn-song-add-to-set').addClass('btn-successful');
+                        $('#btn-song-add-to-set').text('Song added');
+                    }
+                }
+            });
+        }
+    {% endif %}
 
     function toggleTab(tab) {
         $('#btn-song-add-to-set').removeClass('btn-successful');
@@ -101,12 +103,16 @@
     </ul>
 
     <div class="tab-container" id="adder">
-        <ul>
-            <li>
-                <button id="btn-song-add-to-set">Add to set list</button>
-            </li>
-            <li><button id="btn-song-add-and-go">Add and go live</button></li>
-        </ul>
+        {% if current_set_id is not None %}
+            <ul>
+                <li>
+                    <button id="btn-song-add-to-set">Add to set list</button>
+                </li>
+                <li><button id="btn-song-add-and-go">Add and go live</button></li>
+            </ul>
+        {% else %}
+            You need to create a set before adding a song to one!
+        {% endif %}
 
     </div>
 
