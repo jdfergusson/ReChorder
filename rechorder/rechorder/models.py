@@ -106,11 +106,12 @@ class Song(models.Model):
 
 
 class Set(models.Model):
-    song_list = JSONField(null=True)
+    song_list = JSONField(null=False, default=dict)
     last_updated = models.DateTimeField(auto_now=True)
     beamed_song_index = models.IntegerField(null=True, default=None)
     has_changed_count = models.IntegerField(default=0)
-    owner = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=True)
+    # Owner is a UUID, but the UUID django field has a bug, so we'll just store it as a string
+    owner = models.CharField(max_length=36, default='')
     name = models.CharField(max_length=200, default='')
     is_public = models.BooleanField(default=True)
     is_beaming = models.BooleanField(default=True)

@@ -39,12 +39,20 @@ def _get_current_set_id(request):
     return set_id
 
 
+def _set_current_set(request, set):
+    request.session['current_set_id'] = set.pk
+
+
+def _clear_current_set(request):
+    request.session['current_set_id'] = None
+
+
 def _get_or_create_user_uuid(request):
     user_uuid = request.session.get('user_uuid')
-    if uuid is None:
-        user_uuid = uuid.uuid4()
+    if user_uuid is None:
+        user_uuid = str(uuid.uuid4())
         request.session['user_uuid'] = user_uuid
-    return uuid
+    return user_uuid
 
 
 def _get_header_links(request, **overrides):
@@ -177,11 +185,38 @@ def index(request):
 
 
 def sets(request):
-    pass
+    # Find all sets we have permission to see
+
+    sets_queryset = Set.objects.filter(is_public=True) | \
+                    Set.objects.filter(owner=_get_or_create_user_uuid(request))
+    sets_ordered = sets_queryset.order_by('last_updated')
+
+    return render(request, 'rechorder/sets.html', {
+        "sets": sets_ordered,
+        **_get_header_links(request),
+    })
+
+
+def set_new(request):
+    new_set = Set(
+        owner = _get_or_create_user_uuid(request),
+        is_public = True,
+        is_beaming = False,
+    )
+
+    new_set.save()
+    new_set.name = 'New Set {}'.format(new_set.pk)
+    new_set.save()
+    _set_current_set(request, new_set)
+    return redirect(reverse('set', args=[new_set.pk]))
+
+
+def set_close(request):
+    _clear_current_set(request)
+    return redirect(reverse('sets'))
 
 
 def set_add_song(request, set_id):
-
     song = Song.objects.get(pk=int(request.POST.get('song_id')))
 
     this_set = get_object_or_404(Set, pk=set_id)
