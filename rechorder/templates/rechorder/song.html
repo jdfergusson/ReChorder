@@ -111,7 +111,7 @@
                 <li><button id="btn-song-add-and-go">Add and go live</button></li>
             </ul>
         {% else %}
-            You need to create a set before adding a song to one!
+        You need to <a href="{% url 'set.new' %}">create a set</a> before adding a song to one!
         {% endif %}
 
     </div>

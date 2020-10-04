@@ -106,7 +106,7 @@ class Song(models.Model):
 
 
 class Set(models.Model):
-    song_list = JSONField(null=False, default=dict)
+    song_list = JSONField(null=False, default=list)
     last_updated = models.DateTimeField(auto_now=True)
     beamed_song_index = models.IntegerField(null=True, default=None)
     has_changed_count = models.IntegerField(default=0)

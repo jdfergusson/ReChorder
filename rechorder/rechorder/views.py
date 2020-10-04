@@ -185,35 +185,28 @@ def index(request):
 
 
 def sets(request):
-    # Find all sets we have permission to see
+    # If we're here we don't have a current set
+    _clear_current_set(request)
 
+    # Find all sets we have permission to see
     sets_queryset = Set.objects.filter(is_public=True) | \
                     Set.objects.filter(owner=_get_or_create_user_uuid(request))
     sets_ordered = sets_queryset.order_by('last_updated')
 
     return render(request, 'rechorder/sets.html', {
-        "sets": sets_ordered,
+        'sets': sets_ordered,
+        'owner_uuid': _get_or_create_user_uuid(request),
         **_get_header_links(request),
     })
 
 
 def set_new(request):
-    new_set = Set(
-        owner = _get_or_create_user_uuid(request),
-        is_public = True,
-        is_beaming = False,
-    )
+    new_set = Set(owner=_get_or_create_user_uuid(request))
 
     new_set.save()
     new_set.name = 'New Set {}'.format(new_set.pk)
     new_set.save()
-    _set_current_set(request, new_set)
     return redirect(reverse('set', args=[new_set.pk]))
-
-
-def set_close(request):
-    _clear_current_set(request)
-    return redirect(reverse('sets'))
 
 
 def set_add_song(request, set_id):
@@ -264,6 +257,14 @@ def set(request, set_id):
     this_set = get_object_or_404(Set, pk=set_id)
     set_songs = []
 
+    # Check permissions etc.
+    am_i_owner = this_set.owner == _get_or_create_user_uuid(request)
+    is_viewable = this_set.is_public | am_i_owner
+
+    # If the set is owned by the current user, make it their current set
+    if am_i_owner:
+        _set_current_set(request, this_set)
+
     try:
         request.session.pop('last_song_in_set')
         request.session.modified = True
@@ -283,8 +284,19 @@ def set(request, set_id):
         'set_songs': set_songs,
         'set': this_set,
         'keys': KEYS,
-        **_get_header_links(request),
+        'am_i_owner': am_i_owner,
+        'is_viewable': is_viewable,
+        **_get_header_links(
+            request,
+            header_link_back=reverse('sets')),
     })
+
+
+def set_delete(request, set_id):
+    set = get_object_or_404(Set, pk=set_id)
+    set.delete()
+    _clear_current_set(request)
+    return JsonResponse({'success': True})
 
 
 def set_update(request, set_id):
@@ -296,8 +308,11 @@ def set_update(request, set_id):
 
 def set_rename(request, set_id):
     this_set = get_object_or_404(Set, pk=set_id)
+    print("Before:", this_set.is_public, request.POST.get('is_public'))
     this_set.name = request.POST.get('name')[:200]
+    this_set.is_public = request.POST.get('is_public') == "true"
     this_set.save()
+    print("After:", this_set.is_public)
     return JsonResponse({'success': True, 'new_name': this_set.name})
 
 

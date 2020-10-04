@@ -31,7 +31,20 @@
 {% block content %}
      <ul class="main-content-list">
         {% for set in sets %}
-            <li>{{ set }}</li>
+            <li>
+                <a href="{% url 'set' set.id %}">
+                    <div class="song-in-list">
+                        <span class="list-primary">{{ set.name }}</span><br>
+                        <span class="list-secondary">
+                            {{ set.song_list|length }} song{% if set.song_list|length != 1 %}s{% endif %}
+                        </span><br>
+                        <span class="list-tertiary">
+                            {% if set.owner == owner_uuid %}Mine{% else %} Not mine{% endif %} |
+                            {% if set.is_public %}Public{% else %}Private{% endif %}
+                        </span>
+                    </div>
+                </a>
+            </li>
         {% endfor %}
     </ul>
 
