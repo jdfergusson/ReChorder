@@ -202,11 +202,21 @@ def sets(request):
 
 def set_new(request):
     new_set = Set(owner=_get_or_create_user_uuid(request))
-
     new_set.save()
     new_set.name = 'New Set {}'.format(new_set.pk)
     new_set.save()
     return redirect(reverse('set', args=[new_set.pk]))
+
+
+def set_duplicate(request, set_id):
+    this_set = get_object_or_404(Set, pk=set_id)
+    this_set.pk = None
+    this_set.owner = _get_or_create_user_uuid(request)
+    this_set.is_public = True
+    this_set.save()
+    this_set.name = "{} Copy of '{}'".format(this_set.pk, this_set.name)
+    this_set.save()
+    return redirect(reverse('set', args=[this_set.pk]))
 
 
 def set_add_song(request, set_id):

@@ -15,6 +15,7 @@ urlpatterns = [
     url(r'^set/new$', views.set_new, name='set.new'),
     url(r'^set/(?P<set_id>[0-9]+)$', views.set, name='set'),
     url(r'^set/(?P<set_id>[0-9]+)/addsong$', views.set_add_song, name='set.add_song'),
+    url(r'^set/(?P<set_id>[0-9]+)/duplicate', views.set_duplicate, name='set.duplicate'),
     url(r'^set/(?P<set_id>[0-9]+)/update$', views.set_update, name='set.update'),
     url(r'^set/(?P<set_id>[0-9]+)/delete$', views.set_delete, name='set.delete'),
     url(r'^set/(?P<set_id>[0-9]+)/clear$', views.set_clear, name='set.clear'),
