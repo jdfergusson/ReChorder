@@ -353,13 +353,13 @@ def set_show_song(request, set_id, song_index):
         'am_i_master': True,
         'current_index': song_index,
         'set_id': this_set.pk,
-        'set_length': len(set.song_list),
-        'max_index': len(set.song_list) - 1,
+        'set_length': len(this_set.song_list),
+        'max_index': len(this_set.song_list) - 1,
         **_get_base_song_context_dict(request, song, this_set.pk, song_in_set['key_index']),
         **_get_header_links(
             request,
-            header_link_back=reverse('set'),
-            header_link_set=reverse('set'),
+            header_link_back=reverse('set', args=[this_set.pk]),
+            header_link_set=reverse('set', args=[this_set.pk]),
             header_link_songs=reverse('songs')),
     }
     return render(request, 'rechorder/song_in_set.html', context)

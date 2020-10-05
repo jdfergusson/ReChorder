@@ -1,4 +1,5 @@
 {% extends 'rechorder/_base.html' %}
+{% load rechorder_tags %}
 {% load static %}
 
 {% block extrahead %}
@@ -188,10 +189,21 @@
                      src="{% static 'rechorder/icons/mdi-chevron-right-box-outline.svg' %}">
             </a>
         {% endif %}
+    {% else %}
+        <a href="{% url 'set.duplicate' set.pk %}">
+            <img class="img-btn right-aligned-img"
+                 src="{% static 'rechorder/icons/mdi-content-duplicate.svg' %}">
+        </a>
     {% endif %}
 
-    <h1>Set list</h1><br>
-    <h2><span id="name-read-only"></span></h2>
+    <h1><span id="name-read-only">{{ set.name }}</span></h1><br>
+    <h2>
+        {% if am_i_owner %}
+            View and edit your set list
+        {% else %}
+            View another's set list
+        {% endif %}
+    </h2>
 
     <!-- Only edit if we've got ownership of the set -->
     {% if am_i_owner %}
@@ -236,9 +248,10 @@
 {% endblock %}
 
 {% block content %}
-     <ul id="set-list" class="main-content-list">
-        {% for song in set_songs %}
-            <li id="set-item_{{ forloop.counter0 }}_{{ song.id }}">
+    {% if am_i_owner %}
+        <ul id="set-list" class="main-content-list">
+            {% for song in set_songs %}
+                <li id="set-item_{{ forloop.counter0 }}_{{ song.id }}">
                     <div>
                         <img class="sortable-list-handle" src="{% static 'rechorder/icons/mdi-drag.svg' %}">
                     </div>
@@ -247,9 +260,9 @@
                     </div>
                     <div>
                         <select id="target-key_{{ forloop.counter0 }}">
-                        {% for key in keys %}
-                            <option value="{{ forloop.counter0 }}">{{ key }}</option>
-                        {% endfor %}
+                            {% for key in keys %}
+                                <option value="{{ forloop.counter0 }}">{{ key }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div>
@@ -258,15 +271,34 @@
                         </button>
                     </div>
 
-            </li>
-        {% endfor %}
-    </ul>
+                </li>
+            {% endfor %}
+        </ul>
 
-    {% if set_songs %}
-        <button id="btn-clear-set-list">Clear set list</button>
-        <a href="{% url 'set.print' set.pk %}"><img class="img-btn right-aligned-img" src="{% static 'rechorder/icons/mdi-printer.svg' %}"></a>
+        {% if set_songs %}
+            <button id="btn-clear-set-list">Clear set list</button>
+            <a href="{% url 'set.print' set.pk %}"><img class="img-btn right-aligned-img" src="{% static 'rechorder/icons/mdi-printer.svg' %}"></a>
+        {% else %}
+            Set list currently empty. Why not add some <a href="{% url 'songs' %}">songs</a>?
+        {% endif %}
+
     {% else %}
-        Set list currently empty. Why not add some <a href="{% url 'songs' %}">songs</a>?
+        <ul class="main-content-list">
+            {% for song in set_songs %}
+                <li id="set-item_{{ forloop.counter0 }}_{{ song.id }}">
+                    <div class="list-expander">
+                        <a class="song-in-set-link" href="{% url 'song' song.id %}">
+                            <span class="list-primary">
+                                {{ song.title }}
+                            </span><br>
+                            <span class="list-secondary">
+                                Sounding Key: {{ song.key_index|num2chord }}
+                            </span>
+                        </a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
     {% endif %}
 {% endblock %}
 
