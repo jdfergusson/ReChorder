@@ -4,7 +4,7 @@ from django.http import (
     JsonResponse,
 )
 from django.urls import reverse
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator
 from django.shortcuts import (
     render,
     get_object_or_404,
@@ -191,10 +191,13 @@ def sets(request):
     # Find all sets we have permission to see
     sets_queryset = Set.objects.filter(is_public=True) | \
                     Set.objects.filter(owner=_get_or_create_user_uuid(request))
-    sets_ordered = sets_queryset.order_by('last_updated')
+
+    paginator = Paginator(sets_queryset.order_by('last_updated'), 20)
+    page_num = request.GET.get('page', 1)
+    _sets = paginator.get_page(page_num)
 
     return render(request, 'rechorder/sets.html', {
-        'sets': sets_ordered,
+        'sets': _sets,
         'owner_uuid': _get_or_create_user_uuid(request),
         **_get_header_links(request),
     })

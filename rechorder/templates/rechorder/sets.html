@@ -10,8 +10,40 @@
 
 {% block javascript %}
 
-    $( function() {
+    function filterList() {
+        if ($('#input-show-mine').prop('checked')) {
+            $('.set-mine-true').each(function() { $(this).show() });
+        }
+        else {
+            $('.set-mine-true').each(function() { $(this).hide() });
+        }
 
+        if ($('#input-show-others').prop('checked')) {
+            $('.set-mine-false').each(function() { $(this).show() });
+        }
+        else {
+            $('.set-mine-false').each(function() { $(this).hide() });
+        }
+    }
+
+    function toggleTab(tab) {
+        if (tab != 'filters') {
+            $('#filters').hide();
+            $('#btn-toggle-filters').removeClass('img-action-selected');
+        }
+
+        $('#' + tab).toggle();
+        $('#btn-toggle-' + tab).toggleClass('img-action-selected');
+    }
+
+    $( function() {
+        filterList();
+
+        $('#filters').hide();
+        $('#btn-toggle-filters').click(function() {toggleTab('filters');});
+
+        $('#input-show-mine').click(filterList);
+        $('#input-show-others').click(filterList);
     });
 {% endblock %}
 
@@ -26,12 +58,31 @@
     </a>
 
     <h1>Set lists</h1>
+    <br>
+    <h2>Open, copy, and create set lists</h2>
+
+    <ul class="tab-list">
+        <li>
+            <img class="img-actions" id='btn-toggle-filters' src="{% static 'rechorder/icons/mdi-filter-outline.svg' %}">
+        </li>
+    </ul>
+
+    <div class="tab-container" id="filters">
+        View my sets <input type="checkbox" id="input-show-mine" checked="true"><br>
+        View other people's sets <input type="checkbox" id="input-show-others" checked="true">
+    </div>
 {% endblock %}
 
 {% block content %}
-     <ul class="main-content-list">
+    <ul class="main-content-list">
         {% for set in sets %}
-            <li>
+            <li
+                {% if set.owner == owner_uuid %}
+                    class="set-mine-true"
+                {% else %}
+                    class="set-mine-false"
+                {% endif %}
+            >
                 <a href="{% url 'set' set.id %}">
                     <div class="song-in-list">
                         <span class="list-primary">{{ set.name }}</span><br>
@@ -39,6 +90,7 @@
                             {{ set.song_list|length }} song{% if set.song_list|length != 1 %}s{% endif %}
                         </span><br>
                         <span class="list-tertiary">
+                            Last Modified: {{ set.last_updated }} |
                             {% if set.owner == owner_uuid %}Mine{% else %} Not mine{% endif %} |
                             {% if set.is_public %}Public{% else %}Private{% endif %}
                         </span>
@@ -61,6 +113,33 @@
             </li>
         {% endfor %}
     </ul>
+    <div class="paginator">
+        {% if sets.has_previous %}
+            <a href="?page=1">
+                <img src="{% static 'rechorder/icons/mdi-page-first.svg' %}" alt="First">
+            </a>
+            <a href="?page={{ sets.previous_page_number }}">
+                <img src="{% static 'rechorder/icons/mdi-chevron-left.svg' %}" alt="Previous">
+            </a>
+        {% else %}
+            <span class="paginator-spacer"></span>
+        {% endif %}
+
+        <span class="current">
+            Page {{ sets.number }} of {{ sets.paginator.num_pages }}
+        </span>
+
+        {% if sets.has_next %}
+            <a href="?page={{ sets.next_page_number }}">
+                <img src="{% static 'rechorder/icons/mdi-chevron-right.svg' %}" alt="Next">
+            </a>
+            <a href="?page={{ sets.paginator.num_pages }}">
+                <img src="{% static 'rechorder/icons/mdi-page-last.svg' %}" alt="Last">
+            </a>
+        {% else %}
+            <span class="paginator-spacer"></span>
+        {% endif %}
+    </div>
 
 {% endblock %}
 
