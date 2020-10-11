@@ -93,6 +93,7 @@
             data: {
                 'name': $('#input-set-name').val(),
                 'is_public': $('#input-set-is-public').prop('checked'),
+                'is_protected': $('#input-set-is-protected').prop('checked'),
             },
             dataType: 'json',
             success: function(data) {
@@ -151,6 +152,9 @@
         $('#input-set-name').val("{{ set.name|escapejs }}");
         {% if set.is_public %}
             $('#input-set-is-public').prop('checked', true);
+        {% endif %}
+        {% if set.is_protected %}
+            $('#input-set-is-protected').prop('checked', true);
         {% endif %}
 
         $('#areyousure').hide();
@@ -229,6 +233,14 @@
                     </td>
                     <td>
                         <input type="checkbox" id="input-set-is-public">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Protected from deletion:
+                    </td>
+                    <td>
+                        <input type="checkbox" id="input-set-is-protected">
                     </td>
                 </tr>
             </table>

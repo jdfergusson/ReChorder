@@ -115,6 +115,7 @@ class Set(models.Model):
     name = models.CharField(max_length=200, default='')
     is_public = models.BooleanField(default=True)
     is_beaming = models.BooleanField(default=True)
+    is_protected = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if self.beamed_song_index is not None:

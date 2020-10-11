@@ -321,11 +321,10 @@ def set_update(request, set_id):
 
 def set_rename(request, set_id):
     this_set = get_object_or_404(Set, pk=set_id)
-    print("Before:", this_set.is_public, request.POST.get('is_public'))
     this_set.name = request.POST.get('name')[:200]
     this_set.is_public = request.POST.get('is_public') == "true"
+    this_set.is_protected = request.POST.get('is_protected') == "true"
     this_set.save()
-    print("After:", this_set.is_public)
     return JsonResponse({'success': True, 'new_name': this_set.name})
 
 
