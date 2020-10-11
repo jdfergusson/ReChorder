@@ -192,7 +192,7 @@ def sets(request):
     sets_queryset = Set.objects.filter(is_public=True) | \
                     Set.objects.filter(owner=_get_or_create_user_uuid(request))
 
-    paginator = Paginator(sets_queryset.order_by('last_updated'), 20)
+    paginator = Paginator(sets_queryset.order_by('-last_updated'), 20)
     page_num = request.GET.get('page', 1)
     _sets = paginator.get_page(page_num)
 
@@ -326,6 +326,13 @@ def set_rename(request, set_id):
     this_set.is_protected = request.POST.get('is_protected') == "true"
     this_set.save()
     return JsonResponse({'success': True, 'new_name': this_set.name})
+
+
+def set_delete_all_old(request):
+    # Deletes all unprotected sets older than 1 month
+    one_month_ago = datetime.datetime.now() - datetime.timedelta(days=31)
+    Set.objects.filter(last_updated__lt=one_month_ago, is_protected=False).delete()
+    return redirect(reverse('sets'))
 
 
 def set_show_song(request, set_id, song_index):

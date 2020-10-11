@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^song/transpose$', views.song_transpose, name='song.transpose'),
     url(r'^set/$', views.sets, name='sets'),
     url(r'^set/new$', views.set_new, name='set.new'),
+    url(r'^set/deleteallold$', views.set_delete_all_old, name='set._deleteallold'),
     url(r'^set/(?P<set_id>[0-9]+)$', views.set, name='set'),
     url(r'^set/(?P<set_id>[0-9]+)/addsong$', views.set_add_song, name='set.add_song'),
     url(r'^set/(?P<set_id>[0-9]+)/duplicate', views.set_duplicate, name='set.duplicate'),
