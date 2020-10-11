@@ -1,10 +1,12 @@
+{% load rechorder_tags %}
+
 {% for section in song.sections %}
     <h3 class="section-title">{{ section.title }}</h3>
     {% for line in section.lines %}
         <div class="container">
         {% for block in line %}
             <div class="block">
-                <div class="block-chord"><mark>{{ block.chord }}</mark></div><div class="block-lyric">{{ block.lyric | safe}}</div></div>
+                <div class="block-chord"><mark>{{ block.chord.id }}<i>{{ block.chord.qualifiers }}</i></mark></div><div class="block-lyric">{{ block.lyric | safe}}</div></div>
         {% endfor %}
         </div>
     {% endfor %}

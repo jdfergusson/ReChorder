@@ -14,11 +14,12 @@
 
     function update() {
         $.ajax({
-        url: '{% url 'settings.chord_shapes' %}',
+        url: '{% url 'settings.set' %}',
         type: 'POST',
         headers: { "X-CSRFToken": '{{ csrf_token }}' },
         data: {
             'permitted_shapes': JSON.stringify(getFormData($('#shape-selection'))),
+            'display_style': JSON.stringify(getFormData($('#chord-display-style'))),
         },
     });
     }
@@ -32,6 +33,8 @@
         {% for index in selected_shapes %}
             $('#check-{{ index }}').prop('checked', true);
         {% endfor %}
+
+        $('#check-{{ chord_display_style }}').prop('checked', true);
     });
 {% endblock %}
 
@@ -47,7 +50,7 @@
     <h2>Auto Chord Shapes</h2><br>
     Select chord shape keys you're comfortable with:
 
-    <form id="shape-selection">
+    <form id="shape-selection" class="settings-boxes">
         <ul class="yes-no-selection">
             {% for shape in possible_shapes %}
                 <li>
@@ -57,6 +60,21 @@
             {% endfor %}
         </ul>
     </form>
+
+    <h2>Chord display style</h2>
+    <form id="chord-display-style" class="settings-boxes">
+        <ul class="yes-no-selection">
+            <li>
+                <input type="radio" id="check-letters" name="chord-display-style" value="letters">
+                <label for="check-letters">Letters</label>
+            </li>
+            <li>
+                <input type="radio" id="check-numbers" name="chord-display-style" value="numbers">
+                <label for="check-numbers">Numbers</label>
+            </li>
+        </ul>
+    </form>
+
 {% endblock %}
 
 
