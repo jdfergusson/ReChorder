@@ -462,12 +462,12 @@ mark {
  * Chord shape checkboxes
  **********************************************************/
 
-#shape-selection ul {
+.settings-boxes ul {
     display: flex;
     list-style: None;
     flex-wrap: wrap;
     padding-left: 0;
-    justify-content: center;
+    justify-content: left;
 }
 
 .key-label {
@@ -477,12 +477,12 @@ mark {
     vertical-align: center;
 }
 
-.yes-no-selection input[type=checkbox] {
+.settings-boxes input {
     position: absolute;
     left: -9999px;
 }
 
-.yes-no-selection input[type=checkbox] + label {
+.settings-boxes input + label {
     font-size: large;
     color: #626262;
     font-variant: small-caps;
@@ -494,7 +494,7 @@ mark {
     transition: 0.2s;
 }
 
-.yes-no-selection input[type=checkbox]:checked + label {
+.yes-no-selection input:checked + label {
     background-color: #c1e6be;
 }
 

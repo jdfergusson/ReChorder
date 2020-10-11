@@ -13,7 +13,6 @@ urlpatterns = [
     url(r'^song/transpose$', views.song_transpose, name='song.transpose'),
     url(r'^set/$', views.sets, name='sets'),
     url(r'^set/new$', views.set_new, name='set.new'),
-    url(r'^set/deleteallold$', views.set_delete_all_old, name='set._deleteallold'),
     url(r'^set/(?P<set_id>[0-9]+)$', views.set, name='set'),
     url(r'^set/(?P<set_id>[0-9]+)/addsong$', views.set_add_song, name='set.add_song'),
     url(r'^set/(?P<set_id>[0-9]+)/duplicate', views.set_duplicate, name='set.duplicate'),
@@ -26,8 +25,10 @@ urlpatterns = [
     url(r'^slave/$', views.get_beam_masters, name='slave'),
     url(r'^slave/(?P<set_id>[0-9]+)$', views.slave_to_master, name='slave_to'),
     url(r'^slave/(?P<set_id>[0-9]+)/token$', views.slave_get_update_token, name='slave_token'),
-    url(r'^settings/shapes$', views.settings_chord_shapes, name='settings.chord_shapes'),
+    url(r'^settings$', views.settings, name='settings'),
+    url(r'^settings/set$', views.settings_set, name='settings.set'),
 
     # These aren't so user facing...
-    url(r'^upload$', views.upload, name='_upload')
+    url(r'^upload$', views.upload, name='_upload'),
+    url(r'^set/deleteallold$', views.set_delete_all_old, name='set._deleteallold'),
 ]

@@ -21,6 +21,7 @@ class Song(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._key_index = self.original_key
+        self._display_style = 'letters'
 
     def __str__(self):
         return self.title
@@ -32,11 +33,12 @@ class Song(models.Model):
     # NON-DATABASE FUNCTIONS
     ###########################################
 
-    def transpose(self, target_key):
+    def display_in(self, target_key, display_style):
         """
-        Sets the target key for the song
+        How to display the song's chords
 
         :param target_key: Key index as integer or absolute chord string
+        :param display_style: Display style for chords
         """
         try:
             target_index = int(target_key) % 12
@@ -45,6 +47,8 @@ class Song(models.Model):
 
         if target_index is not None:
             self._key_index = target_index
+
+        self._display_style = display_style
 
     def _extract_sections(self, text):
         section_header_re = re.compile(r'^([a-zA-Z0-9 \.\-\+_~#]+):[ \t]*\n', flags=re.MULTILINE)
@@ -93,7 +97,7 @@ class Song(models.Model):
             if not lyric.strip() and not chord.strip():
                 continue
             lyric = lyric.replace(' ', '&nbsp;').replace('\n','')
-            blocks.append({'chord': Chord(chord, self), 'lyric': lyric})
+            blocks.append({'chord': Chord(chord, self, self._display_style), 'lyric': lyric})
         return blocks
 
     @property

@@ -34,6 +34,13 @@ def _get_selected_chord_shapes(request):
     return request.session['selected_chord_shapes']
 
 
+def _get_display_style(request):
+    if request.session.get('chord_display_style') not in ('letters', 'numbers'):
+        request.session['chord_display_style'] = 'letters'
+        request.session.modified = True
+    return request.session['chord_display_style']
+
+
 def _get_current_set_id(request):
     set_id = request.session.get('current_set_id')
     return set_id
@@ -75,7 +82,7 @@ def _get_header_links(request, **overrides):
         'header_link_songs': songs_link,
         'header_link_set': set_link,
         'header_link_receive': reverse('slave'),
-        'header_link_settings': reverse('settings.chord_shapes')
+        'header_link_settings': reverse('settings')
     }
 
     for override in overrides:
@@ -355,7 +362,8 @@ def set_show_song(request, set_id, song_index):
     this_set.save()
 
     key_index, capo_fret_number = _get_song_key_index(request, song, this_set.pk, song_in_set['key_index'])
-    song.transpose(key_index)
+    display_style = _get_display_style(request)
+    song.display_in(key_index, display_style)
 
     context = {
         'song': song,
@@ -388,7 +396,8 @@ def set_print(request, set_id):
         else:
             key_index, capo_fret_number = _get_song_key_index(request, song, this_set.pk, song_in_set['key_index'])
 
-        song.transpose(key_index)
+        display_style = _get_display_style(request)
+        song.display_in(key_index, display_style)
 
         songs.append({
             'song': song,
@@ -437,7 +446,8 @@ def slave_to_master(request, set_id):
         song = get_object_or_404(Song, pk=song_in_set['id'])
 
         key_index, capo_fret_number = _get_song_key_index(request, song, set_id, song_in_set['key_index'])
-        song.transpose(key_index)
+        display_style = _get_display_style(request)
+        song.display_in(key_index, display_style)
 
         context = {
             **context_base,
@@ -491,7 +501,8 @@ def song_delete(request, song_id):
 def song_print(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
     key_index, capo_fret_number = _get_song_key_index(request, song)
-    song.transpose(key_index)
+    display_style = _get_display_style(request)
+    song.display_in(key_index, display_style)
 
     songs = [{
         'song': song,
@@ -567,7 +578,8 @@ def song_transpose(request):
     request.session.modified = True
 
     key_index, capo_fret_number = _get_song_key_index(request, song, set_id, sounding_key_index)
-    song.transpose(key_index)
+    display_style = _get_display_style(request)
+    song.display_in(key_index, display_style)
 
     return JsonResponse(_get_update_song_data(request, song, set_id))
 
@@ -596,7 +608,8 @@ def song(request, song_id):
     request.session.modified = True
 
     key_index, capo_fret_number = _get_song_key_index(request, song)
-    song.transpose(key_index)
+    display_style = _get_display_style(request)
+    song.display_in(key_index, display_style)
 
     context = {
         'song': song,
@@ -610,19 +623,22 @@ def song(request, song_id):
     return render(request, 'rechorder/song.html', context)
 
 
-def settings_chord_shapes(request):
-    if request.method == 'POST':
-        request.session['selected_chord_shapes'] = \
-            [int(i) for i in json.loads(request.POST.get('permitted_shapes', ''))]
-        request.session.modified = True
-        return JsonResponse({'success': True})
-    else:
-        context = {
-            'selected_shapes': _get_selected_chord_shapes(request),
-            'possible_shapes': [{'name': KEYS[i], 'index': i} for i in range(12)],
-            **_get_header_links(request),
-        }
-        return render(request, 'rechorder/settings_chord_shapes.html', context)
+def settings(request):
+    context = {
+        'selected_shapes': _get_selected_chord_shapes(request),
+        'possible_shapes': [{'name': KEYS[i], 'index': i} for i in range(12)],
+        'chord_display_style': _get_display_style(request),
+        **_get_header_links(request),
+    }
+    return render(request, 'rechorder/user_settings.html', context)
+
+
+def settings_set(request):
+    request.session['selected_chord_shapes'] = \
+        [int(i) for i in json.loads(request.POST.get('permitted_shapes', ''))]
+    request.session['chord_display_style'] = json.loads(request.POST.get('display_style', ''))['chord-display-style']
+    request.session.modified = True
+    return JsonResponse({'success': True})
 
 
 def upload(request):
