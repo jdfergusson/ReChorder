@@ -1,4 +1,5 @@
 {% extends 'rechorder/_base.html' %}
+{% load rechorder_tags %}
 {% load static %}
 
 {% block extrahead %}
@@ -36,7 +37,7 @@
 
         $.ajax({
             type: 'POST',
-            url: '{% url 'set.update' %}',
+            url: '{% url 'set.update' set.pk %}',
             headers: { "X-CSRFToken": '{{ csrf_token }}' },
             data: {new_set: JSON.stringify(new_set)},
             dataType: 'json'
@@ -46,7 +47,7 @@
 
     function clearList() {
         $.ajax({
-            url: '{% url 'set.clear' %}',
+            url: '{% url 'set.clear' set.pk %}',
             /* It seems ajax requires some data for it to work correctly */
             data: {clear: true},
             dataType: 'json',
@@ -68,6 +69,48 @@
                 obj = obj.parent();
             }
         }
+    }
+
+    function toggleTab(tab) {
+        $('#areyousure').hide();
+        $('#success').hide();
+
+        if (tab != 'editor') {
+            $('#editor').hide();
+            $('#btn-toggle-editor').removeClass('img-action-selected');
+        }
+
+        $('#' + tab).toggle();
+        $('#btn-toggle-' + tab).toggleClass('img-action-selected');
+    }
+
+    function save() {
+        $('#areyousure').hide();
+        $.ajax({
+            type: 'POST',
+            url: '{% url 'set.rename' set.pk %}',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            data: {
+                'name': $('#input-set-name').val(),
+                'is_public': $('#input-set-is-public').prop('checked'),
+                'is_protected': $('#input-set-is-protected').prop('checked'),
+            },
+            dataType: 'json',
+            success: function(data) {
+                console.log("Hello");
+                $('#success').show();
+                $('#name-read-only').text(data.new_name);
+                $('#input-set-name').val(data.new_name);
+            }
+        });
+    }
+
+    function delete_set() {
+        $('#success').hide();
+        $('#areyousure-message').text(
+            "Are you sure you want to delete this set? This is non-reversible."
+        );
+        $('#areyousure').show();
     }
 
     $( function() {
@@ -93,38 +136,47 @@
             $("#target-key_" + i).change(onListChange);
         }
 
-        $('#name-read-only').text("{{ set.name|escapejs }}");
-        $('#input-set-name').val("{{ set.name|escapejs }}");
-        $('#name-edit').hide();
-        $('#btn-rename').click(function() {
-            $('#name-edit').show()
-            $('#name-show').hide()
-        });
-        $('#btn-name-edit-done').click(function() {
-            $.ajax({
-                type: 'POST',
-                url: '{% url 'set.rename' %}',
-                headers: { "X-CSRFToken": '{{ csrf_token }}' },
-                data: {
-                    'name': $('#input-set-name').val(),
-                },
-                dataType: 'json',
-                success: function(data) {
-                    $('#name-read-only').text(data.new_name);
-                    $('#input-set-name').val(data.new_name);
-                    $('#name-edit').hide()
-                    $('#name-show').show()
-                }
-            });
-        });
         $('.song-in-set-link').click(function() {
             obj_in_list = getObjInList($(this));
 
             if (obj_in_list)
             {
-                window.location.href = "{% url 'set.song' 9999 %}".replace('9999', obj_in_list.index());
+                window.location.href = "{% url 'set.song' set.pk 9999 %}".replace('9999', obj_in_list.index());
             }
+        });
 
+        $('#editor').hide();
+        $('#btn-toggle-editor').click(function() {toggleTab('editor');});
+
+        $('#name-read-only').text("{{ set.name|escapejs }}");
+        $('#input-set-name').val("{{ set.name|escapejs }}");
+        {% if set.is_public %}
+            $('#input-set-is-public').prop('checked', true);
+        {% endif %}
+        {% if set.is_protected %}
+            $('#input-set-is-protected').prop('checked', true);
+        {% endif %}
+
+        $('#areyousure').hide();
+        $('#success').hide();
+
+        $('#btn-editor-save').click(save);
+        $('#btn-editor-delete').click(delete_set);
+
+        $('#btn-ays-yes').click(function() {
+            $.ajax({
+                type: 'POST',
+                headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                url: '{% url 'set.delete' set.id %}',
+                dataType: 'json',
+                success: function() {
+                    window.location = "{% url 'sets' %}";
+                },
+            });
+        });
+
+        $('#btn-ays-no').click(function () {
+            $('#areyousure').hide();
         });
     });
 {% endblock %}
@@ -134,36 +186,84 @@
 {% endblock %}
 
 {% block title %}
-
-    {% if set_songs %}
-        <a href="{% url 'set.song' 0 %}">
-            <img class="img-btn right-aligned-img" id="img-set-display"
-                 src="{% static 'rechorder/icons/mdi-chevron-right-box-outline.svg' %}">
+    {% if am_i_owner %}
+        {% if set_songs %}
+            <a href="{% url 'set.song' set.pk 0 %}">
+                <img class="img-btn right-aligned-img" id="img-set-display"
+                     src="{% static 'rechorder/icons/mdi-chevron-right-box-outline.svg' %}">
+            </a>
+        {% endif %}
+    {% else %}
+        <a href="{% url 'set.duplicate' set.pk %}">
+            <img class="img-btn right-aligned-img"
+                 src="{% static 'rechorder/icons/mdi-content-duplicate.svg' %}">
         </a>
     {% endif %}
 
-    <h1>Set list</h1>
+    <h1><span id="name-read-only">{{ set.name }}</span></h1><br>
+    <h2>
+        {% if am_i_owner %}
+            View and edit your set list
+        {% else %}
+            Viewing a set list created by someone else
+        {% endif %}
+    </h2>
 
-    <div id="set-name">
-        <span id="name-show">
-            <button id="btn-rename" class="img-btn-header">
-                <img src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
-            </button>
-            <h2><span id="name-read-only"></span></h2>
-        </span>
-        <span id="name-edit">
-            <button id="btn-name-edit-done" class="img-btn-header">
-                <img src="{% static 'rechorder/icons/mdi-content-save-outline.svg' %}">
-            </button>
-            <input id="input-set-name">
-        </span>
-    </div>
+    <!-- Only edit if we've got ownership of the set -->
+    {% if am_i_owner %}
+        <ul class="tab-list">
+            <li>
+                <img class="img-actions" id='btn-toggle-editor' src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
+            </li>
+        </ul>
+
+        <div class="tab-container" id="editor">
+            <table>
+                <tr>
+                    <td>
+                        Set Name:
+                    </td>
+                    <td>
+                        <input id="input-set-name">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Publicly viewable:
+                    </td>
+                    <td>
+                        <input type="checkbox" id="input-set-is-public">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Protected from deletion:
+                    </td>
+                    <td>
+                        <input type="checkbox" id="input-set-is-protected">
+                    </td>
+                </tr>
+            </table>
+            <div id="editor-buttons">
+                <button id="btn-editor-save" type="button">Save</button>
+                <button id="btn-editor-delete" type="button">Delete</button>
+            </div>
+
+            <span id="success">Set updated successfully</span>
+            <span id="areyousure">
+                <span id="areyousure-message"></span>
+                <button id="btn-ays-yes" type="button">Yes</button>
+                <button id="btn-ays-no" type="button">No</button>
+            </span>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
-     <ul id="set-list" class="main-content-list">
-        {% for song in set_songs %}
-            <li id="set-item_{{ forloop.counter0 }}_{{ song.id }}">
+    {% if am_i_owner %}
+        <ul id="set-list" class="main-content-list">
+            {% for song in set_songs %}
+                <li id="set-item_{{ forloop.counter0 }}_{{ song.id }}">
                     <div>
                         <img class="sortable-list-handle" src="{% static 'rechorder/icons/mdi-drag.svg' %}">
                     </div>
@@ -172,9 +272,9 @@
                     </div>
                     <div>
                         <select id="target-key_{{ forloop.counter0 }}">
-                        {% for key in keys %}
-                            <option value="{{ forloop.counter0 }}">{{ key }}</option>
-                        {% endfor %}
+                            {% for key in keys %}
+                                <option value="{{ forloop.counter0 }}">{{ key }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div>
@@ -183,15 +283,34 @@
                         </button>
                     </div>
 
-            </li>
-        {% endfor %}
-    </ul>
+                </li>
+            {% endfor %}
+        </ul>
 
-    {% if set_songs %}
-        <button id="btn-clear-set-list">Clear set list</button>
-        <a href="{% url 'set.print' set.pk %}"><img class="img-btn right-aligned-img" src="{% static 'rechorder/icons/mdi-printer.svg' %}"></a>
+        {% if set_songs %}
+            <button id="btn-clear-set-list">Clear set list</button>
+            <a href="{% url 'set.print' set.pk %}"><img class="img-btn right-aligned-img" src="{% static 'rechorder/icons/mdi-printer.svg' %}"></a>
+        {% else %}
+            Set list currently empty. Why not add some <a href="{% url 'songs' %}">songs</a>?
+        {% endif %}
+
     {% else %}
-        Set list currently empty. Why not add some <a href="{% url 'songs' %}">songs</a>?
+        <ul class="main-content-list">
+            {% for song in set_songs %}
+                <li id="set-item_{{ forloop.counter0 }}_{{ song.id }}">
+                    <div class="list-expander">
+                        <a class="song-in-set-link" href="{% url 'song' song.id %}">
+                            <span class="list-primary">
+                                {{ song.title }}
+                            </span><br>
+                            <span class="list-secondary">
+                                Sounding Key: {{ song.key_index|num2chord }}
+                            </span>
+                        </a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
     {% endif %}
 {% endblock %}
 

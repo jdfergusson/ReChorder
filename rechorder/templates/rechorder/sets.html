@@ -1,0 +1,145 @@
+{% extends 'rechorder/_base.html' %}
+{% load static %}
+
+{% block extrahead %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <!-- (Start) Add jQuery UI Touch Punch -->
+    <script>!function(a){function f(a,b){if(!(a.originalEvent.touches.length>1)){a.preventDefault();var c=a.originalEvent.changedTouches[0],d=document.createEvent("MouseEvents");d.initMouseEvent(b,!0,!0,window,1,c.screenX,c.screenY,c.clientX,c.clientY,!1,!1,!1,!1,0,null),a.target.dispatchEvent(d)}}if(a.support.touch="ontouchend"in document,a.support.touch){var e,b=a.ui.mouse.prototype,c=b._mouseInit,d=b._mouseDestroy;b._touchStart=function(a){var b=this;!e&&b._mouseCapture(a.originalEvent.changedTouches[0])&&(e=!0,b._touchMoved=!1,f(a,"mouseover"),f(a,"mousemove"),f(a,"mousedown"))},b._touchMove=function(a){e&&(this._touchMoved=!0,f(a,"mousemove"))},b._touchEnd=function(a){e&&(f(a,"mouseup"),f(a,"mouseout"),this._touchMoved||f(a,"click"),e=!1)},b._mouseInit=function(){var b=this;b.element.bind({touchstart:a.proxy(b,"_touchStart"),touchmove:a.proxy(b,"_touchMove"),touchend:a.proxy(b,"_touchEnd")}),c.call(b)},b._mouseDestroy=function(){var b=this;b.element.unbind({touchstart:a.proxy(b,"_touchStart"),touchmove:a.proxy(b,"_touchMove"),touchend:a.proxy(b,"_touchEnd")}),d.call(b)}}}(jQuery);</script>
+{% endblock %}
+
+{% block javascript %}
+
+    function filterList() {
+        if ($('#input-show-mine').prop('checked')) {
+            $('.set-mine-true').each(function() { $(this).show() });
+        }
+        else {
+            $('.set-mine-true').each(function() { $(this).hide() });
+        }
+
+        if ($('#input-show-others').prop('checked')) {
+            $('.set-mine-false').each(function() { $(this).show() });
+        }
+        else {
+            $('.set-mine-false').each(function() { $(this).hide() });
+        }
+    }
+
+    function toggleTab(tab) {
+        if (tab != 'filters') {
+            $('#filters').hide();
+            $('#btn-toggle-filters').removeClass('img-action-selected');
+        }
+
+        $('#' + tab).toggle();
+        $('#btn-toggle-' + tab).toggleClass('img-action-selected');
+    }
+
+    $( function() {
+        filterList();
+
+        $('#filters').hide();
+        $('#btn-toggle-filters').click(function() {toggleTab('filters');});
+
+        $('#input-show-mine').click(filterList);
+        $('#input-show-others').click(filterList);
+    });
+{% endblock %}
+
+{% block header %}
+    {% include 'rechorder/_header.html' with selected="set" %}
+{% endblock %}
+
+{% block title %}
+    <a href="{% url 'set.new' %}">
+        <img class="img-btn right-aligned-img"
+             src="{% static 'rechorder/icons/mdi-file-plus-outline.svg' %}">
+    </a>
+
+    <h1>Set lists</h1>
+    <br>
+    <h2>Open, copy, and create set lists</h2>
+
+    <ul class="tab-list">
+        <li>
+            <img class="img-actions" id='btn-toggle-filters' src="{% static 'rechorder/icons/mdi-filter-outline.svg' %}">
+        </li>
+    </ul>
+
+    <div class="tab-container" id="filters">
+        View my sets <input type="checkbox" id="input-show-mine" checked="true"><br>
+        View other people's sets <input type="checkbox" id="input-show-others" checked="true">
+    </div>
+{% endblock %}
+
+{% block content %}
+    <ul class="main-content-list">
+        {% for set in sets %}
+            <li
+                {% if set.owner == owner_uuid %}
+                    class="set-mine-true"
+                {% else %}
+                    class="set-mine-false"
+                {% endif %}
+            >
+                <a href="{% url 'set' set.id %}">
+                    <div class="song-in-list">
+                        <span class="list-primary">{{ set.name }}</span><br>
+                        <span class="list-secondary">
+                            {{ set.song_list|length }} song{% if set.song_list|length != 1 %}s{% endif %}
+                        </span><br>
+                        <span class="list-tertiary">
+                            Last Modified: {{ set.last_updated }} |
+                            {% if set.owner == owner_uuid %}Mine{% else %} Not mine{% endif %} |
+                            {% if set.is_public %}Public{% else %}Private{% endif %}
+                        </span>
+                    </div>
+                </a>
+
+
+                <div class="list-expander">
+                    <span class="list-primary"><a class="song-in-set-link" href="#">{{ song.title }}</a></span>
+                </div>
+                {% if set.owner != owner_uuid %}
+                    <div>
+                        <a href="{% url 'set.duplicate' set.id %}">
+                            <img class="img-btn"
+                                 src="{% static 'rechorder/icons/mdi-content-duplicate.svg' %}"
+                                 alt="Copy Set">
+                        </a>
+                    </div>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+    <div class="paginator">
+        {% if sets.has_previous %}
+            <a href="?page=1">
+                <img src="{% static 'rechorder/icons/mdi-page-first.svg' %}" alt="First">
+            </a>
+            <a href="?page={{ sets.previous_page_number }}">
+                <img src="{% static 'rechorder/icons/mdi-chevron-left.svg' %}" alt="Previous">
+            </a>
+        {% else %}
+            <span class="paginator-spacer"></span>
+        {% endif %}
+
+        <span class="current">
+            Page {{ sets.number }} of {{ sets.paginator.num_pages }}
+        </span>
+
+        {% if sets.has_next %}
+            <a href="?page={{ sets.next_page_number }}">
+                <img src="{% static 'rechorder/icons/mdi-chevron-right.svg' %}" alt="Next">
+            </a>
+            <a href="?page={{ sets.paginator.num_pages }}">
+                <img src="{% static 'rechorder/icons/mdi-page-last.svg' %}" alt="Last">
+            </a>
+        {% else %}
+            <span class="paginator-spacer"></span>
+        {% endif %}
+    </div>
+
+{% endblock %}
+

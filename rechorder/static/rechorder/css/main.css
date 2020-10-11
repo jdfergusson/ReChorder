@@ -503,6 +503,35 @@ mark {
 }
 
 /**********************************************************
+ * Paginator
+ **********************************************************/
+
+.paginator {
+    text-align: center;
+    font-variant: small-caps;
+    font-size: large;
+}
+
+.paginator img {
+    height: 2em;
+    vertical-align: middle;
+}
+
+.paginator img:hover {
+    background-color: #cee0ec;
+}
+
+.paginator a:hover {
+    background: none;
+}
+
+.paginator-spacer {
+    display: inline-block;
+    /* A guess at the width of the two images that would normally be here */
+    width: 4.4em;
+}
+
+/**********************************************************
  * Printing
  **********************************************************/
 

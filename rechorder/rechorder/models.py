@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import JSONField
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 import re
+import uuid
 from .music_handler.chord import Chord
 from .music_handler.interpret import interpret_absolute_chord
 
@@ -105,11 +106,16 @@ class Song(models.Model):
 
 
 class Set(models.Model):
-    song_list = JSONField(null=True)
+    song_list = JSONField(null=False, default=list)
     last_updated = models.DateTimeField(auto_now=True)
     beamed_song_index = models.IntegerField(null=True, default=None)
     has_changed_count = models.IntegerField(default=0)
+    # Owner is a UUID, but the UUID django field has a bug, so we'll just store it as a string
+    owner = models.CharField(max_length=36, default='')
     name = models.CharField(max_length=200, default='')
+    is_public = models.BooleanField(default=True)
+    is_beaming = models.BooleanField(default=True)
+    is_protected = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if self.beamed_song_index is not None:

@@ -21,7 +21,7 @@ CREATE USER <psql_user>;
 CREATE DATABASE rechorder OWNER <psql_user>; 
 ``` 
 
-Then edit the database connection settings in `rechorder/rechorder/settings.py`
+Then edit the database connection settings in `config/settings.py`
 to use the psql user and password as entered above.
 
 Then 
@@ -31,7 +31,7 @@ python ./manage.py migrate
 python ./manage.py runserver
 ``` 
 
-Then navigate to `localhost:8000/rechorder` in a browser
+Then navigate to `localhost:8000` in a browser
 
 ### Icons
 
