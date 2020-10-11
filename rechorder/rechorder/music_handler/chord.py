@@ -5,7 +5,7 @@ CHORD_NAMES_SLIGHTLY_FLAT = ['A', 'B\u266d', 'B', 'C', 'C\u266f', 'D', 'E\u266d'
 CHORD_NAMES_SHARPS = ['A', 'A\u266f', 'B', 'C', 'C\u266f', 'D', 'D\u266f', 'E', 'F', 'F\u266f', 'G', 'G\u266f']
 CHORD_NAMES_FLATS = ['A', 'B\u266d', 'B', 'C', 'D\u266d', 'D', 'E\u266d', 'E', 'F', 'G\u266d', 'G', 'A\u266d']
 
-# This clearly looses quite a bit of information, doubling up chords in the way that it does.
+# This clearly loses quite a bit of information, doubling up chords in the way that it does.
 # However, to handle major and minor keys without having that information, this is a (massive)
 # compromise. That said, if you're using numbers, it's likely that you're just using basic chords.
 CHORD_NAME_NUMBERS = ['1', '\u266d2', '2', '3', '3', '4', '\u266d5', '5', '6', '6', '7', '7']
