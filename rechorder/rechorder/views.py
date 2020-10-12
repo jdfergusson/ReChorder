@@ -159,6 +159,15 @@ def _get_base_song_context_dict(request, song, set_id=-1, sounding_key_index=Non
         if shape_index not in selected_chord_shapes:
             chord_shapes.append({'index': shape_index, 'name': KEYS[shape_index]})
 
+    current_set_id = _get_current_set_id(request)
+    set = None
+    if current_set_id is not None:
+        try:
+            set = Set.objects.get(pk=current_set_id)
+        except Set.DoesNotExist:
+            pass
+
+        
     return {
         'keys': KEYS,
         'frets': [i for i in range(12)],
@@ -170,7 +179,7 @@ def _get_base_song_context_dict(request, song, set_id=-1, sounding_key_index=Non
         ],
         'chord_shapes': chord_shapes,
         'key_details': _get_key_details(request, song, set_id, sounding_key_index),
-        'current_set_id': _get_current_set_id(request),
+        'current_set': set,
     }
 
 
