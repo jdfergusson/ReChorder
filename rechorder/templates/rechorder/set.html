@@ -189,16 +189,24 @@
     {% if am_i_owner %}
         {% if set_songs %}
             <a href="{% url 'set.song' set.pk 0 %}">
-                <img class="img-btn right-aligned-img" id="img-set-display"
+                <img class="img-btn right-aligned-img"
                      src="{% static 'rechorder/icons/mdi-chevron-right-box-outline.svg' %}">
             </a>
         {% endif %}
     {% else %}
+        <a href="{% url 'slave_to' set.pk %}">
+            <img class="img-btn right-aligned-img"
+                    src="{% static 'rechorder/icons/mdi-cellphone-text.svg' %}">
+        </a>
         <a href="{% url 'set.duplicate' set.pk %}">
             <img class="img-btn right-aligned-img"
                  src="{% static 'rechorder/icons/mdi-content-duplicate.svg' %}">
         </a>
     {% endif %}
+    <a href="{% url 'sets' %}">
+        <img class="img-btn right-aligned-img"
+             src="{% static 'rechorder/icons/mdi-close-box-outline.svg' %}">
+    </a>
 
     <h1><span id="name-read-only">{{ set.name }}</span></h1><br>
     <h2>

@@ -3,7 +3,7 @@
 
 
 {% block javascript %}
-    {% if current_set_id is not None %}
+    {% if current_set is not None %}
         function addSongToSet(go_live) {
             var data = {'song_id': {{ song.pk }}};
             if (go_live) {
@@ -12,7 +12,7 @@
 
             $.ajax({
                 type: 'POST',
-                url: '{% url 'set.add_song' current_set_id %}',
+                url: '{% url 'set.add_song' current_set.pk %}',
                 headers: { "X-CSRFToken": '{{ csrf_token }}' },
                 data: data,
                 dataType: 'json',
@@ -103,15 +103,16 @@
     </ul>
 
     <div class="tab-container" id="adder">
-        {% if current_set_id is not None %}
+        {% if current_set.pk is not None %}
             <ul>
+                Current set list: <i>{{ current_set.name }}</i>
                 <li>
                     <button id="btn-song-add-to-set">Add to set list</button>
                 </li>
                 <li><button id="btn-song-add-and-go">Add and go live</button></li>
             </ul>
         {% else %}
-        You need to <a href="{% url 'set.new' %}">create a set</a> before adding a song to one!
+        You need to <a href="{% url 'set.new' %}">create</a> or <a href="{% url 'sets' %}">open</a> a set before adding a song to one!
         {% endif %}
 
     </div>
