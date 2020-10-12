@@ -1,10 +1,12 @@
 from django.http import (
+    HttpResponse,
     HttpResponseNotFound,
     HttpResponseBadRequest,
     JsonResponse,
 )
 from django.urls import reverse
 from django.core.paginator import Paginator
+from django.core import serializers
 from django.shortcuts import (
     render,
     get_object_or_404,
@@ -643,26 +645,54 @@ def settings_set(request):
 
 def upload(request):
     if request.method == 'POST':
-        with zipfile.ZipFile(request.FILES['zipfile']) as zip_file:
-            file_names = zip_file.namelist()
-            for name in file_names:
-                if os.path.splitext(name)[1].lower() != '.onsong':
-                    continue
+        if request.FILES.get('zipfile') is not None:
+            with zipfile.ZipFile(request.FILES['zipfile']) as zip_file:
+                file_names = zip_file.namelist()
+                for name in file_names:
+                    if os.path.splitext(name)[1].lower() != '.onsong':
+                        continue
 
-                try:
-                    with zip_file.open(name, 'r') as f:
-                        data = f.read().decode('utf-8', errors='ignore')
+                    try:
+                        with zip_file.open(name, 'r') as f:
+                            data = f.read().decode('utf-8', errors='ignore')
 
-                    song_data = song_from_onsong_text(data)
-                    if song_data is not None:
-                        song = Song(**song_data)
-                        song.save()
-                        print('Added song "{}"'.format(song.title))
-                except Exception as e:
-                    print('{} failed:'.format(name))
-                    print(e)
+                        song_data = song_from_onsong_text(data)
+                        if song_data is not None:
+                            song = Song(**song_data)
+                            song.save()
+                            print('Added song "{}"'.format(song.title))
+                    except Exception as e:
+                        print('{} failed:'.format(name))
+                        print(e)
+                        continue
+        elif request.FILES.get('jsonfile') is not None:
+            data = json.load(request.FILES['jsonfile'])
+            for s in data:
+                if s.get('model') != 'rechorder.song':
                     continue
+                song_data = s['fields']
+                existing_songs = Song.objects.filter(
+                    title=song_data['title'],
+                    artist=song_data['artist'],
+                    original_key=song_data['original_key'],
+                    raw=song_data['raw'],
+                )
+                if existing_songs.count() == 0:
+                    new_song = Song(
+                        title=song_data['title'],
+                        artist=song_data['artist'],
+                        original_key=song_data['original_key'],
+                        raw=song_data['raw'],
+                    )
+                    new_song.save()
+                    print("Added new song: {}".format(new_song.title))
 
         return render(request, 'rechorder/upload.html')
     else:
         return render(request, 'rechorder/upload.html')
+
+
+def download(request):
+    songs = Song.objects.order_by('title')
+    songs_json = serializers.serialize('json', songs)
+    return HttpResponse(songs_json, content_type='application/json')

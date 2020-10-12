@@ -31,4 +31,5 @@ urlpatterns = [
     # These aren't so user facing...
     url(r'^upload$', views.upload, name='_upload'),
     url(r'^set/deleteallold$', views.set_delete_all_old, name='set._deleteallold'),
+    url(r'^download', views.download, name='_download'),
 ]

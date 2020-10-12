@@ -6,5 +6,14 @@
         <input type="file" name="zipfile">
         <button type="submit">Upload</button>
     </form>
+    <br>
+
+    JSON file:<br>
+    Warning: If a song has changed at all, this will silently create duplicates
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="jsonfile">
+        <button type="submit">Upload</button>
+    </form>
 </body>
 </html>
