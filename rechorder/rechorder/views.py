@@ -161,9 +161,11 @@ def _get_base_song_context_dict(request, song, set_id=-1, sounding_key_index=Non
 
     current_set_id = _get_current_set_id(request)
     set = None
+    set_is_editable = False
     if current_set_id is not None:
         try:
             set = Set.objects.get(pk=current_set_id)
+            set_is_editable = set.owner == _get_or_create_user_uuid(request)
         except Set.DoesNotExist:
             pass
 
@@ -180,6 +182,7 @@ def _get_base_song_context_dict(request, song, set_id=-1, sounding_key_index=Non
         'chord_shapes': chord_shapes,
         'key_details': _get_key_details(request, song, set_id, sounding_key_index),
         'current_set': set,
+        'set_is_editable': set_is_editable,
     }
 
 
@@ -202,21 +205,49 @@ def index(request):
     return redirect(reverse('songs'))
 
 
-def sets(request):
+def sets_mine(request):
     # If we're here we don't have a current set
     _clear_current_set(request)
 
     # Find all sets we have permission to see
-    sets_queryset = Set.objects.filter(is_public=True) | \
-                    Set.objects.filter(owner=_get_or_create_user_uuid(request))
+    sets_queryset = Set.objects.filter(owner=_get_or_create_user_uuid(request))
 
     paginator = Paginator(sets_queryset.order_by('-last_updated'), 20)
     page_num = request.GET.get('page', 1)
     _sets = paginator.get_page(page_num)
 
-    return render(request, 'rechorder/sets.html', {
+    return render(request, 'rechorder/sets_mine.html', {
         'sets': _sets,
-        'owner_uuid': _get_or_create_user_uuid(request),
+        **_get_header_links(
+            request,
+            header_link_back=reverse('sets')),
+    })
+
+
+def sets_others(request):
+    # If we're here we don't have a current set
+    _clear_current_set(request)
+
+    # Find all sets we have permission to see
+    sets_queryset = \
+        Set.objects.filter(is_public=True).exclude(owner=_get_or_create_user_uuid(request))
+
+    paginator = Paginator(sets_queryset.order_by('-last_updated'), 20)
+    page_num = request.GET.get('page', 1)
+    _sets = paginator.get_page(page_num)
+
+    return render(request, 'rechorder/sets_others.html', {
+        'sets': _sets,
+        **_get_header_links(
+            request,
+            header_link_back=reverse('sets')),
+    })
+
+
+def sets(request):
+    _clear_current_set(request)
+
+    return render(request, 'rechorder/sets_choose_view.html', {
         **_get_header_links(request),
     })
 
@@ -292,9 +323,8 @@ def set(request, set_id):
     am_i_owner = this_set.owner == _get_or_create_user_uuid(request)
     is_viewable = this_set.is_public | am_i_owner
 
-    # If the set is owned by the current user, make it their current set
-    if am_i_owner:
-        _set_current_set(request, this_set)
+    # Make this the current set
+    _set_current_set(request, this_set)
 
     try:
         request.session.pop('last_song_in_set')
@@ -380,9 +410,10 @@ def set_show_song(request, set_id, song_index):
         'song': song,
         'am_i_master': True,
         'current_index': song_index,
-        'set_id': this_set.pk,
+        'set': this_set,
         'set_length': len(this_set.song_list),
         'max_index': len(this_set.song_list) - 1,
+        'am_i_owner': this_set.owner == _get_or_create_user_uuid(request),
         **_get_base_song_context_dict(request, song, this_set.pk, song_in_set['key_index']),
         **_get_header_links(
             request,

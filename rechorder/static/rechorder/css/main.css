@@ -176,6 +176,10 @@ h2 {
     color: #626262;
 }
 
+h2 a {
+    color: #626262;
+}
+
 h3 {
     font-size: medium;
     display: inline;
@@ -433,9 +437,10 @@ mark {
  * Set list
  **********************************************************/
 
-#set-list li {
+.sortable-list li {
     padding-left: 0;
 }
+
 
 /**********************************************************
  * Song in set specifics

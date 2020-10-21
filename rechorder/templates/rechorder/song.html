@@ -103,7 +103,7 @@
     </ul>
 
     <div class="tab-container" id="adder">
-        {% if current_set.pk is not None %}
+        {% if set_is_editable %}
             <ul>
                 Current set list: <i>{{ current_set.name }}</i>
                 <li>
@@ -111,8 +111,11 @@
                 </li>
                 <li><button id="btn-song-add-and-go">Add and go live</button></li>
             </ul>
+        {% elif current_set.pk is not None %}
+            You do not own the current set "{{ current_set.name }}".
+            Please <a href="{% url 'set.duplicate' current_set.pk %}">make a copy</a> before editing
         {% else %}
-        You need to <a href="{% url 'set.new' %}">create</a> or <a href="{% url 'sets' %}">open</a> a set before adding a song to one!
+            You need to <a href="{% url 'set.new' %}">create</a> or <a href="{% url 'sets' %}">open</a> a set before adding a song to one!
         {% endif %}
 
     </div>
