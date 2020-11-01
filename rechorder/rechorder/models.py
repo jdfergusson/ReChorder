@@ -112,20 +112,13 @@ class Song(models.Model):
 class Set(models.Model):
     song_list = JSONField(null=False, default=list)
     last_updated = models.DateTimeField(auto_now=True)
-    beamed_song_index = models.IntegerField(null=True, default=None)
-    has_changed_count = models.IntegerField(default=0)
     # Owner is a UUID, but the UUID django field has a bug, so we'll just store it as a string
     owner = models.CharField(max_length=36, default='')
     name = models.CharField(max_length=200, default='')
     is_public = models.BooleanField(default=True)
-    is_beaming = models.BooleanField(default=True)
     is_protected = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        if self.beamed_song_index is not None:
-            if not 0 <= self.beamed_song_index < len(self.song_list):
-                self.beamed_song_index = None
-        self.has_changed_count = self.has_changed_count + 1 % 10000
 
         # Let's make sure the set has a name while we're here
         if not self.name.strip():
@@ -143,3 +136,20 @@ class Set(models.Model):
 
     def __str__(self):
         return '"{}" containing {} songs'.format(self.name, len(self.song_list))
+
+
+class Beam(models.Model):
+    set = models.ForeignKey(Set, null=False, on_delete=models.CASCADE)
+    last_updated = models.DateTimeField(auto_now=True)
+    # Owner is a UUID, but the UUID django field has a bug, so we'll just store it as a string
+    owner = models.CharField(max_length=36, default='')
+    current_song_index = models.IntegerField(null=True, default=None)
+    has_changed_count = models.IntegerField(default=0)
+
+    def save(self, *args, **kwargs):
+        if self.current_song_index is not None:
+            if not 0 <= self.current_song_index < len(Set(pk=self.set).song_list):
+                self.current_song_index = None
+        self.has_changed_count = self.has_changed_count + 1 % 10000
+
+        super().save(*args, **kwargs)

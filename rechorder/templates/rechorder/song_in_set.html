@@ -85,6 +85,11 @@
             $('#btn-toggle-font-resizer').removeClass('img-action-selected');
         }
 
+        if (tab != 'beam-settings') {
+            $('#beam-settings').hide();
+            $('#btn-toggle-beam-settings').removeClass('img-action-selected');
+        }
+
         $('#' + tab).toggle();
         $('#btn-toggle-' + tab).toggleClass('img-action-selected');
     }
@@ -95,6 +100,9 @@
 
         $('#font-resizer').hide();
         $('#btn-toggle-font-resizer').click(function() {toggleTab('font-resizer');});
+
+        $('#beam-settings').hide();
+        $('#btn-toggle-beam-settings').click(function() {toggleTab('beam-settings');});
     });
 {% endblock %}
 
@@ -135,6 +143,8 @@
                     id="btn-toggle-transposer" src="{% static 'rechorder/icons/mdi-music-accidental-natural.svg' %}">
         </li><li>
             <img class='img-actions' id="btn-toggle-font-resizer" src="{% static 'rechorder/icons/mdi-format-font.svg' %}">
+        </li><li>
+            <img class='img-actions' id="btn-toggle-beam-settings" src="{% static 'rechorder/icons/mdi-cellphone-text.svg' %}">
         </li>
     </ul>
 
@@ -142,7 +152,10 @@
         {% include 'rechorder/_transposer.html' with sk_editable='false' %}
     </div>
     <div class="tab-container" id="font-resizer">
-    {% include 'rechorder/_font_resizer.html' %}
+        {% include 'rechorder/_font_resizer.html' %}
+    </div>
+    <div class="tab-container" id="beam-settings">
+        {% include 'rechorder/_beaming_toggle.html' with set_pk=set.pk %}
     </div>
 {% else %}
     <h1>No song. Waiting for beaming to start...</h1>

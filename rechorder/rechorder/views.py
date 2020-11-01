@@ -25,7 +25,7 @@ import zipfile
 from rechorder.music_handler.interpret import KEYS, ABSOLUTE_LOOKUP, interpret_absolute_chord, song_from_onsong_text
 
 
-from .models import Song, Set
+from .models import Song, Set, Beam
 
 
 def _get_selected_chord_shapes(request):
@@ -195,6 +195,42 @@ def _get_update_song_data(request, song, set_id=-1):
             'artist': song.artist,
         },
     }
+
+
+def _is_beaming(request):
+    return request.session.get('is_beaming', False)
+
+
+def _get_or_create_beam(request, set):
+    owner = _get_or_create_user_uuid(request)
+    if _is_beaming(request):
+        beams = Beam.objects.filter(owner=owner)
+
+        # This should never happen, but just in case, remove down to only one
+        # beam per user
+        if beams.count() > 1:
+            beams.delete()
+            # Since this should never happen, I have no qualms about doing a
+            # second database filter here
+            beams = Beam.objects.filter(owner=owner)
+
+        # Find or create the beam object
+        if beams.count() == 1:
+            beam = beams[0]
+        else:
+            beam = Beam(set=set, owner=owner)
+            beam.save()
+
+        return beam
+
+    else:
+        return None
+
+
+def _delete_beam(request):
+    owner = _get_or_create_user_uuid(request)
+    beams = Beam.objects.filter(owner=owner)
+    beams.delete()
 
 
 ###########################
@@ -398,9 +434,12 @@ def set_show_song(request, set_id, song_index):
 
     song = Song.objects.get(pk=song_in_set['id'])
 
-    # Set service view in database
-    this_set.beamed_song_index = song_index
-    this_set.save()
+    # Update beam if applicable
+    if _is_beaming(request):
+        beam = _get_or_create_beam(request, this_set)
+        beam.set = this_set
+        beam.current_song_index = song_index
+        beam.save()
 
     key_index, capo_fret_number = _get_song_key_index(request, song, this_set.pk, song_in_set['key_index'])
     display_style = _get_display_style(request)
@@ -459,14 +498,41 @@ def set_print(request, set_id):
     return render(request, 'rechorder/print_set.html', context)
 
 
-def get_beam_masters(request):
+def beaming_toggle(request):
+    is_beaming = json.loads(request.POST.get('enable', ''))
+
+    request.session['is_beaming'] = bool(is_beaming)
+    request.session.modified = True
+
+    if is_beaming:
+        # If we also have a set ID, we can create the Beam object. If not,
+        # it'll be done when the set is navigated to.
+        try:
+            set_pk = int(request.POST.get('set_pk', None))
+            if set_pk is not None:
+                set = Set.objects.get(pk=set_pk)
+                _get_or_create_beam(request, set)
+        except (Set.DoesNotExist, ValueError):
+            pass
+
+    else:
+        _delete_beam(request)
+
+    return beaming_status(request)
+
+
+def beaming_status(request):
+    return JsonResponse({'beaming_enabled': _is_beaming(request)})
+
+
+def get_beams(request):
     update_time_cutoff = datetime.datetime.now() - datetime.timedelta(days=1)
+    # Clean all old beams out
+    Beam.objects.filter(last_updated__lte=update_time_cutoff).delete()
+
     context = {
         # Will get all sets that have a beamed song index
-        'sets': Set.objects.filter(
-            beamed_song_index__isnull=False,
-            last_updated__gte=update_time_cutoff,
-        ).order_by('-last_updated'),
+        'masters': Beam.objects.all().order_by('-last_updated'),
         **_get_header_links(request),
     }
     return render(request, 'rechorder/beam_masters.html', context)

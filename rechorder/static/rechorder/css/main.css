@@ -123,6 +123,10 @@ button, select {
     background-color: #c1e6be;
 }
 
+.btn-unsuccessful {
+    background-color: #e6bec1;
+}
+
 @media (hover:hover) {
     button:hover, select:hover, a:hover {
         background-color: #cee0ec;
