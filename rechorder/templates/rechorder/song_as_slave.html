@@ -75,7 +75,7 @@
     </ul>
 
     <div class="tab-container" id="transposer">
-        {% include 'rechorder/_transposer.html' with sk_editable='false' %}
+        {% include 'rechorder/_transposer.html' with sk_editable='false' set_id=beam.set.pk %}
     </div>
     <div class="tab-container" id="font-resizer">
         {% include 'rechorder/_font_resizer.html' %}
