@@ -447,7 +447,6 @@ def set_show_song(request, set_id, song_index):
 
     context = {
         'song': song,
-        'am_i_master': True,
         'current_index': song_index,
         'set': this_set,
         'set_length': len(this_set.song_list),
@@ -538,33 +537,37 @@ def get_beams(request):
     return render(request, 'rechorder/beam_masters.html', context)
 
 
-def slave_to_master(request, set_id):
-    set = get_object_or_404(Set, pk=set_id)
+def slave_to_master(request, beam_id):
+    beam = get_object_or_404(Beam, pk=beam_id)
 
     context_base = {
-        'set_id': set_id,
-        'am_i_master': False,
         'capo_fret_number': 0,
+        'beam': beam,
         **_get_header_links(request, header_link_back=reverse('slave')),
     }
 
-    if set.beamed_song_index is not None and \
-            0 <= set.beamed_song_index < len(set.song_list):
-        song_in_set = set.song_list[set.beamed_song_index]
+    print(beam.current_song_index, len(beam.set.song_list))
+    if beam.current_song_index is not None and \
+            0 <= beam.current_song_index < len(beam.set.song_list):
+        song_in_set = beam.set.song_list[beam.current_song_index]
         song = get_object_or_404(Song, pk=song_in_set['id'])
 
-        key_index, capo_fret_number = _get_song_key_index(request, song, set_id, song_in_set['key_index'])
+        key_index, capo_fret_number = _get_song_key_index(
+            request,
+            song,
+            beam.set.pk,
+            song_in_set['key_index'])
         display_style = _get_display_style(request)
         song.display_in(key_index, display_style)
 
         context = {
             **context_base,
             'song': song,
-            'update_token': set.has_changed_count,
+            'update_token': beam.has_changed_count,
             'capo_fret_number': capo_fret_number,
-            'set_length': len(set.song_list),
-            'current_index': set.beamed_song_index,
-            **_get_base_song_context_dict(request, song, set_id, song_in_set['key_index']),
+            'set_length': len(beam.set.song_list),
+            'current_index': beam.current_song_index,
+            **_get_base_song_context_dict(request, song, beam.set.pk, song_in_set['key_index']),
         }
     else:
         context = {
@@ -573,12 +576,12 @@ def slave_to_master(request, set_id):
             'update_token': -1,
         }
 
-    return render(request, 'rechorder/song_in_set.html', context)
+    return render(request, 'rechorder/song_as_slave.html', context)
 
 
-def slave_get_update_token(request, set_id):
-    set = get_object_or_404(Set, pk=set_id)
-    return JsonResponse({'update_token': set.has_changed_count})
+def slave_get_update_token(request, beam_id):
+    beam = get_object_or_404(Beam, pk=beam_id)
+    return JsonResponse({'update_token': beam.has_changed_count})
 
 
 def song_update(request, song_id):

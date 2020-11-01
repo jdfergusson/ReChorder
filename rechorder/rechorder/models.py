@@ -148,7 +148,7 @@ class Beam(models.Model):
 
     def save(self, *args, **kwargs):
         if self.current_song_index is not None:
-            if not 0 <= self.current_song_index < len(Set(pk=self.set).song_list):
+            if not 0 <= self.current_song_index < len(self.set.song_list):
                 self.current_song_index = None
         self.has_changed_count = self.has_changed_count + 1 % 10000
 

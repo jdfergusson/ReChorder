@@ -27,8 +27,8 @@ urlpatterns = [
     url(r'^beaming/toggle', views.beaming_toggle, name='beaming.toggle'),
     url(r'^beaming/status', views.beaming_status, name='beaming.status'),
     url(r'^slave/$', views.get_beams, name='slave'),
-    url(r'^slave/(?P<set_id>[0-9]+)$', views.slave_to_master, name='slave_to'),
-    url(r'^slave/(?P<set_id>[0-9]+)/token$', views.slave_get_update_token, name='slave_token'),
+    url(r'^slave/(?P<beam_id>[0-9]+)$', views.slave_to_master, name='slave_to'),
+    url(r'^slave/(?P<beam_id>[0-9]+)/token$', views.slave_get_update_token, name='slave_token'),
     url(r'^settings$', views.settings, name='settings'),
     url(r'^settings/set$', views.settings_set, name='settings.set'),
 

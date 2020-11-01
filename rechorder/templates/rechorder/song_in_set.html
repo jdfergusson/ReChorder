@@ -2,77 +2,49 @@
 {% load static %}
 
 {% block javascript %}
-    {% if not am_i_master %}
-        function checkForUpdates() {
-            $.ajax({
-                url: '{% url 'slave_token' set.id %}',
-                success: function (data)
-                {
-                    if (data.update_token != {{ update_token }})
-                    {
-                        location.reload();
-                    }
-                }
-            });
-        }
+    function next() {
+        {% if current_index < max_index %}
+            window.location.href = "{% url 'set.song' set.id current_index|add:'1' %}";
+        {% endif %}
+    }
 
-        $(function() {
-            /* Check for an update every second */
-            window.setInterval(checkForUpdates, 1000);
-        });
-    {% endif %}
+    function prev() {
+        {% if current_index > 0 %}
+            window.location.href = "{% url 'set.song' set.id current_index|add:'-1' %}";
+        {% endif %}
+    }
 
+    function processKeyPress(e) {
+        e = e || window.event;
 
-    {% if am_i_master %}
-        function next() {
-            {% if current_index < max_index %}
-                window.location.href = "{% url 'set.song' set.id current_index|add:'1' %}";
-            {% endif %}
-        }
+        /* Scroll by 1/2 window height each button press */
+        var n = window.innerHeight / 2;
 
-        function prev() {
-            {% if current_index > 0 %}
-                window.location.href = "{% url 'set.song' set.id current_index|add:'-1' %}";
-            {% endif %}
-        }
-
-        function processKeyPress(e) {
-            e = e || window.event;
-
-            /* Scroll by 1/2 window height each button press */
-            var n = window.innerHeight / 2;
-
-            if (e.key == 'PageUp' || e.key == 'ArrowUp') {
-                e.preventDefault();
-                if (window.scrollY <= 5)
-                {
-                    prev();
-                }
-                else
-                {
-                    new_scroll_loc = document.body.scrollTop - n;
-                    $("html, body").animate({ scrollTop: new_scroll_loc });
-                }
+        if (e.key == 'PageUp' || e.key == 'ArrowUp') {
+            e.preventDefault();
+            if (window.scrollY <= 5)
+            {
+                prev();
             }
-            else if (e.key == 'PageDown' || e.key == 'ArrowDown') {
-                e.preventDefault();
-                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 5)
-                {
-                    next();
-                }
-                else
-                {
-                    new_scroll_loc = document.body.scrollTop + n;
-                    $("html, body").animate({ scrollTop: new_scroll_loc });
-                }
+            else
+            {
+                new_scroll_loc = document.body.scrollTop - n;
+                $("html, body").animate({ scrollTop: new_scroll_loc });
             }
         }
-
-        $(function() {
-            document.onkeydown = processKeyPress;
-        });
-
-    {% endif %}
+        else if (e.key == 'PageDown' || e.key == 'ArrowDown') {
+            e.preventDefault();
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 5)
+            {
+                next();
+            }
+            else
+            {
+                new_scroll_loc = document.body.scrollTop + n;
+                $("html, body").animate({ scrollTop: new_scroll_loc });
+            }
+        }
+    }
 
     function toggleTab(tab) {
         if (tab != 'transposer') {
@@ -103,15 +75,13 @@
 
         $('#beam-settings').hide();
         $('#btn-toggle-beam-settings').click(function() {toggleTab('beam-settings');});
+
+        document.onkeydown = processKeyPress;
     });
 {% endblock %}
 
 {% block header %}
-    {% if am_i_master %}
-        {% include 'rechorder/_header.html' with selected='set' %}
-    {% else %}
-        {% include 'rechorder/_header.html' with selected='receive' %}
-    {% endif %}
+    {% include 'rechorder/_header.html' with selected='set' %}
 {% endblock %}
 
 {% block title %}
@@ -168,21 +138,19 @@
         {% include 'rechorder/_print_song.html' %}
     </span>
 
-    {% if am_i_master %}
-        <div id="set-nav-btns">
-            {% if current_index > 0 %}
-                <a href="{% url 'set.song' set.id current_index|add:'-1' %}">
-                    <img src="{% static 'rechorder/icons/mdi-chevron-left-box-outline.svg' %}">
-                </a>
-            {% endif %}
+    <div id="set-nav-btns">
+        {% if current_index > 0 %}
+            <a href="{% url 'set.song' set.id current_index|add:'-1' %}">
+                <img src="{% static 'rechorder/icons/mdi-chevron-left-box-outline.svg' %}">
+            </a>
+        {% endif %}
 
 
-            {% if current_index < max_index %}
-                <a href="{% url 'set.song' set.id current_index|add:'1' %}">
-                    <img class="right-aligned-img" src="{% static 'rechorder/icons/mdi-chevron-right-box-outline.svg' %}">
-                </a>
-            {% endif %}
-        </div>
-    {% endif %}
+        {% if current_index < max_index %}
+            <a href="{% url 'set.song' set.id current_index|add:'1' %}">
+                <img class="right-aligned-img" src="{% static 'rechorder/icons/mdi-chevron-right-box-outline.svg' %}">
+            </a>
+        {% endif %}
+    </div>
 {% endif %}
 {% endblock %}
