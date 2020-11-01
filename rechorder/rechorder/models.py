@@ -145,6 +145,7 @@ class Beam(models.Model):
     owner = models.CharField(max_length=36, default='')
     current_song_index = models.IntegerField(null=True, default=None)
     has_changed_count = models.IntegerField(default=0)
+    beamer_device_name = models.CharField(max_length=200, default='Unknown')
 
     def save(self, *args, **kwargs):
         if self.current_song_index is not None:

@@ -58,7 +58,7 @@
     <h2>
         <a href="{% url 'sets' %}">Beaming</a>
         &#8594;
-        Following {{ set.name }}
+        Following "{{ beam.set.name }}"
         &#8594;
         {{ current_index|add:'1' }} of {{ set_length }}
     </h2><br>

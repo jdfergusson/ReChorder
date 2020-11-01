@@ -64,6 +64,14 @@ def _get_or_create_user_uuid(request):
     return user_uuid
 
 
+def _get_or_create_device_name(request):
+    device_name = request.session.get('device_name')
+    if device_name is None:
+        device_name = 'Unnamed Device'
+        request.session['device_name'] = device_name
+    return device_name
+
+
 def _get_header_links(request, **overrides):
     if 'last_visited_song' in request.session:
         songs_link = reverse('song', args=[request.session['last_visited_song']])
@@ -218,7 +226,8 @@ def _get_or_create_beam(request, set):
         if beams.count() == 1:
             beam = beams[0]
         else:
-            beam = Beam(set=set, owner=owner)
+            device_name = _get_or_create_device_name(request)
+            beam = Beam(set=set, owner=owner, beamer_device_name=device_name)
             beam.save()
 
         return beam
@@ -738,6 +747,7 @@ def settings(request):
     context = {
         'selected_shapes': _get_selected_chord_shapes(request),
         'possible_shapes': [{'name': KEYS[i], 'index': i} for i in range(12)],
+        'device_name': _get_or_create_device_name(request),
         'chord_display_style': _get_display_style(request),
         **_get_header_links(request),
     }
@@ -748,7 +758,17 @@ def settings_set(request):
     request.session['selected_chord_shapes'] = \
         [int(i) for i in json.loads(request.POST.get('permitted_shapes', ''))]
     request.session['chord_display_style'] = json.loads(request.POST.get('display_style', ''))['chord-display-style']
+    request.session['device_name'] = request.POST.get('device_name', '["Unnamed Device"]').strip()
     request.session.modified = True
+
+    # Try to update the user's beam if it exists
+    try:
+        beam = Beam.objects.get(owner=_get_or_create_user_uuid(request))
+        beam.beamer_device_name = request.session['device_name']
+        beam.save()
+    except Beam.DoesNotExist:
+        pass
+
     return JsonResponse({'success': True})
 
 
