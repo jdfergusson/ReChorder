@@ -110,6 +110,7 @@
                 {% if set_id %}
                 'sounding_key_index': "{{ key_details.sounding_key_index }}",
                 'set_id': "{{ set_id }}",
+                'song_in_set_index': "{{ current_index }}",
                 {% endif %}
                 'transpose_data': JSON.stringify(getFormData($('#transposer-form'))),
             },
