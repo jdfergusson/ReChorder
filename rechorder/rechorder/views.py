@@ -427,7 +427,7 @@ def set(request, set_id):
         'is_viewable': is_viewable,
         **_get_header_links(
             request,
-            header_link_back=reverse('sets')),
+            header_link_back=reverse('sets_mine') if am_i_owner else reverse('sets_others')),
     })
 
 
