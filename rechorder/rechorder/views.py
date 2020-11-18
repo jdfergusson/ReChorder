@@ -238,7 +238,7 @@ def _is_beaming(request):
     return request.session.get('is_beaming', False)
 
 
-def _get_or_create_beam(request, set):
+def _get_or_create_beam(request, set, song_index=None):
     owner = _get_or_create_user_uuid(request)
     if _is_beaming(request):
         beams = Beam.objects.filter(owner=owner)
@@ -256,7 +256,11 @@ def _get_or_create_beam(request, set):
             beam = beams[0]
         else:
             device_name = _get_or_create_device_name(request)
-            beam = Beam(set=set, owner=owner, beamer_device_name=device_name)
+            beam = Beam(
+                set=set,
+                owner=owner,
+                beamer_device_name=device_name,
+                current_song_index=song_index)
             beam.save()
 
         return beam
@@ -551,10 +555,12 @@ def beaming_toggle(request):
         # it'll be done when the set is navigated to.
         try:
             set_pk = int(request.POST.get('set_pk', None))
-            if set_pk is not None:
-                set = Set.objects.get(pk=set_pk)
-                _get_or_create_beam(request, set)
-        except (Set.DoesNotExist, ValueError):
+            song_index = int(request.POST.get('song_index', None))
+            print(set_pk, song_index)
+            if None not in (set_pk, song_index):
+                _set = Set.objects.get(pk=set_pk)
+                beam = _get_or_create_beam(request, _set, song_index)
+        except (Set.DoesNotExist, ValueError, TypeError):
             pass
 
     else:
