@@ -37,7 +37,7 @@
 
         $('#check-{{ chord_display_style }}').prop('checked', true);
         $('#btn-device-name-save').click(update)
-        $('#text-device-name').val("{{ device_name }}");
+        $('#text-device-name').val("{{ device_name|escapejs }}");
     });
 {% endblock %}
 
