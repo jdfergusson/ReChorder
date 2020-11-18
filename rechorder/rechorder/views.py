@@ -643,7 +643,7 @@ def song_update(request, song_id):
         song.raw = content
         song.save()
 
-        return JsonResponse(_get_update_song_data(request, song))
+        return JsonResponse({})
     return HttpResponseBadRequest('Invalid POST data')
 
 
@@ -729,7 +729,14 @@ def song_transpose(request):
     display_style = _get_display_style(request)
     song.display_in(key_index, display_style)
 
-    return JsonResponse(_get_update_song_data(request, song, set_id, song_in_set_index))
+    return JsonResponse({
+        'song_html': render_to_string('rechorder/_print_song.html', {'song': song}),
+        'key_details': _get_key_details(request, song, set_id, song_in_set_index),
+        'song_meta': {
+            'title': song.title,
+            'artist': song.artist,
+        },
+    })
 
 
 def songs(request):
