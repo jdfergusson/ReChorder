@@ -200,3 +200,7 @@
         </li>
     </ul>
 </form>
+
+{% if song.key_notes.strip %}
+    Key advice: {{ song.key_notes }}
+{% endif %}

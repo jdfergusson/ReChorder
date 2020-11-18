@@ -16,6 +16,7 @@ class Song(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(11)]
     )
     artist = models.CharField(max_length=200, null=True)
+    key_notes = models.CharField(max_length=200, null=False, default="")
     raw = models.TextField()
 
     def __init__(self, *args, **kwargs):

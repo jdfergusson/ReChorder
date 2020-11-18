@@ -634,12 +634,14 @@ def song_update(request, song_id):
     title = request.POST.get('title')
     artist = request.POST.get('artist')
     original_key = int(request.POST.get('original_key'))
+    key_notes = request.POST.get('key_notes')
     content = request.POST.get('content')
 
-    if None not in (title, artist, original_key, content):
+    if None not in (title, artist, original_key, key_notes, content):
         song.title = title
         song.artist = artist
         song.original_key = original_key
+        song.key_notes = key_notes
         song.raw = content
         song.save()
 
