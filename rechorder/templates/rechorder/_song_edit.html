@@ -9,9 +9,10 @@
             url: '{% url 'song.update' song.id %}',
             data: {
                 'title': $('#editor-song-title').val(),
-                'artist':  $('#editor-song-artist').val(),
-                'original_key':  $('#editor-original-key').val(),
-                'content':  $('#editor-song-content').val(),
+                'artist': $('#editor-song-artist').val(),
+                'original_key': $('#editor-original-key').val(),
+                'key_notes': $('#editor-key-notes').val(),
+                'content': $('#editor-song-content').val(),
             },
             dataType: 'json',
             success: function(data) {
@@ -68,6 +69,7 @@
         $('#editor-song-title').val("{{ song.title|escapejs }}");
         $('#editor-song-artist').val("{{ song.artist|escapejs }}");
         $('#editor-original-key').val("{{ song.original_key }}");
+        $('#editor-key-notes').val("{{ song.key_notes|escapejs }}");
         $('#editor-song-content').val("{{ song.raw|escapejs }}");
 
         $('#btn-editor-save').click(saveSong);
@@ -80,6 +82,7 @@
         $('#editor-song-title').focus(onEdit);
         $('#editor-song-artist').focus(onEdit);
         $('#editor-original-key').focus(onEdit);
+        $('#editor-key-notes').focus(onEdit);
         $('#editor-song-content').focus(onEdit);
 
         $('#editor-original-key').prop("disabled", true);
@@ -110,6 +113,7 @@
                 </button>
             </td>
         </tr>
+        <tr><td>Advice on key: </td><td><input id="editor-key-notes"></td></tr>
     </table>
     <textarea class="song-content-edit" id="editor-song-content"></textarea>
     <br>
