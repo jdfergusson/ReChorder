@@ -371,12 +371,8 @@ def set_add_song(request, set_id):
         _get_transpose_data(request, song.pk, None, None))
 
     if request.POST.get('go_live', False):
-        # This is falling over - we need an updated way of working out which song we're on in the set
-        if this_set.beamed_song_index is None:
-            song_in_set_index = len(this_set.song_list)
-        else:
-            song_in_set_index = this_set.beamed_song_index + 1
-
+        last_song_index = int(request.session.get('last_song_in_set'))
+        song_in_set_index = last_song_index + 1 if last_song_index is not None else len(this_set.song_list)
         this_set.song_list.insert(song_in_set_index, song_in_set)
         this_set.save()
 
@@ -398,6 +394,7 @@ def set_clear(request, set_id):
 
 def set(request, set_id):
     this_set = get_object_or_404(Set, pk=set_id)
+    this_set.check_list_integrity()
     set_songs = []
 
     # Check permissions etc.
@@ -467,9 +464,6 @@ def set_delete_all_old(request):
 def set_show_song(request, set_id, song_index):
     this_set = get_object_or_404(Set, pk=set_id)
 
-    request.session['last_song_in_set'] = song_index
-    request.session.modified = True
-
     try:
         # We'll never get negative numbers if the URL doesn't allow it
         song_index = int(song_index)
@@ -477,8 +471,10 @@ def set_show_song(request, set_id, song_index):
     except (ValueError, IndexError):
         return HttpResponseNotFound('<h1>Error: Page not found</h1>')
 
-    # TODO: What if the song has been deleted?
-    song = Song.objects.get(pk=song_in_set['id'])
+    request.session['last_song_in_set'] = song_index
+    request.session.modified = True
+
+    song = get_object_or_404(Song, pk=song_in_set['id'])
 
     # Update beam if applicable
     if _is_beaming(request):
