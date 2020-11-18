@@ -1,0 +1,94 @@
+{% extends 'rechorder/_base.html' %}
+{% load static %}
+
+{% block javascript %}
+    function checkForUpdates() {
+       $.ajax({
+            url: '{% url 'slave_token' beam.pk %}',
+            success: function (data)
+            {
+                if (data.update_token != {{ update_token }})
+                {
+                    location.reload();
+                }
+            }
+        });
+    }
+
+    $(function() {
+        /* Check for an update every second */
+        window.setInterval(checkForUpdates, 1000);
+    });
+
+    function toggleTab(tab) {
+        if (tab != 'transposer') {
+            $('#transposer').hide();
+            $('#btn-toggle-transposer').removeClass('img-action-selected');
+        }
+
+        if (tab != 'font-resizer') {
+            $('#font-resizer').hide();
+            $('#btn-toggle-font-resizer').removeClass('img-action-selected');
+        }
+
+        $('#' + tab).toggle();
+        $('#btn-toggle-' + tab).toggleClass('img-action-selected');
+    }
+
+    $(function() {
+        $('#transposer').hide();
+        $('#btn-toggle-transposer').click(function() {toggleTab('transposer');});
+
+        $('#font-resizer').hide();
+        $('#btn-toggle-font-resizer').click(function() {toggleTab('font-resizer');});
+    });
+{% endblock %}
+
+{% block header %}
+    {% include 'rechorder/_header.html' with selected='receive' %}
+{% endblock %}
+
+{% block title %}
+{% if song %}
+     <a href="{% url 'song' song.id %}">
+        <img class="img-btn right-aligned-img"
+             src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
+    </a>
+
+    <h2>
+        <a href="{% url 'sets' %}">Beaming</a>
+        &#8594;
+        Following "{{ beam.set.name }}"
+        &#8594;
+        {{ current_index|add:'1' }} of {{ set_length }}
+    </h2><br>
+    <h1 id="song-title">{{ song.title }}</h1><br>
+    <h2 id="song-artist">{{ song.artist }}</h2><br>
+    <h3>Key of: <span id="key-shown"></span> Capo: <span id="key-capo"></span></h3><br>
+
+    <ul class="tab-list">
+        <li><img class="img-actions"
+                    id="btn-toggle-transposer" src="{% static 'rechorder/icons/mdi-music-accidental-natural.svg' %}">
+        </li><li>
+            <img class='img-actions' id="btn-toggle-font-resizer" src="{% static 'rechorder/icons/mdi-format-font.svg' %}">
+        </li>
+    </ul>
+
+    <div class="tab-container" id="transposer">
+        {% include 'rechorder/_transposer.html' with sk_editable='false' set_id=beam.set.pk %}
+    </div>
+    <div class="tab-container" id="font-resizer">
+        {% include 'rechorder/_font_resizer.html' %}
+    </div>
+{% else %}
+    <h1>No song. Waiting for beaming to start...</h1>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if song %}
+    <span id="song">
+        {% include 'rechorder/_print_song.html' %}
+    </span>
+{% endif %}
+{% endblock %}

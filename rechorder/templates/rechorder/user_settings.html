@@ -20,12 +20,13 @@
         data: {
             'permitted_shapes': JSON.stringify(getFormData($('#shape-selection'))),
             'display_style': JSON.stringify(getFormData($('#chord-display-style'))),
+            'device_name': $('#text-device-name').val(),
         },
     });
     }
 
     $(function() {
-        $('input').each(function(index) {
+        $('.pressable').each(function(index) {
             $(this).change(update);
             $(this).prop('checked', false);
         });
@@ -35,6 +36,8 @@
         {% endfor %}
 
         $('#check-{{ chord_display_style }}').prop('checked', true);
+        $('#btn-device-name-save').click(update)
+        $('#text-device-name').val("{{ device_name|escapejs }}");
     });
 {% endblock %}
 
@@ -47,6 +50,13 @@
 {% endblock %}
 
 {% block content %}
+    <h2>This Device</h2><br>
+    <form id="device-name">
+        Name: <input id="text-device-name">
+        <button type="button" id="btn-device-name-save">Save</button>
+    </form>
+    <br>
+
     <h2>Auto Chord Shapes</h2><br>
     Select chord shape keys you're comfortable with:
 
@@ -54,26 +64,30 @@
         <ul class="yes-no-selection">
             {% for shape in possible_shapes %}
                 <li>
-                    <input type="checkbox" id="check-{{ shape.index }}" name="{{ shape.index }}">
+                    <input class="pressable" type="checkbox" id="check-{{ shape.index }}" name="{{ shape.index }}">
                     <label for="check-{{ shape.index }}" class="key-label">{{ shape.name }}</label>
                 </li>
             {% endfor %}
         </ul>
     </form>
 
-    <h2>Chord display style</h2>
+    <h2>Chord display style</h2><br>
+    Select how to display chords:
     <form id="chord-display-style" class="settings-boxes">
         <ul class="yes-no-selection">
             <li>
-                <input type="radio" id="check-letters" name="chord-display-style" value="letters">
+                <input class="pressable" type="radio" id="check-letters" name="chord-display-style" value="letters">
                 <label for="check-letters">Letters</label>
             </li>
             <li>
-                <input type="radio" id="check-numbers" name="chord-display-style" value="numbers">
+                <input class="pressable" type="radio" id="check-numbers" name="chord-display-style" value="numbers">
                 <label for="check-numbers">Numbers</label>
             </li>
         </ul>
     </form>
+
+    <h2>Beaming</h2><br>
+    {% include 'rechorder/_beaming_toggle.html' %}
 
 {% endblock %}
 

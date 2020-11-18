@@ -123,6 +123,10 @@ button, select {
     background-color: #c1e6be;
 }
 
+.btn-unsuccessful {
+    background-color: #e6bec1;
+}
+
 @media (hover:hover) {
     button:hover, select:hover, a:hover {
         background-color: #cee0ec;
@@ -173,6 +177,10 @@ h2 {
     font-variant: small-caps;
     display: inline;
     margin: 0;
+    color: #626262;
+}
+
+h2 a {
     color: #626262;
 }
 
@@ -433,9 +441,10 @@ mark {
  * Set list
  **********************************************************/
 
-#set-list li {
+.sortable-list li {
     padding-left: 0;
 }
+
 
 /**********************************************************
  * Song in set specifics

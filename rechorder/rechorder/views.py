@@ -22,10 +22,13 @@ import os
 import uuid
 import zipfile
 
+#TODO: Remove this
+import inspect
+
 from rechorder.music_handler.interpret import KEYS, ABSOLUTE_LOOKUP, interpret_absolute_chord, song_from_onsong_text
 
 
-from .models import Song, Set
+from .models import Song, Set, Beam
 
 
 def _get_selected_chord_shapes(request):
@@ -64,6 +67,14 @@ def _get_or_create_user_uuid(request):
     return user_uuid
 
 
+def _get_or_create_device_name(request):
+    device_name = request.session.get('device_name')
+    if device_name is None:
+        device_name = 'Unnamed Device'
+        request.session['device_name'] = device_name
+    return device_name
+
+
 def _get_header_links(request, **overrides):
     if 'last_visited_song' in request.session:
         songs_link = reverse('song', args=[request.session['last_visited_song']])
@@ -93,17 +104,44 @@ def _get_header_links(request, **overrides):
     return links
 
 
-def _get_sounding_key_index(request, song, sounding_key_index=None):
-    song_key_data = request.session.get('keys', {}).get('{}'.format(song.pk), {})
-    return int(song_key_data.get('sounding_key_index', song.original_key)
-               if sounding_key_index is None else sounding_key_index)
+def _get_sounding_key_index(request, song, set_pk=None, song_in_set=None):
+    """
+    Returns the index of the sounding key of the song as preferred by the user or chosen by the current set.
+    If the user has not set a preference, set the sounding key to the original key of the song.
+    """
+    sounding_key_index = song.original_key
+    try:
+        if None not in (set_pk, song_in_set):
+            set = Set.objects.get(pk=set_pk)
+            sounding_key_index = set.song_list[song_in_set]['key_index']
+        else:
+            # set_pk and song_in_set should both be none
+            song_key_data = _get_transpose_data(request, song.pk, None, None)
+            sounding_key_index = song_key_data['sounding_key_index']
+    except Exception:
+        pass
+
+    return sounding_key_index
 
 
-def _get_song_key_index(request, song, set_id=-1, sounding_key_index=None):
-    sounding_key_index = _get_sounding_key_index(request, song, sounding_key_index)
-    song_key_data = request.session.get('keys', {}).get('{}'.format(song.pk), {})
+def _get_transpose_data(request, song_pk, set_pk, song_in_set):
+    song_key_data = request.session.get('keys', {}).get('{}'.format(song_pk), {})
+    return song_key_data.get('{}.{}'.format(set_pk, song_in_set))
 
-    transpose_data = song_key_data.get('{}'.format(set_id))
+
+def _set_transpose_data(request, song_pk, set_pk, song_in_set, transpose_data):
+    keys_dict = request.session.get('keys', {})
+    song_key_data = keys_dict['{}'.format(song_pk)] = keys_dict.get('{}'.format(song_pk), {})
+    song_key_data['{}.{}'.format(set_pk, song_in_set)] = deepcopy(transpose_data)
+    request.session['keys'] = keys_dict
+    request.session.modified = True
+
+
+def _get_song_key_index(request, song, set_pk=None, song_in_set=None):
+    sounding_key_index = _get_sounding_key_index(request, song, set_pk, song_in_set)
+
+    # Get transpose data for the specific view we're looking at now
+    transpose_data = _get_transpose_data(request, song.pk, set_pk, song_in_set)
 
     key_index = sounding_key_index
     capo_fret_number = 0
@@ -133,21 +171,21 @@ def _get_song_key_index(request, song, set_id=-1, sounding_key_index=None):
     return key_index, capo_fret_number
 
 
-def _get_key_details(request, song, set_id=-1, sounding_key_index=None):
+def _get_key_details(request, song, set_pk=None, song_in_set=None):
     key_details = {}
-    key_details['key_index'], key_details['capo_fret_number'] = _get_song_key_index(request, song, set_id)
+    key_details['key_index'], key_details['capo_fret_number'] = \
+        _get_song_key_index(request, song, set_pk, song_in_set)
 
-    song_key_data = request.session.get('keys', {}).get('{}'.format(song.pk), {})
-    key_details['sounding_key_index'] = _get_sounding_key_index(request, song, sounding_key_index)
-    key_details['transpose_data'] = song_key_data.get('{}'.format(set_id), {
+    key_details['sounding_key_index'] = _get_sounding_key_index(request, song, set_pk, song_in_set)
+    key_details['transpose_data'] = _get_transpose_data(request, song.pk, set_pk, song_in_set) or {
         # Default to displaying in sounding key
         'adv-tran-opt': 'sk'
-    })
+    }
     key_details['original_key_index'] = song.original_key
     return key_details
 
 
-def _get_base_song_context_dict(request, song, set_id=-1, sounding_key_index=None):
+def _get_base_song_context_dict(request, song, set_pk=None, song_in_set=None):
     chord_shapes = []
     selected_chord_shapes = _get_selected_chord_shapes(request)
     for shape_index in selected_chord_shapes:
@@ -161,13 +199,14 @@ def _get_base_song_context_dict(request, song, set_id=-1, sounding_key_index=Non
 
     current_set_id = _get_current_set_id(request)
     set = None
+    set_is_editable = False
     if current_set_id is not None:
         try:
             set = Set.objects.get(pk=current_set_id)
+            set_is_editable = set.owner == _get_or_create_user_uuid(request)
         except Set.DoesNotExist:
             pass
 
-        
     return {
         'keys': KEYS,
         'frets': [i for i in range(12)],
@@ -178,20 +217,62 @@ def _get_base_song_context_dict(request, song, set_id=-1, sounding_key_index=Non
             {'index': 0, 'name': 'A'},
         ],
         'chord_shapes': chord_shapes,
-        'key_details': _get_key_details(request, song, set_id, sounding_key_index),
+        'key_details': _get_key_details(request, song, set_pk, song_in_set),
         'current_set': set,
+        'set_is_editable': set_is_editable,
     }
 
 
-def _get_update_song_data(request, song, set_id=-1):
+def _get_update_song_data(request, song, set_pk=None, song_in_set=None):
     return {
         'song_html': render_to_string('rechorder/_print_song.html', {'song': song}),
-        'key_details': _get_key_details(request, song, set_id),
+        'key_details': _get_key_details(request, song, set_pk, song_in_set),
         'song_meta': {
             'title': song.title,
             'artist': song.artist,
         },
     }
+
+
+def _is_beaming(request):
+    return request.session.get('is_beaming', False)
+
+
+def _get_or_create_beam(request, set, song_index=None):
+    owner = _get_or_create_user_uuid(request)
+    if _is_beaming(request):
+        beams = Beam.objects.filter(owner=owner)
+
+        # This should never happen, but just in case, remove down to only one
+        # beam per user
+        if beams.count() > 1:
+            beams.delete()
+            # Since this should never happen, I have no qualms about doing a
+            # second database filter here
+            beams = Beam.objects.filter(owner=owner)
+
+        # Find or create the beam object
+        if beams.count() == 1:
+            beam = beams[0]
+        else:
+            device_name = _get_or_create_device_name(request)
+            beam = Beam(
+                set=set,
+                owner=owner,
+                beamer_device_name=device_name,
+                current_song_index=song_index)
+            beam.save()
+
+        return beam
+
+    else:
+        return None
+
+
+def _delete_beam(request):
+    owner = _get_or_create_user_uuid(request)
+    beams = Beam.objects.filter(owner=owner)
+    beams.delete()
 
 
 ###########################
@@ -202,21 +283,49 @@ def index(request):
     return redirect(reverse('songs'))
 
 
-def sets(request):
+def sets_mine(request):
     # If we're here we don't have a current set
     _clear_current_set(request)
 
     # Find all sets we have permission to see
-    sets_queryset = Set.objects.filter(is_public=True) | \
-                    Set.objects.filter(owner=_get_or_create_user_uuid(request))
+    sets_queryset = Set.objects.filter(owner=_get_or_create_user_uuid(request))
 
     paginator = Paginator(sets_queryset.order_by('-last_updated'), 20)
     page_num = request.GET.get('page', 1)
     _sets = paginator.get_page(page_num)
 
-    return render(request, 'rechorder/sets.html', {
+    return render(request, 'rechorder/sets_mine.html', {
         'sets': _sets,
-        'owner_uuid': _get_or_create_user_uuid(request),
+        **_get_header_links(
+            request,
+            header_link_back=reverse('sets')),
+    })
+
+
+def sets_others(request):
+    # If we're here we don't have a current set
+    _clear_current_set(request)
+
+    # Find all sets we have permission to see
+    sets_queryset = \
+        Set.objects.filter(is_public=True).exclude(owner=_get_or_create_user_uuid(request))
+
+    paginator = Paginator(sets_queryset.order_by('-last_updated'), 20)
+    page_num = request.GET.get('page', 1)
+    _sets = paginator.get_page(page_num)
+
+    return render(request, 'rechorder/sets_others.html', {
+        'sets': _sets,
+        **_get_header_links(
+            request,
+            header_link_back=reverse('sets')),
+    })
+
+
+def sets(request):
+    _clear_current_set(request)
+
+    return render(request, 'rechorder/sets_choose_view.html', {
         **_get_header_links(request),
     })
 
@@ -246,25 +355,24 @@ def set_add_song(request, set_id):
     this_set = get_object_or_404(Set, pk=set_id)
 
     # Get sounding key from current settings
-    song_key_data = request.session.get('keys', {}).get('{}'.format(song.pk), {})
-    sounding_key_index = int(song_key_data.get('sounding_key_index', song.original_key))
+    sounding_key_index = _get_sounding_key_index(request, song)
 
     song_in_set = {
         'id': song.pk,
         'key_index': sounding_key_index,
     }
 
-    # Copy current key settings to set settings
-    if '-1' in song_key_data:
-        song_key_data['{}'.format(this_set.id)] = deepcopy(song_key_data['-1'])
-        request.session.modified = True
+    # Copy un-setted key settings to set settings
+    _set_transpose_data(
+        request,
+        song.pk,
+        this_set.pk,
+        len(this_set.song_list),
+        _get_transpose_data(request, song.pk, None, None))
 
     if request.POST.get('go_live', False):
-        if this_set.beamed_song_index is None:
-            song_in_set_index = len(this_set.song_list)
-        else:
-            song_in_set_index = this_set.beamed_song_index + 1
-
+        last_song_index = int(request.session.get('last_song_in_set'))
+        song_in_set_index = last_song_index + 1 if last_song_index is not None else len(this_set.song_list)
         this_set.song_list.insert(song_in_set_index, song_in_set)
         this_set.save()
 
@@ -286,15 +394,15 @@ def set_clear(request, set_id):
 
 def set(request, set_id):
     this_set = get_object_or_404(Set, pk=set_id)
+    this_set.check_list_integrity()
     set_songs = []
 
     # Check permissions etc.
     am_i_owner = this_set.owner == _get_or_create_user_uuid(request)
     is_viewable = this_set.is_public | am_i_owner
 
-    # If the set is owned by the current user, make it their current set
-    if am_i_owner:
-        _set_current_set(request, this_set)
+    # Make this the current set
+    _set_current_set(request, this_set)
 
     try:
         request.session.pop('last_song_in_set')
@@ -319,7 +427,7 @@ def set(request, set_id):
         'is_viewable': is_viewable,
         **_get_header_links(
             request,
-            header_link_back=reverse('sets')),
+            header_link_back=reverse('sets_mine') if am_i_owner else reverse('sets_others')),
     })
 
 
@@ -356,9 +464,6 @@ def set_delete_all_old(request):
 def set_show_song(request, set_id, song_index):
     this_set = get_object_or_404(Set, pk=set_id)
 
-    request.session['last_song_in_set'] = song_index
-    request.session.modified = True
-
     try:
         # We'll never get negative numbers if the URL doesn't allow it
         song_index = int(song_index)
@@ -366,24 +471,30 @@ def set_show_song(request, set_id, song_index):
     except (ValueError, IndexError):
         return HttpResponseNotFound('<h1>Error: Page not found</h1>')
 
-    song = Song.objects.get(pk=song_in_set['id'])
+    request.session['last_song_in_set'] = song_index
+    request.session.modified = True
 
-    # Set service view in database
-    this_set.beamed_song_index = song_index
-    this_set.save()
+    song = get_object_or_404(Song, pk=song_in_set['id'])
 
-    key_index, capo_fret_number = _get_song_key_index(request, song, this_set.pk, song_in_set['key_index'])
+    # Update beam if applicable
+    if _is_beaming(request):
+        beam = _get_or_create_beam(request, this_set)
+        beam.set = this_set
+        beam.current_song_index = song_index
+        beam.save()
+
+    key_index, capo_fret_number = _get_song_key_index(request, song, this_set.pk, song_index)
     display_style = _get_display_style(request)
     song.display_in(key_index, display_style)
 
     context = {
         'song': song,
-        'am_i_master': True,
         'current_index': song_index,
-        'set_id': this_set.pk,
+        'set': this_set,
         'set_length': len(this_set.song_list),
         'max_index': len(this_set.song_list) - 1,
-        **_get_base_song_context_dict(request, song, this_set.pk, song_in_set['key_index']),
+        'am_i_owner': this_set.owner == _get_or_create_user_uuid(request),
+        **_get_base_song_context_dict(request, song, this_set.pk, song_index),
         **_get_header_links(
             request,
             header_link_back=reverse('set', args=[this_set.pk]),
@@ -398,14 +509,15 @@ def set_print(request, set_id):
     this_set.check_list_integrity()
 
     songs = []
-    for song_in_set in this_set.song_list:
+    for i in range(len(this_set.song_list)):
+        song_in_set = this_set.song_list[i]
         song = Song.objects.get(pk=song_in_set['id'])
         request.GET.get('no_personal_keys', False)
         if request.GET.get('no_personal_keys', False):
             key_index =  song_in_set['key_index']
             capo_fret_number = 0
         else:
-            key_index, capo_fret_number = _get_song_key_index(request, song, this_set.pk, song_in_set['key_index'])
+            key_index, capo_fret_number = _get_song_key_index(request, song, this_set.pk, i)
 
         display_style = _get_display_style(request)
         song.display_in(key_index, display_style)
@@ -428,46 +540,78 @@ def set_print(request, set_id):
     return render(request, 'rechorder/print_set.html', context)
 
 
-def get_beam_masters(request):
+def beaming_toggle(request):
+    is_beaming = json.loads(request.POST.get('enable', ''))
+
+    request.session['is_beaming'] = bool(is_beaming)
+    request.session.modified = True
+
+    if is_beaming:
+        # If we also have a set ID, we can create the Beam object. If not,
+        # it'll be done when the set is navigated to.
+        try:
+            set_pk = int(request.POST.get('set_pk', None))
+            song_index = int(request.POST.get('song_index', None))
+            print(set_pk, song_index)
+            if None not in (set_pk, song_index):
+                _set = Set.objects.get(pk=set_pk)
+                beam = _get_or_create_beam(request, _set, song_index)
+        except (Set.DoesNotExist, ValueError, TypeError):
+            pass
+
+    else:
+        _delete_beam(request)
+
+    return beaming_status(request)
+
+
+def beaming_status(request):
+    return JsonResponse({'beaming_enabled': _is_beaming(request)})
+
+
+def get_beams(request):
     update_time_cutoff = datetime.datetime.now() - datetime.timedelta(days=1)
+    # Clean all old beams out
+    Beam.objects.filter(last_updated__lte=update_time_cutoff).delete()
+
     context = {
         # Will get all sets that have a beamed song index
-        'sets': Set.objects.filter(
-            beamed_song_index__isnull=False,
-            last_updated__gte=update_time_cutoff,
-        ).order_by('-last_updated'),
+        'masters': Beam.objects.all().order_by('-last_updated'),
         **_get_header_links(request),
     }
     return render(request, 'rechorder/beam_masters.html', context)
 
 
-def slave_to_master(request, set_id):
-    set = get_object_or_404(Set, pk=set_id)
+def slave_to_master(request, beam_id):
+    beam = get_object_or_404(Beam, pk=beam_id)
 
     context_base = {
-        'set_id': set_id,
-        'am_i_master': False,
         'capo_fret_number': 0,
+        'beam': beam,
         **_get_header_links(request, header_link_back=reverse('slave')),
     }
 
-    if set.beamed_song_index is not None and \
-            0 <= set.beamed_song_index < len(set.song_list):
-        song_in_set = set.song_list[set.beamed_song_index]
+    if beam.current_song_index is not None and \
+            0 <= beam.current_song_index < len(beam.set.song_list):
+        song_in_set = beam.set.song_list[beam.current_song_index]
         song = get_object_or_404(Song, pk=song_in_set['id'])
 
-        key_index, capo_fret_number = _get_song_key_index(request, song, set_id, song_in_set['key_index'])
+        key_index, capo_fret_number = _get_song_key_index(
+            request,
+            song,
+            beam.set.pk,
+            beam.current_song_index)
         display_style = _get_display_style(request)
         song.display_in(key_index, display_style)
 
         context = {
             **context_base,
             'song': song,
-            'update_token': set.has_changed_count,
+            'update_token': beam.has_changed_count,
             'capo_fret_number': capo_fret_number,
-            'set_length': len(set.song_list),
-            'current_index': set.beamed_song_index,
-            **_get_base_song_context_dict(request, song, set_id, song_in_set['key_index']),
+            'set_length': len(beam.set.song_list),
+            'current_index': beam.current_song_index,
+            **_get_base_song_context_dict(request, song, beam.set.pk, beam.current_song_index),
         }
     else:
         context = {
@@ -476,12 +620,12 @@ def slave_to_master(request, set_id):
             'update_token': -1,
         }
 
-    return render(request, 'rechorder/song_in_set.html', context)
+    return render(request, 'rechorder/song_as_slave.html', context)
 
 
-def slave_get_update_token(request, set_id):
-    set = get_object_or_404(Set, pk=set_id)
-    return JsonResponse({'update_token': set.has_changed_count})
+def slave_get_update_token(request, beam_id):
+    beam = get_object_or_404(Beam, pk=beam_id)
+    return JsonResponse({'update_token': beam.has_changed_count})
 
 
 def song_update(request, song_id):
@@ -499,7 +643,7 @@ def song_update(request, song_id):
         song.raw = content
         song.save()
 
-        return JsonResponse(_get_update_song_data(request, song))
+        return JsonResponse({})
     return HttpResponseBadRequest('Invalid POST data')
 
 
@@ -531,8 +675,6 @@ def song_print(request, song_id):
 
     return render(request, 'rechorder/print_set.html', context)
 
-    return JsonResponse({'success': True})
-
 
 def song_create(request):
     if request.method == 'POST':
@@ -561,42 +703,44 @@ def song_transpose(request):
     song_id = int(request.POST['song_id'])
     song = get_object_or_404(Song, pk=song_id)
     set_id = int(request.POST.get('set_id', -1))
-
-    # Get the user's keys data for this song
-    users_keys = request.session.get('keys')
-    if users_keys is None:
-        users_keys = request.session['keys'] = {}
-    song_dict_key = '{}'.format(song_id)
-    if song_dict_key not in users_keys:
-        users_keys[song_dict_key] = {}
-    users_key_song_data = users_keys[song_dict_key]
+    song_in_set_index = int(request.POST.get('song_in_set_index', -1))
+    if set_id < 0:
+        set_id = None
+    if song_in_set_index < 0:
+        song_in_set_index = None
 
     # Sounding key index is static if we have a set ID, or dynamic (and thus in the form details)
     # if we're outside a set
-    if set_id == -1:
+    if None in (set_id, song_in_set_index):
         try:
+            # Pop this off the data since we store it differently in the dict
             sounding_key_index = int(transpose_data.pop('sounding-key'))
         except (ValueError, KeyError):
             # Default to original key
             sounding_key_index = song.original_key
-        users_key_song_data['sounding_key_index'] = sounding_key_index
+        transpose_data['sounding_key_index'] = sounding_key_index
     else:
-        sounding_key_index = request.POST['sounding_key_index']
+        transpose_data['sounding_key_index'] = request.POST['sounding_key_index']
 
     # Save the key information
-    users_key_song_data['{}'.format(set_id)] = transpose_data
+    _set_transpose_data(request, song_id, set_id, song_in_set_index, transpose_data)
 
-    request.session.modified = True
-
-    key_index, capo_fret_number = _get_song_key_index(request, song, set_id, sounding_key_index)
+    key_index, capo_fret_number = _get_song_key_index(request, song, set_id, song_in_set_index)
     display_style = _get_display_style(request)
     song.display_in(key_index, display_style)
 
-    return JsonResponse(_get_update_song_data(request, song, set_id))
+    return JsonResponse({
+        'song_html': render_to_string('rechorder/_print_song.html', {'song': song}),
+        'key_details': _get_key_details(request, song, set_id, song_in_set_index),
+        'song_meta': {
+            'title': song.title,
+            'artist': song.artist,
+        },
+    })
 
 
 def songs(request):
-    songs = Song.objects.order_by('title')
+    _songs = Song.objects.order_by('title')
 
     try:
         request.session.pop('last_visited_song')
@@ -605,7 +749,7 @@ def songs(request):
         pass
 
     context = {
-        'songs': songs,
+        'songs': _songs,
         'keys': KEYS,
         **_get_header_links(request, header_link_songs=reverse('songs'))
     }
@@ -638,6 +782,7 @@ def settings(request):
     context = {
         'selected_shapes': _get_selected_chord_shapes(request),
         'possible_shapes': [{'name': KEYS[i], 'index': i} for i in range(12)],
+        'device_name': _get_or_create_device_name(request),
         'chord_display_style': _get_display_style(request),
         **_get_header_links(request),
     }
@@ -648,7 +793,17 @@ def settings_set(request):
     request.session['selected_chord_shapes'] = \
         [int(i) for i in json.loads(request.POST.get('permitted_shapes', ''))]
     request.session['chord_display_style'] = json.loads(request.POST.get('display_style', ''))['chord-display-style']
+    request.session['device_name'] = request.POST.get('device_name', '["Unnamed Device"]').strip()
     request.session.modified = True
+
+    # Try to update the user's beam if it exists
+    try:
+        beam = Beam.objects.get(owner=_get_or_create_user_uuid(request))
+        beam.beamer_device_name = request.session['device_name']
+        beam.save()
+    except Beam.DoesNotExist:
+        pass
+
     return JsonResponse({'success': True})
 
 

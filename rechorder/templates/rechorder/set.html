@@ -114,27 +114,64 @@
     }
 
     $( function() {
-        /* Set up sortable list */
-        $("#set-list").sortable({
-            update: onListChange,
-            handle: '.sortable-list-handle'
-        });
-        $("#set-list").disableSelection();
-        $("#set-list .set-item-delete").click(function() {
-            var obj_in_list = getObjInList($(this));
-            if (obj_in_list)
-            {
-                obj_in_list.remove()
+        {% if am_i_owner %}
+            /* Set up sortable list */
+            $("#set-list").sortable({
+                update: onListChange,
+                handle: '.sortable-list-handle'
+            });
+            $("#set-list").disableSelection();
+            $("#set-list .set-item-delete").click(function() {
+                var obj_in_list = getObjInList($(this));
+                if (obj_in_list)
+                {
+                    obj_in_list.remove()
+                }
+                onListChange();
+            });
+
+            $("#btn-clear-set-list").click(clearList);
+
+            for (let i = 0; i < initial_set_list.length; i++) {
+                $("#target-key_" + i)[0].value = initial_set_list[i].key_index;
+                $("#target-key_" + i).change(onListChange);
             }
-            onListChange();
-        });
 
-        $("#btn-clear-set-list").click(clearList);
 
-        for (let i = 0; i < initial_set_list.length; i++) {
-            $("#target-key_" + i)[0].value = initial_set_list[i].key_index;
-            $("#target-key_" + i).change(onListChange);
-        }
+            $('#editor').hide();
+            $('#btn-toggle-editor').click(function() {toggleTab('editor');});
+
+            $('#name-read-only').text("{{ set.name|escapejs }}");
+            $('#input-set-name').val("{{ set.name|escapejs }}");
+            {% if set.is_public %}
+                $('#input-set-is-public').prop('checked', true);
+            {% endif %}
+            {% if set.is_protected %}
+                $('#input-set-is-protected').prop('checked', true);
+            {% endif %}
+
+            $('#areyousure').hide();
+            $('#success').hide();
+
+            $('#btn-editor-save').click(save);
+            $('#btn-editor-delete').click(delete_set);
+
+            $('#btn-ays-yes').click(function() {
+                $.ajax({
+                    type: 'POST',
+                    headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                    url: '{% url 'set.delete' set.id %}',
+                    dataType: 'json',
+                    success: function() {
+                        window.location = "{% url 'sets' %}";
+                    },
+                });
+            });
+
+            $('#btn-ays-no').click(function () {
+                $('#areyousure').hide();
+            });
+        {% endif %}
 
         $('.song-in-set-link').click(function() {
             obj_in_list = getObjInList($(this));
@@ -145,39 +182,6 @@
             }
         });
 
-        $('#editor').hide();
-        $('#btn-toggle-editor').click(function() {toggleTab('editor');});
-
-        $('#name-read-only').text("{{ set.name|escapejs }}");
-        $('#input-set-name').val("{{ set.name|escapejs }}");
-        {% if set.is_public %}
-            $('#input-set-is-public').prop('checked', true);
-        {% endif %}
-        {% if set.is_protected %}
-            $('#input-set-is-protected').prop('checked', true);
-        {% endif %}
-
-        $('#areyousure').hide();
-        $('#success').hide();
-
-        $('#btn-editor-save').click(save);
-        $('#btn-editor-delete').click(delete_set);
-
-        $('#btn-ays-yes').click(function() {
-            $.ajax({
-                type: 'POST',
-                headers: { "X-CSRFToken": '{{ csrf_token }}' },
-                url: '{% url 'set.delete' set.id %}',
-                dataType: 'json',
-                success: function() {
-                    window.location = "{% url 'sets' %}";
-                },
-            });
-        });
-
-        $('#btn-ays-no').click(function () {
-            $('#areyousure').hide();
-        });
     });
 {% endblock %}
 
@@ -208,14 +212,15 @@
              src="{% static 'rechorder/icons/mdi-close-box-outline.svg' %}">
     </a>
 
-    <h1><span id="name-read-only">{{ set.name }}</span></h1><br>
     <h2>
+        <a href="{% url 'sets' %}">Sets</a> &#8594;
         {% if am_i_owner %}
-            View and edit your set list
+            <a href="{% url 'sets_mine' %}">Mine</a>
         {% else %}
-            Viewing a set list created by someone else
+            <a href="{% url 'sets_others' %}">Others'</a>
         {% endif %}
-    </h2>
+        &#8594;</h2><br>
+    <h1><span id="name-read-only">{{ set.name }}</span></h1>
 
     <!-- Only edit if we've got ownership of the set -->
     {% if am_i_owner %}
@@ -237,7 +242,7 @@
                 </tr>
                 <tr>
                     <td>
-                        Publicly viewable:
+                        Publicly listed:
                     </td>
                     <td>
                         <input type="checkbox" id="input-set-is-public">
@@ -268,16 +273,27 @@
 {% endblock %}
 
 {% block content %}
-    {% if am_i_owner %}
-        <ul id="set-list" class="main-content-list">
-            {% for song in set_songs %}
-                <li id="set-item_{{ forloop.counter0 }}_{{ song.id }}">
+    <ul id="set-list"
+        {% if am_i_owner %}
+            class="main-content-list sortable-list"
+        {% else %}
+            class="main-content-list"
+        {% endif %}
+    >
+        {% for song in set_songs %}
+            <li id="set-item_{{ forloop.counter0 }}_{{ song.id }}">
+                {% if am_i_owner %}
                     <div>
                         <img class="sortable-list-handle" src="{% static 'rechorder/icons/mdi-drag.svg' %}">
                     </div>
-                    <div class="list-expander">
-                        <span class="list-primary"><a class="song-in-set-link" href="#">{{ song.title }}</a></span>
-                    </div>
+                {% endif %}
+                <div class="list-expander">
+                    <a class="song-in-set-link" href="#">
+                        <span class="list-primary">{{ song.title }}</span><br>
+                        <span class="list-secondary">Sounding key: {{ song.key_index|num2chord }}</span>
+                    </a>
+                </div>
+                {% if am_i_owner %}
                     <div>
                         <select id="target-key_{{ forloop.counter0 }}">
                             {% for key in keys %}
@@ -285,40 +301,25 @@
                             {% endfor %}
                         </select>
                     </div>
+
                     <div>
                         <button class="img-btn set-item-delete">
                             <img src="{% static 'rechorder/icons/mdi-delete-outline.svg' %}">
                         </button>
                     </div>
+                {% endif %}
 
-                </li>
-            {% endfor %}
-        </ul>
+            </li>
+        {% endfor %}
+    </ul>
 
-        {% if set_songs %}
-            <button id="btn-clear-set-list">Clear set list</button>
-            <a href="{% url 'set.print' set.pk %}"><img class="img-btn right-aligned-img" src="{% static 'rechorder/icons/mdi-printer.svg' %}"></a>
-        {% else %}
-            Set list currently empty. Why not add some <a href="{% url 'songs' %}">songs</a>?
-        {% endif %}
 
+    {% if set_songs %}
+        {% if am_i_owner %}<button id="btn-clear-set-list">Clear set list</button>{% endif %}
+        <a href="{% url 'set.print' set.pk %}"><img class="img-btn right-aligned-img" src="{% static 'rechorder/icons/mdi-printer.svg' %}"></a>
     {% else %}
-        <ul class="main-content-list">
-            {% for song in set_songs %}
-                <li id="set-item_{{ forloop.counter0 }}_{{ song.id }}">
-                    <div class="list-expander">
-                        <a class="song-in-set-link" href="{% url 'song' song.id %}">
-                            <span class="list-primary">
-                                {{ song.title }}
-                            </span><br>
-                            <span class="list-secondary">
-                                Sounding Key: {{ song.key_index|num2chord }}
-                            </span>
-                        </a>
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
+        Set list currently empty.
+        {% if am_i_owner %}Why not add some <a href="{% url 'songs' %}">songs</a>?{% endif %}
     {% endif %}
 {% endblock %}
 

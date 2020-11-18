@@ -2,116 +2,49 @@
 {% load static %}
 
 {% block javascript %}
-    {% if not am_i_master %}
-        function checkForUpdates() {
-            $.ajax({
-                url: '{% url 'slave_token' set_id %}',
-                success: function (data)
-                {
-                    if (data.update_token != {{ update_token }})
-                    {
-                        location.reload();
-                    }
-                }
-            });
-        }
+    function next() {
+        {% if current_index < max_index %}
+            window.location.href = "{% url 'set.song' set.id current_index|add:'1' %}";
+        {% endif %}
+    }
 
-        $(function() {
-            /* Check for an update every second */
-            window.setInterval(checkForUpdates, 1000);
-        });
-    {% endif %}
+    function prev() {
+        {% if current_index > 0 %}
+            window.location.href = "{% url 'set.song' set.id current_index|add:'-1' %}";
+        {% endif %}
+    }
 
+    function processKeyPress(e) {
+        e = e || window.event;
 
-    {% if am_i_master %}
-        function next() {
-            {% if current_index < max_index %}
-                window.location.href = "{% url 'set.song' set_id current_index|add:'1' %}";
-            {% endif %}
-        }
+        /* Scroll by 1/2 window height each button press */
+        var n = window.innerHeight / 2;
 
-        function prev() {
-            {% if current_index > 0 %}
-                window.location.href = "{% url 'set.song' set_id current_index|add:'-1' %}";
-            {% endif %}
-        }
-
-        function processKeyPress(e) {
-            e = e || window.event;
-
-            /* Scroll by 1/2 window height each button press */
-            var n = window.innerHeight / 2;
-
-            if (e.key == 'PageUp' || e.key == 'ArrowUp') {
-                e.preventDefault();
-                if (window.scrollY <= 5)
-                {
-                    prev();
-                }
-                else
-                {
-                    new_scroll_loc = document.body.scrollTop - n;
-                    $("html, body").animate({ scrollTop: new_scroll_loc });
-                }
+        if (e.key == 'PageUp' || e.key == 'ArrowUp') {
+            e.preventDefault();
+            if (window.scrollY <= 5)
+            {
+                prev();
             }
-            else if (e.key == 'PageDown' || e.key == 'ArrowDown') {
-                e.preventDefault();
-                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 5)
-                {
-                    next();
-                }
-                else
-                {
-                    new_scroll_loc = document.body.scrollTop + n;
-                    $("html, body").animate({ scrollTop: new_scroll_loc });
-                }
+            else
+            {
+                new_scroll_loc = document.body.scrollTop - n;
+                $("html, body").animate({ scrollTop: new_scroll_loc });
             }
         }
-
-        $(function() {
-            document.onkeydown = processKeyPress;
-            document.addEventListener('touchstart', handleTouchStart, false);
-            document.addEventListener('touchmove', handleTouchMove, false);
-        });
-
-        var xDown = null;
-        var yDown = null;
-
-        function getTouches(evt) {
-          return evt.touches ||             // browser API
-                 evt.originalEvent.touches; // jQuery
+        else if (e.key == 'PageDown' || e.key == 'ArrowDown') {
+            e.preventDefault();
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 5)
+            {
+                next();
+            }
+            else
+            {
+                new_scroll_loc = document.body.scrollTop + n;
+                $("html, body").animate({ scrollTop: new_scroll_loc });
+            }
         }
-
-        function handleTouchStart(evt) {
-            const firstTouch = getTouches(evt)[0];
-            xDown = firstTouch.clientX;
-            yDown = firstTouch.clientY;
-        };
-
-        function handleTouchMove(evt) {
-            if ( ! xDown || ! yDown ) {
-                return;
-            }
-
-            var xUp = evt.touches[0].clientX;
-            var yUp = evt.touches[0].clientY;
-
-            var xDiff = xDown - xUp;
-            var yDiff = yDown - yUp;
-
-            if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
-                if ( xDiff > 0 ) {
-                    next();
-                } else {
-                    prev();
-                }
-            }
-
-            /* reset values */
-            xDown = null;
-            yDown = null;
-        };
-    {% endif %}
+    }
 
     function toggleTab(tab) {
         if (tab != 'transposer') {
@@ -124,6 +57,11 @@
             $('#btn-toggle-font-resizer').removeClass('img-action-selected');
         }
 
+        if (tab != 'beam-settings') {
+            $('#beam-settings').hide();
+            $('#btn-toggle-beam-settings').removeClass('img-action-selected');
+        }
+
         $('#' + tab).toggle();
         $('#btn-toggle-' + tab).toggleClass('img-action-selected');
     }
@@ -134,15 +72,16 @@
 
         $('#font-resizer').hide();
         $('#btn-toggle-font-resizer').click(function() {toggleTab('font-resizer');});
+
+        $('#beam-settings').hide();
+        $('#btn-toggle-beam-settings').click(function() {toggleTab('beam-settings');});
+
+        document.onkeydown = processKeyPress;
     });
 {% endblock %}
 
 {% block header %}
-    {% if am_i_master %}
-        {% include 'rechorder/_header.html' with selected='set' %}
-    {% else %}
-        {% include 'rechorder/_header.html' with selected='receive' %}
-    {% endif %}
+    {% include 'rechorder/_header.html' with selected='set' %}
 {% endblock %}
 
 {% block title %}
@@ -152,8 +91,21 @@
              src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
     </a>
 
-   <h1 id="song-title">{{ song.title }}</h1><br>
-    <h2 id="song-artist">{{ song.artist }} - {{ current_index|add:'1' }} of {{ set_length }}</h2><br>
+    <h2>
+        <a href="{% url 'sets' %}">Sets</a>
+        &#8594;
+        {% if am_i_owner %}
+            <a href="{% url 'sets_mine' %}">Mine</a>
+        {% else %}
+            <a href="{% url 'sets_others' %}">Others'</a>
+        {% endif %}
+        &#8594;
+        <a href="{% url 'set' set.id %}">{{ set.name }}</a>
+        &#8594;
+        {{ current_index|add:'1' }} of {{ set_length }}
+    </h2><br>
+    <h1 id="song-title">{{ song.title }}</h1><br>
+    <h2 id="song-artist">{{ song.artist }}</h2><br>
     <h3>Key of: <span id="key-shown"></span> Capo: <span id="key-capo"></span></h3><br>
 
     <ul class="tab-list">
@@ -161,14 +113,19 @@
                     id="btn-toggle-transposer" src="{% static 'rechorder/icons/mdi-music-accidental-natural.svg' %}">
         </li><li>
             <img class='img-actions' id="btn-toggle-font-resizer" src="{% static 'rechorder/icons/mdi-format-font.svg' %}">
+        </li><li>
+            <img class='img-actions' id="btn-toggle-beam-settings" src="{% static 'rechorder/icons/mdi-cellphone-text.svg' %}">
         </li>
     </ul>
 
     <div class="tab-container" id="transposer">
-        {% include 'rechorder/_transposer.html' with sk_editable='false' %}
+        {% include 'rechorder/_transposer.html' with sk_editable='false' set_id=set.id %}
     </div>
     <div class="tab-container" id="font-resizer">
-    {% include 'rechorder/_font_resizer.html' %}
+        {% include 'rechorder/_font_resizer.html' %}
+    </div>
+    <div class="tab-container" id="beam-settings">
+        {% include 'rechorder/_beaming_toggle.html' with set_pk=set.pk song_index=current_index %}
     </div>
 {% else %}
     <h1>No song. Waiting for beaming to start...</h1>
@@ -181,21 +138,21 @@
         {% include 'rechorder/_print_song.html' %}
     </span>
 
-    {% if am_i_master %}
-        <div id="set-nav-btns">
-            {% if current_index > 0 %}
-                <a href="{% url 'set.song' set_id current_index|add:'-1' %}">
-                    <img src="{% static 'rechorder/icons/mdi-chevron-left-box-outline.svg' %}">
-                </a>
-            {% endif %}
+    <div id="set-nav-btns">
+        {% if current_index > 0 %}
+            <a href="{% url 'set.song' set.id current_index|add:'-1' %}">
+                <img src="{% static 'rechorder/icons/mdi-chevron-left-box-outline.svg' %}">
+            </a>
+        {% endif %}
 
 
-            {% if current_index < max_index %}
-                <a href="{% url 'set.song' set_id current_index|add:'1' %}">
-                    <img class="right-aligned-img" src="{% static 'rechorder/icons/mdi-chevron-right-box-outline.svg' %}">
-                </a>
-            {% endif %}
-        </div>
-    {% endif %}
+        {% if current_index < max_index %}
+            <a href="{% url 'set.song' set.id current_index|add:'1' %}">
+                <img class="right-aligned-img" src="{% static 'rechorder/icons/mdi-chevron-right-box-outline.svg' %}">
+            </a>
+        {% endif %}
+    </div>
 {% endif %}
+
+
 {% endblock %}

@@ -1,0 +1,45 @@
+<script type="text/javascript">
+
+    function do_change(enable) {
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url 'beaming.toggle' %}',
+            data: {
+                'enable': enable,
+                'set_pk': '{{ set_pk }}',
+                'song_index': '{{ song_index }}',
+            },
+            dataType: 'json',
+            success: update_beaming_toggle,
+        });
+    }
+
+    function update_beaming_toggle(data) {
+        if (data.beaming_enabled) {
+            $('#btn-enable-beaming').hide()
+            $('#btn-disable-beaming').show()
+        }
+        else {
+            $('#btn-enable-beaming').show()
+            $('#btn-disable-beaming').hide()
+        }
+    }
+
+    $(function() {
+        $('#btn-enable-beaming').click(function() {do_change(true);});
+        $('#btn-disable-beaming').click(function() {do_change(false);});
+
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url 'beaming.status' %}',
+            dataType: 'json',
+            success: update_beaming_toggle,
+        });
+    });
+</script>
+
+
+<button id="btn-enable-beaming" class="btn-unsuccessful">Enable Beaming</button>
+<button id="btn-disable-beaming" class="btn-successful">Disable Beaming</button>
