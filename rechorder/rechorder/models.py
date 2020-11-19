@@ -8,6 +8,16 @@ import uuid
 from .music_handler.chord import Chord
 from .music_handler.interpret import interpret_absolute_chord
 
+SECTION_NAMES = {
+    'v': 'Verse',
+    'c': 'Chorus',
+    'b': 'Bridge',
+    'p': 'Prechorus',
+    'm': 'Instrumental',
+    'i': 'Intro',
+    'o': 'Ending',
+}
+
 
 class Song(models.Model):
     title = models.CharField(max_length=200)
@@ -17,6 +27,7 @@ class Song(models.Model):
     )
     artist = models.CharField(max_length=200, null=True)
     key_notes = models.CharField(max_length=200, null=False, default="")
+    verse_order = models.CharField(max_length=200, null=False, default="")
     raw = models.TextField()
 
     def __init__(self, *args, **kwargs):
@@ -51,25 +62,36 @@ class Song(models.Model):
 
         self._display_style = display_style
 
+    def _extract_title(self, search):
+        section_code = search.group(1).lower()
+        number = search.group(2)
+
+        return "{} {}".format(
+            SECTION_NAMES.get(section_code, "Section"),
+            number,
+        ).strip() + ":"
+
     def _extract_sections(self, text):
-        section_header_re = re.compile(r'^([a-zA-Z0-9 \.\-\+_~#]+):[ \t]*\n', flags=re.MULTILINE)
+        section_header_re = re.compile(r'^\{([vcbmiop])([0-9]*)\}', flags=re.IGNORECASE|re.MULTILINE)
 
         sections = []
         remaining_text = text
         while True:
-            title = section_header_re.search(remaining_text)
+            title_search = section_header_re.search(remaining_text)
 
-            if title is None:
+            if title_search is None:
                 sections.append(self._parse_section('', remaining_text))
                 break
 
-            remaining_text = remaining_text[title.end():]
+            title = self._extract_title(title_search)
+
+            remaining_text = remaining_text[title_search.end():]
             next_break = section_header_re.search(remaining_text)
             if next_break is None:
-                sections.append(self._parse_section(title.group(0).strip(), remaining_text))
+                sections.append(self._parse_section(title, remaining_text))
                 break
             else:
-                sections.append(self._parse_section(title.group(0).strip(), remaining_text[:next_break.start()]))
+                sections.append(self._parse_section(title, remaining_text[:next_break.start()]))
 
         return sections
 
