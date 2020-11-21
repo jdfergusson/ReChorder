@@ -12,6 +12,8 @@
                 'title': $('#song-title').val(),
                 'artist':  $('#song-artist').val(),
                 'original_key':  $('#original-key').val(),
+                'key_notes': $('#editor-key-notes').val(),
+                'verse_order': $('#editor-verse-order').val(),
                 'content':  $('#song-content').val(),
             },
             dataType: 'json',
@@ -68,6 +70,8 @@
                 <option value="{{ forloop.counter0 }}">{{ key }}</option>
             {% endfor %}
         </select></td></tr>
+        <tr><td>Advice on key: </td><td><input id="editor-key-notes"></td></tr>
+        <tr><td>Verse order: </td><td><input id="editor-verse-order"></td></tr>
         <tr><td>Song content:</td></tr>
     </table>
     <textarea class="song-content-edit" id="song-content"></textarea>
@@ -81,5 +85,7 @@
         <button id="btn-ays-yes">Yes</button>
         <button id="btn-ays-no">No</button>
     </span>
+
+{% include 'rechorder/_syntax_help.html' %}
 
 {% endblock %}

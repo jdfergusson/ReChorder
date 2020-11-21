@@ -200,6 +200,12 @@ h3 {
     justify-content: space-between;
 }
 
+.code-block {
+    background-color: white;
+    border: 2px solid black;
+    font-family: monospace;
+}
+
 /**********************************************************
  * Image buttons
  *********************************************************/
