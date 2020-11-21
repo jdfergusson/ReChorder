@@ -12,6 +12,7 @@
                 'artist': $('#editor-song-artist').val(),
                 'original_key': $('#editor-original-key').val(),
                 'key_notes': $('#editor-key-notes').val(),
+                'verse_order': $('#editor-verse-order').val(),
                 'content': $('#editor-song-content').val(),
             },
             dataType: 'json',
@@ -70,6 +71,7 @@
         $('#editor-song-artist').val("{{ song.artist|escapejs }}");
         $('#editor-original-key').val("{{ song.original_key }}");
         $('#editor-key-notes').val("{{ song.key_notes|escapejs }}");
+        $('#editor-verse-order').val("{{ song.verse_order|escapejs }}");
         $('#editor-song-content').val("{{ song.raw|escapejs }}");
 
         $('#btn-editor-save').click(saveSong);
@@ -114,6 +116,7 @@
             </td>
         </tr>
         <tr><td>Advice on key: </td><td><input id="editor-key-notes"></td></tr>
+        <tr><td>Verse order: </td><td><input id="editor-verse-order"></td></tr>
     </table>
     <textarea class="song-content-edit" id="editor-song-content"></textarea>
     <br>

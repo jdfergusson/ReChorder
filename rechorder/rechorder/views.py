@@ -13,6 +13,7 @@ from django.shortcuts import (
     redirect,
 )
 from django.template.loader import render_to_string
+from django.utils.text import slugify
 
 from copy import deepcopy
 
@@ -552,7 +553,6 @@ def beaming_toggle(request):
         try:
             set_pk = int(request.POST.get('set_pk', None))
             song_index = int(request.POST.get('song_index', None))
-            print(set_pk, song_index)
             if None not in (set_pk, song_index):
                 _set = Set.objects.get(pk=set_pk)
                 beam = _get_or_create_beam(request, _set, song_index)
@@ -635,6 +635,7 @@ def song_update(request, song_id):
     artist = request.POST.get('artist')
     original_key = int(request.POST.get('original_key'))
     key_notes = request.POST.get('key_notes')
+    verse_order = request.POST.get('verse_order')
     content = request.POST.get('content')
 
     if None not in (title, artist, original_key, key_notes, content):
@@ -642,6 +643,7 @@ def song_update(request, song_id):
         song.artist = artist
         song.original_key = original_key
         song.key_notes = key_notes
+        song.verse_order = verse_order
         song.raw = content
         song.save()
 
@@ -676,6 +678,11 @@ def song_print(request, song_id):
        context['no_personal_keys'] = True
 
     return render(request, 'rechorder/print_set.html', context)
+
+
+def song_xml(request, song_id):
+    _song = get_object_or_404(Song, pk=song_id)
+    return HttpResponse(_song.to_xml(), content_type='text/xml')
 
 
 def song_create(request):
@@ -780,6 +787,16 @@ def song(request, song_id):
     return render(request, 'rechorder/song.html', context)
 
 
+def download_xml(request):
+    songs = Song.objects.all()
+    response = HttpResponse(content_type='application/zip')
+    zip_file = zipfile.ZipFile(response, 'w')
+    for song in songs:
+        zip_file.writestr('openlyric-songs/{}-{}.xml'.format(song.pk, slugify(song.title)), song.to_xml())
+    response['Content-Disposition'] = 'attachment, filename=rechorder_songs.zip'
+    return response
+
+
 def settings(request):
     context = {
         'selected_shapes': _get_selected_chord_shapes(request),
@@ -841,6 +858,8 @@ def upload(request):
                     title=song_data['title'],
                     artist=song_data['artist'],
                     original_key=song_data['original_key'],
+                    key_notes=song_data['key_notes'],
+                    verse_order=song_data['verse_order'],
                     raw=song_data['raw'],
                 )
                 if existing_songs.count() == 0:
@@ -848,6 +867,8 @@ def upload(request):
                         title=song_data['title'],
                         artist=song_data['artist'],
                         original_key=song_data['original_key'],
+                        key_notes=song_data['key_notes'],
+                        verse_order=song_data['verse_order'],
                         raw=song_data['raw'],
                     )
                     new_song.save()
