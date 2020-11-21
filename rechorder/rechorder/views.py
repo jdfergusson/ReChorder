@@ -13,6 +13,7 @@ from django.shortcuts import (
     redirect,
 )
 from django.template.loader import render_to_string
+from django.utils.text import slugify
 
 from copy import deepcopy
 
@@ -785,6 +786,16 @@ def song(request, song_id):
         ),
     }
     return render(request, 'rechorder/song.html', context)
+
+
+def download_xml(request):
+    songs = Song.objects.all()
+    response = HttpResponse(content_type='application/zip')
+    zip_file = zipfile.ZipFile(response, 'w')
+    for song in songs:
+        zip_file.writestr('openlyric-songs/{}-{}.xml'.format(song.pk, slugify(song.title)), song.to_xml())
+    response['Content-Disposition'] = 'attachment, filename=rechorder_songs.zip'
+    return response
 
 
 def settings(request):

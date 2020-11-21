@@ -61,7 +61,6 @@ class Song(models.Model):
 
         _authors = ElementTree.SubElement(_properties, 'authors')
         authors = re.split(r'[;,&\+]', self.artist)
-        print(authors)
         for author in authors:
             _author = ElementTree.SubElement(_authors, 'author')
             _author.text = author.strip()
@@ -73,7 +72,7 @@ class Song(models.Model):
         # Lyrics
         _lyrics = ElementTree.SubElement(_song, 'lyrics')
         for section in self.sections:
-            if section['is_lyrical']:
+            if section['is_lyrical'] and section['lines']:
                 _verse = ElementTree.SubElement(_lyrics, 'verse', {
                     'name': '{}{}'.format(section['code'], section['number'])
                 })
@@ -114,6 +113,9 @@ class Song(models.Model):
             Details of the section
         )
         '''
+        if search is None:
+            return ('', {'code': 'c', 'number': '', 'is_lyrical': True})
+
         section_code = search.group(1).lower()
         number = search.group(2)
         is_lyrical = not search.group(3) == '!'
@@ -140,11 +142,11 @@ class Song(models.Model):
         while True:
             title_search = section_header_re.search(remaining_text)
 
-            if title_search is None:
-                sections.append(self._parse_section('', remaining_text))
-                break
-
             title, section_details = self._extract_title(title_search)
+
+            if title_search is None:
+                sections.append(self._parse_section('', section_details, remaining_text))
+                break
 
             remaining_text = remaining_text[title_search.end():]
             next_break = section_header_re.search(remaining_text)

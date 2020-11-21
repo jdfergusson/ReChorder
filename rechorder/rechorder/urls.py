@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^song/(?P<song_id>[0-9]+)/xml', views.song_xml, name='song.xml'),
     url(r'^song/create', views.song_create, name='song.create'),
     url(r'^song/transpose$', views.song_transpose, name='song.transpose'),
+    url(r'^song/downloadxml$', views.download_xml, name='songs.download_xml'),
     url(r'^set/$', views.sets, name='sets'),
     url(r'^set/mine$', views.sets_mine, name='sets_mine'),
     url(r'^set/others$', views.sets_others, name='sets_others'),
