@@ -59,6 +59,13 @@ class Song(models.Model):
         _title = ElementTree.SubElement(_titles, 'title')
         _title.text = self.title
 
+        _authors = ElementTree.SubElement(_properties, 'authors')
+        authors = re.split(r'[;,&\+]', self.artist)
+        print(authors)
+        for author in authors:
+            _author = ElementTree.SubElement(_authors, 'author')
+            _author.text = author.strip()
+
         if self.verse_order.strip():
             _verse_order = ElementTree.SubElement(_properties, 'verseOrder')
             _verse_order.text = self.verse_order

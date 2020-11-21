@@ -848,6 +848,8 @@ def upload(request):
                     title=song_data['title'],
                     artist=song_data['artist'],
                     original_key=song_data['original_key'],
+                    key_notes=song_data['key_notes'],
+                    verse_order=song_data['verse_order'],
                     raw=song_data['raw'],
                 )
                 if existing_songs.count() == 0:
@@ -855,6 +857,8 @@ def upload(request):
                         title=song_data['title'],
                         artist=song_data['artist'],
                         original_key=song_data['original_key'],
+                        key_notes=song_data['key_notes'],
+                        verse_order=song_data['verse_order'],
                         raw=song_data['raw'],
                     )
                     new_song.save()
