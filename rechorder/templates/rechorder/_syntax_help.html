@@ -1,0 +1,62 @@
+<script type="text/javascript">
+
+    $(function() {
+        $('#syntax-help').hide()
+        $('#btn-syntax-help').click(function() {
+            $('#syntax-help').toggle()
+        });
+    });
+</script>
+
+<p><button id="btn-syntax-help">Syntax Help</button>
+<div id="syntax-help">
+
+    <p><h1>Sections</h1>
+    <br>Sections are named using curly brackets:
+    <br>{&lt;Type&gt;&lt;Number&gt;&lt;!&gt;}
+    <br>Each section should have a unique name
+    <br><h2>Type</h2>
+    <br>The type is what is expanded into the name of the section:
+    <ul class="code-block">
+        <li>v&#8594;Verse</li>
+        <li>c&#8594;Chorus</li>
+        <li>b&#8594;Bridge</li>
+        <li>p&#8594;Prechorus</li>
+        <li>i&#8594;Intro</li>
+        <li>o&#8594;Ending</li>
+        <li>m&#8594;Instrumental</li>
+    </ul>
+    <h2>Number</h2>
+    <br>The number is the section number, for example
+    Chorus 1 should be {c1}, verse 3 should be {v3}
+    <br><h2>Exclamation mark</h2>
+    <br>The exclamation mark at the end of the section name
+    tells the system that this section should <i>not</i> be
+    included when exporting lyrics to OpenLP. For example an introduction that
+    contains no lyrics, followed by a verse, might look like this:
+    <div class="code-block">
+        {i!}<br>
+        [G] [D] [Em] [C]<br>
+        <br>
+        {v1}<br>
+        [G]Start of a [D]verse...
+    </div>
+
+    <p><h1>Chords</h1>
+    <br>Chords go in square brackets inline with the lyrics
+    <br> [&lt;Note&gt;&lt;Modifier&gt;/&lt;Bass Note&gt;].
+    <br>Everything apart from the Note is optional. Notes should be capitalised
+    <br><h2>Some examples:</h2>
+    <div class="code-block">
+        [G]Some [Fm]really meaningful [Bmb5/D]Lyr[E/F#]ics
+    </div>
+
+    <p><h1>Verse Order</h1>
+    <br>The verse order is used only when exporting the song to OpenLP. It
+    tells OpenLP in which order to display the verses. The labels used should
+    match the section labels used in the song.
+    <br><h2>For example:</h2>
+    <div class="code-block">
+        v1 c1 v2 c1 b c1 c2 o
+    </div>
+</div>

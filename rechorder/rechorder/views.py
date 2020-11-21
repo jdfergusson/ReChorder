@@ -691,6 +691,8 @@ def song_create(request):
             title=request.POST.get('title'),
             artist=request.POST.get('artist'),
             original_key=request.POST.get('original_key'),
+            key_notes=request.POST.get('key_notes', ''),
+            verse_order=request.POST.get('verse_order', ''),
             raw=request.POST.get('content')
         )
         song.save()
