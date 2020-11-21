@@ -553,7 +553,6 @@ def beaming_toggle(request):
         try:
             set_pk = int(request.POST.get('set_pk', None))
             song_index = int(request.POST.get('song_index', None))
-            print(set_pk, song_index)
             if None not in (set_pk, song_index):
                 _set = Set.objects.get(pk=set_pk)
                 beam = _get_or_create_beam(request, _set, song_index)
