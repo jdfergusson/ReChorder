@@ -680,6 +680,11 @@ def song_print(request, song_id):
     return render(request, 'rechorder/print_set.html', context)
 
 
+def song_xml(request, song_id):
+    _song = get_object_or_404(Song, pk=song_id)
+    return HttpResponse(_song.to_xml(), content_type='text/xml')
+
+
 def song_create(request):
     if request.method == 'POST':
         song = Song(

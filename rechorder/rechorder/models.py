@@ -3,8 +3,10 @@ from django.urls import reverse
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+from xml.etree import ElementTree
+from xml.dom import minidom
+
 import re
-import uuid
 from .music_handler.chord import Chord
 from .music_handler.interpret import interpret_absolute_chord
 
@@ -45,6 +47,38 @@ class Song(models.Model):
     # NON-DATABASE FUNCTIONS
     ###########################################
 
+    def to_xml(self):
+        _song = ElementTree.Element('song', {
+            'xmlns': 'http://openlyrics.info/namespace/2009/song',
+            'version': '0.9',
+        })
+
+        # Properties
+        _properties = ElementTree.SubElement(_song, 'properties')
+        _titles = ElementTree.SubElement(_properties, 'titles')
+        _title = ElementTree.SubElement(_titles, 'title')
+        _title.text = self.title
+
+        if self.verse_order.strip():
+            _verse_order = ElementTree.SubElement(_properties, 'verseOrder')
+            _verse_order.text = self.verse_order
+
+        # Lyrics
+        _lyrics = ElementTree.SubElement(_song, 'lyrics')
+        for section in self.sections:
+            if section['is_lyrical']:
+                _verse = ElementTree.SubElement(_lyrics, 'verse', {
+                    'name': '{}{}'.format(section['code'], section['number'])
+                })
+                for line in section['lines']:
+                    line = ''.join([i['lyric'] for i in line])
+                    _lines = ElementTree.SubElement(_verse, 'lines')
+                    _lines.text = line.replace('&nbsp;', ' ').strip()
+
+        rough_string = ElementTree.tostring(_song)
+        reparsed = minidom.parseString(rough_string)
+        return reparsed.toprettyxml(indent='  ')
+
     def display_in(self, target_key, display_style):
         """
         How to display the song's chords
@@ -62,17 +96,37 @@ class Song(models.Model):
 
         self._display_style = display_style
 
-    def _extract_title(self, search):
+    @staticmethod
+    def _extract_title(search):
+        '''
+        Returns the section title details
+
+        :param search: Regex search to use to extract the details
+        :return: (
+            Section title, e.g. "Verse 2:",
+            Details of the section
+        )
+        '''
         section_code = search.group(1).lower()
         number = search.group(2)
+        is_lyrical = not search.group(3) == '!'
 
-        return "{} {}".format(
-            SECTION_NAMES.get(section_code, "Section"),
-            number,
-        ).strip() + ":"
+        details = {
+            'code': section_code,
+            'number': number,
+            'is_lyrical': is_lyrical,
+        }
+
+        return (
+            '{} {}'.format(
+                SECTION_NAMES.get(section_code, 'Section'),
+                number,
+            ).strip() + ':',
+            details,
+        )
 
     def _extract_sections(self, text):
-        section_header_re = re.compile(r'^\{([vcbmiop])([0-9]*)\}', flags=re.IGNORECASE|re.MULTILINE)
+        section_header_re = re.compile(r'^\{([vcbmiop])([0-9]*)(\!?)\}', flags=re.IGNORECASE|re.MULTILINE)
 
         sections = []
         remaining_text = text
@@ -83,20 +137,27 @@ class Song(models.Model):
                 sections.append(self._parse_section('', remaining_text))
                 break
 
-            title = self._extract_title(title_search)
+            title, section_details = self._extract_title(title_search)
 
             remaining_text = remaining_text[title_search.end():]
             next_break = section_header_re.search(remaining_text)
             if next_break is None:
-                sections.append(self._parse_section(title, remaining_text))
+                sections.append(self._parse_section(title, section_details, remaining_text))
                 break
             else:
-                sections.append(self._parse_section(title, remaining_text[:next_break.start()]))
+                sections.append(self._parse_section(
+                    title,
+                    section_details,
+                    remaining_text[:next_break.start()]
+                ))
 
         return sections
 
-    def _parse_section(self, title, text):
-        section = {'title': title}
+    def _parse_section(self, title, details, text):
+        section = {
+            'title': title,
+            **details,
+        }
 
         section['lines'] = []
         for line in text.split('\n'):
