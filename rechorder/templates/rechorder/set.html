@@ -182,6 +182,14 @@
             }
         });
 
+        /* If the set has no songs and we're the owner, we can assume it's new - focus on the set name */
+        {% if not set_songs %}
+            {% if am_i_owner %}
+                toggleTab('editor');
+                $('#input-set-name').focus();
+            {% endif %}
+        {% endif %}
+
     });
 {% endblock %}
 
