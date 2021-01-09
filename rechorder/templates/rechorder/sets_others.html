@@ -78,13 +78,6 @@
                 <div class="list-expander">
                     <span class="list-primary"><a class="song-in-set-link" href="#">{{ song.title }}</a></span>
                 </div>
-                <div>
-                    <a href="{% url 'set.duplicate' set.id %}">
-                        <img class="img-btn"
-                             src="{% static 'rechorder/icons/mdi-content-duplicate.svg' %}"
-                             alt="Copy Set">
-                    </a>
-                </div>
             </li>
         {% endfor %}
     </ul>
