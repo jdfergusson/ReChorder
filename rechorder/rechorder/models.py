@@ -2,6 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.utils import timezone
 
 from xml.etree import ElementTree
 from xml.dom import minidom
@@ -30,6 +31,7 @@ class Song(models.Model):
     artist = models.CharField(max_length=200, null=True)
     key_notes = models.CharField(max_length=200, null=False, default="")
     verse_order = models.CharField(max_length=200, null=False, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
     raw = models.TextField()
 
     def __init__(self, *args, **kwargs):
