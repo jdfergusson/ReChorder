@@ -49,7 +49,14 @@ def _get_display_style(request):
 
 def _get_current_set_id(request):
     set_id = request.session.get('current_set_id')
-    return set_id
+    if Set.objects.filter(pk=set_id).exists():
+        return set_id
+    else:
+        try:
+            request.session.pop('current_set_id')
+        except KeyError:
+            pass
+    return None
 
 
 def _set_current_set(request, set):
@@ -463,7 +470,10 @@ def set_delete_all_old(request):
 
 
 def set_show_song(request, set_id, song_index):
-    this_set = get_object_or_404(Set, pk=set_id)
+    try:
+        this_set = Set.objects.get(pk=set_id)
+    except Set.DoesNotExist:
+        return redirect(reverse('sets'))
 
     try:
         # We'll never get negative numbers if the URL doesn't allow it
