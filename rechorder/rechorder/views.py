@@ -379,8 +379,10 @@ def set_add_song(request, set_id):
         _get_transpose_data(request, song.pk, None, None))
 
     if request.POST.get('go_live', False):
-        last_song_index = int(request.session.get('last_song_in_set'))
-        song_in_set_index = last_song_index + 1 if last_song_index is not None else len(this_set.song_list)
+        last_song_in_set = request.session.get('last_song_in_set')
+        song_in_set_index = len(this_set.song_list)
+        if last_song_in_set is not None:
+            song_in_set_index = min(int(last_song_in_set) + 1, song_in_set_index)
         this_set.song_list.insert(song_in_set_index, song_in_set)
         this_set.save()
 
