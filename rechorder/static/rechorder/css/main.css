@@ -342,7 +342,6 @@ h3 {
  * Song display
  **********************************************************/
 
-
 .block {
   float: none;
   padding-bottom: 0.2em;
@@ -358,14 +357,14 @@ h3 {
     font-size: large;
     /*text-decoration: underline;*/
     font-weight: bold;
-    padding-top: 0.8em;
+    padding-top: 0em;
     padding-bottom: 0.3em;
     display: block;
 }
 
 .song-section-hr {
     border: 1px solid #E0E0E0;
-    margin: 5px;
+    margin-top: 0.5em;
     margin-left: 0px;
 }
 
@@ -379,13 +378,13 @@ h3 {
 }
 
 mark {
+    padding-top: 0.3em;
     background-color: #c1e6be;
 }
 
 .block-lyric {
     padding-top: 0.3em;
 }
-
 
 /**********************************************************
  * Songs
