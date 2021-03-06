@@ -356,10 +356,17 @@ h3 {
 
 .section-title {
     font-size: large;
+    /*text-decoration: underline;*/
     font-weight: bold;
     padding-top: 0.8em;
     padding-bottom: 0.3em;
     display: block;
+}
+
+.song-section-hr {
+    border: 1px solid #E0E0E0;
+    margin: 5px;
+    margin-left: 0px;
 }
 
 .block-chord {
