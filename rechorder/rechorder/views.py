@@ -23,9 +23,6 @@ import os
 import uuid
 import zipfile
 
-#TODO: Remove this
-import inspect
-
 from rechorder.music_handler.interpret import KEYS, ABSOLUTE_LOOKUP, interpret_absolute_chord, song_from_onsong_text
 
 
@@ -41,7 +38,7 @@ def _get_selected_chord_shapes(request):
 
 
 def _get_display_style(request):
-    if request.session.get('chord_display_style') not in ('letters', 'numbers'):
+    if request.session.get('chord_display_style') not in ('letters', 'nashville', 'roman'):
         request.session['chord_display_style'] = 'letters'
         request.session.modified = True
     return request.session['chord_display_style']

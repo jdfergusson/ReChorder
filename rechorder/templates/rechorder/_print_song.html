@@ -6,7 +6,7 @@
         <div class="container">
         {% for block in line %}
             <div class="block">
-                <div class="block-chord"><mark>{{ block.chord.id }}<i>{{ block.chord.qualifiers }}</i></mark></div><div class="block-lyric">{{ block.lyric | safe}}</div></div>
+                <div class="block-chord"><mark>{{ block.chord.id }}<sup>{{ block.chord.quality }}</sup>{{ block.chord.formatted_bass_note }}</mark></div><div class="block-lyric">{{ block.lyric | safe}}</div></div>
         {% endfor %}
         </div>
     {% endfor %}
