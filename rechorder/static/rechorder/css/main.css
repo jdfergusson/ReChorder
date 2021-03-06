@@ -218,6 +218,25 @@ h3 {
 }
 
 /**********************************************************
+ * Error box
+ *********************************************************/
+
+.error-box {
+    border: 2px solid red;
+    padding: 0.2em;
+    background-color: #e6bec1;
+}
+
+.error-box h2 {
+    color: black;
+    font-weight: bold;
+}
+
+#verse-order-error ul {
+    list-style: disc inside none;
+}
+
+/**********************************************************
  * Image buttons
  *********************************************************/
 

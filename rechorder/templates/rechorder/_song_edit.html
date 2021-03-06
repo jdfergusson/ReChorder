@@ -2,6 +2,7 @@
 
 <script type="text/javascript">
     function saveSong() {
+        validateOrder();
         $('#areyousure').hide();
         $.ajax({
             type: 'POST',
@@ -21,6 +22,51 @@
                 transposeSettingsChanged();
             },
         });
+    }
+
+    function validateOrder() {
+        verse_order = $('#editor-verse-order').val();
+        var problem = false;
+        var feedback_obj = $('#verse-order-error-list');
+
+        if (verse_order.trim() != "")
+        {
+
+            var verses_in_order = new Object();
+            verse_order.split(' ').forEach((i) => {
+                verses_in_order[i] = 0;
+            });
+            console.log(verses_in_order);
+
+            const regex = /\{[a-zA-Z0-9]+\}/g;
+            searchtext = $('#editor-song-content').val();
+
+            while (result = regex.exec(searchtext)) {
+                section = result[0].replace('{', '').replace('}','');
+                if (!(section in verses_in_order)) {
+                    problem = true;
+                    feedback_obj.append("<li>Section " + section + " not found in verse order</li>");
+                } else {
+                    verses_in_order[section]++;
+                }
+            }
+
+            for (const [ i, v ] of Object.entries(verses_in_order)) {
+                if (v == 0) {
+                    problem = true;
+                    feedback_obj.append("<li>Section " + i + " not found in song</li>");
+                }
+            }
+
+        }
+        console.log(problem);
+        if (problem) {
+            $('#verse-order-error').show();
+        }
+        else
+        {
+            $('#verse-order-error').hide();
+        }
     }
 
     function deleteSong() {
@@ -80,6 +126,7 @@
 
         $('#areyousure').hide();
         $('#success').hide();
+        $('#verse-order-error').hide();
 
         $('#editor-song-title').focus(onEdit);
         $('#editor-song-artist').focus(onEdit);
@@ -91,6 +138,8 @@
         $('#btn-key-unlocked').hide();
         $('#btn-key-unlocked').click(lockKey);
         $('#btn-key-locked').click(unlockKey);
+
+        validateOrder();
     });
 </script>
 
@@ -118,6 +167,7 @@
         <tr><td>Advice on key: </td><td><input id="editor-key-notes"></td></tr>
         <tr><td>Verse order: </td><td><input id="editor-verse-order"></td></tr>
     </table>
+    <div id="verse-order-error" class="error-box"><h2>Errors in verse order:</h2><br><ul id="verse-order-error-list"></ul></div>
     <textarea class="song-content-edit" id="editor-song-content"></textarea>
     <br>
 
