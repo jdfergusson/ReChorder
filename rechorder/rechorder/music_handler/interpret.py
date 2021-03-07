@@ -31,10 +31,14 @@ def interpret_absolute_chord(string):
     # Remove any surrounding brackets
     string = string.replace('[', '').replace(']', '')
 
+    # Remove any internal parentheses
+    string = string.replace('(', '').replace(')', '')
+
     s = string.strip().split('/')
 
     bass_string = s[1] if len(s) > 1 else ''
     s = s[0]
+
 
     qualifier_search = re.search('(add|sus|m|min|man|aug|dim|[0-9])', s)
     if qualifier_search is None:

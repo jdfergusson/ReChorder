@@ -57,6 +57,24 @@
         $('#btn-toggle-' + tab).toggleClass('img-action-selected');
     }
 
+    function processKeyPress(e) {
+        e = e || window.event;
+
+        /* Scroll by 1/2 window height each button press */
+        var n = window.innerHeight / 2;
+
+        if (e.key == 'PageUp' || e.key == 'ArrowUp') {
+            e.preventDefault();
+            new_scroll_loc = document.body.scrollTop - n;
+            $("html, body").animate({ scrollTop: new_scroll_loc });
+        }
+        else if (e.key == 'PageDown' || e.key == 'ArrowDown') {
+            e.preventDefault();
+            new_scroll_loc = document.body.scrollTop + n;
+            $("html, body").animate({ scrollTop: new_scroll_loc });
+        }
+    }
+
     $(function() {
         $('#adder').hide();
         $('#btn-toggle-adder').click(function() {toggleTab('adder');});
@@ -73,6 +91,8 @@
         $('#btn-song-add-to-set').click(function() {addSongToSet(false);});
         $('#btn-song-add-and-go').click(function() {addSongToSet(true);});
         $('#add-actions-success').hide();
+
+        document.onkeydown = processKeyPress;
     });
 {% endblock %}
 

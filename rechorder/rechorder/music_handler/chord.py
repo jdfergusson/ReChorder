@@ -1,4 +1,5 @@
 from .interpret import interpret_absolute_chord
+import re
 
 CHORD_NAMES_BASE = ['A', 'B\u266d', 'B', 'C', 'C\u266f', 'D', 'E\u266d', 'E', 'F', 'F\u266f', 'G', 'G\u266f']
 CHORD_NAMES_SLIGHTLY_FLAT = ['A', 'B\u266d', 'B', 'C', 'C\u266f', 'D', 'E\u266d', 'E', 'F', 'F\u266f', 'G', 'A\u266d']
@@ -8,7 +9,8 @@ CHORD_NAMES_FLATS = ['A', 'B\u266d', 'B', 'C', 'D\u266d', 'D', 'E\u266d', 'E', '
 # This clearly loses quite a bit of information, doubling up chords in the way that it does.
 # However, to handle major and minor keys without having that information, this is a (massive)
 # compromise. That said, if you're using numbers, it's likely that you're just using basic chords.
-CHORD_NAME_NUMBERS = ['1', '\u266d2', '2', '3', '3', '4', '\u266d5', '5', '6', '6', '7', '7']
+CHORD_NAME_NASHVILLE = ['1', '\u266d2', '2', '3', '3', '4', '\u266d5', '5', '6', '6', '7', '7']
+CHORD_NAME_ROMAN = ['I', '\u266dII', 'II', 'III', 'III', 'IV', '\u266dV', 'V', 'VI', 'VI', 'VII', 'VII']
 
 # This is a rough attempt at improving the key choice. Is a key traditionally though of in flats or sharps?
 # Sadly we're assuming here that the key is major. Definitely room for improvement
@@ -39,6 +41,7 @@ KEY_NAMES_LOOKUP = [
     CHORD_NAMES_FLATS,
 ]
 
+
 class Chord:
     def __init__(self, string, key_ref=None, display_style='letters'):
         """
@@ -49,7 +52,7 @@ class Chord:
         self._key_ref = key_ref
         self._display_style = display_style
 
-        index, qualification, bass_index = interpret_absolute_chord(string)
+        index, quality, bass_index = interpret_absolute_chord(string)
 
         # Make chord relative to the key
         if index is not None:
@@ -57,12 +60,15 @@ class Chord:
         else:
             self.index = None
 
-        self.qualification = qualification
+        self._quality = quality
 
         if bass_index:
             self.bass_index = (bass_index - self._original_key_index + 12) % 12
         else:
             self.bass_index = None
+
+        self.is_minor = bool(re.match(r'm([0-9\u266d\u266f][a-zA-Z0-9\u266d\u266f]*)?$', self._quality))
+
 
     @property
     def _key_index(self):
@@ -77,34 +83,41 @@ class Chord:
         if self.index is None:
             return ''
 
-        if self._display_style == 'numbers':
-            return CHORD_NAME_NUMBERS[self.index]
+        if self._display_style == 'nashville':
+            return CHORD_NAME_NASHVILLE[self.index]
+        if self._display_style == 'roman':
+            if self.is_minor:
+                return CHORD_NAME_ROMAN[self.index].lower()
+            else:
+                return CHORD_NAME_ROMAN[self.index]
         else:
             return KEY_NAMES_LOOKUP[self._key_ref.key][(self.index + self._key_index) % 12]
 
     @property
-    def qualifiers(self):
-        if self.index is None:
-            return ''
+    def quality(self):
+        quality = self._quality
 
-        qualifiers = self.qualification
+        if self._display_style == 'roman' and self.is_minor:
+            quality = quality.replace('m', '', 1)
 
-        if self.bass_index is not None:
-            if self._display_style == 'numbers':
-                qualifiers += '/{}'.format(CHORD_NAME_NUMBERS[self.bass_index])
-            else:
-                qualifiers += '/{}'.format(
-                    KEY_NAMES_LOOKUP[self._key_ref.key][(self.bass_index + self._key_index) % 12]
-                )
+        return quality
 
-        return qualifiers
+    @property
+    def formatted_bass_note(self):
+        if self.bass_index is None:
+            return ""
+        if self._display_style == 'nashville':
+            return '/{}'.format(CHORD_NAME_NASHVILLE[self.bass_index])
+        elif self._display_style == 'roman':
+            return '/{}'.format(CHORD_NAME_ROMAN[self.bass_index])
+        else:
+            return '/{}'.format(KEY_NAMES_LOOKUP[self._key_ref.key][(self.bass_index + self._key_index) % 12])
 
     def __str__(self):
         if self.index is None:
             return ''
 
-        return '{}{}'.format(self.id, self.qualifiers)
-        return chord
+        return '{}{}{}'.format(self.id, self.quality, self.formatted_bass_note)
 
     def __repr__(self):
         return repr({

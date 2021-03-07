@@ -206,10 +206,6 @@
             </a>
         {% endif %}
     {% else %}
-        <a href="{% url 'slave_to' set.pk %}">
-            <img class="img-btn right-aligned-img"
-                    src="{% static 'rechorder/icons/mdi-cellphone-text.svg' %}">
-        </a>
         <a href="{% url 'set.duplicate' set.pk %}">
             <img class="img-btn right-aligned-img"
                  src="{% static 'rechorder/icons/mdi-content-duplicate.svg' %}">
