@@ -542,6 +542,10 @@ mark {
     transition: 0.2s;
 }
 
+.yes-no-selection {
+    margin-top: 0.3em;
+}
+
 .yes-no-selection input:checked + label {
     background-color: #c1e6be;
 }

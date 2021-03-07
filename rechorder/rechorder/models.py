@@ -74,14 +74,23 @@ class Song(models.Model):
         # Lyrics
         _lyrics = ElementTree.SubElement(_song, 'lyrics')
         for section in self.sections:
-            if section['is_lyrical'] and section['lines']:
+            _lines = None
+            if section['is_lyrical'] and section['subsections']:
                 _verse = ElementTree.SubElement(_lyrics, 'verse', {
                     'name': '{}{}'.format(section['code'], section['number'])
                 })
-                for line in section['lines']:
-                    line = ''.join([i['lyric'] for i in line])
-                    _lines = ElementTree.SubElement(_verse, 'lines')
-                    _lines.text = line.replace('&nbsp;', ' ').strip()
+                for subsection in section['subsections']:
+                    # Set break=optional (can we make it mandatory?)
+                    line_texts = []
+                    for long_line in subsection:
+                        for line in long_line:
+                            line = ''.join([i['lyric'] for i in line])
+                            line = line.replace('&nbsp;', ' ').strip()
+                            _lines = ElementTree.SubElement(_verse, 'lines')
+                            _lines.text = line
+                    _lines.set("break", "optional")
+            if _lines is not None:
+                _lines.attrib.pop("break")
 
         rough_string = ElementTree.tostring(_song)
         reparsed = minidom.parseString(rough_string)
@@ -138,7 +147,6 @@ class Song(models.Model):
 
     def _extract_sections(self, text):
         section_header_re = re.compile(r'^\{([vcbmiop])([0-9]*)(\!?)\}', flags=re.IGNORECASE|re.MULTILINE)
-
         sections = []
         remaining_text = text
         while True:
@@ -152,6 +160,7 @@ class Song(models.Model):
 
             remaining_text = remaining_text[title_search.end():]
             next_break = section_header_re.search(remaining_text)
+
             if next_break is None:
                 sections.append(self._parse_section(title, section_details, remaining_text))
                 break
@@ -170,15 +179,28 @@ class Song(models.Model):
             **details,
         }
 
-        section['lines'] = []
-        for line in text.split('\n'):
-            # Gets rid of extra line breaks
-            if line.strip() != '':
-                section['lines'].append(self._parse_line(line))
+        # Section contains three levels of array:
+        # Section [
+        #   subsection [
+        #       long_line [
+        #           short_line [
+        # ] ] ] ]
+
+        text = text.strip()
+
+        section['subsections'] = []
+        for subsection_text in text.split('\n\n'):
+            subsection = []
+            for long_line_text in subsection_text.split('\n'):
+                long_line = []
+                for small_line in long_line_text.split("\\"):
+                    long_line.append(self._parse_small_line(small_line))
+                subsection.append(long_line)
+            section['subsections'].append(subsection)
 
         return section
 
-    def _parse_line(self, line):
+    def _parse_small_line(self, line):
         blocks = []
         a = line.split('[')
         for block in a:

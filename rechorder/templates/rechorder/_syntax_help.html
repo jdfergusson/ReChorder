@@ -59,4 +59,37 @@
     <div class="code-block">
         v1 c1 v2 c1 b c1 c2 o
     </div>
+
+    <p><h1>Formatting</h1>
+    <br><h2>Optional Line Breaks</h2>
+    <br>You can add optional line breaks using a backslash "\", for when some devices may want short lines, but others may want long.
+    For instance, take this line:
+    <div class="code-block">
+        All I once held dear, built my life upon
+    </div>
+    Some people may want to view this split across two lines:
+    <div class="code-block">
+        All I once held dear, <br>
+        built my life upon
+    </div>
+    To allow for this, use the backslash when writing the song to enter a line break that may or may not be displayed. E.G.:
+    <div class="code-block">
+        [C]All [G/B]I [Am]once [F]held [C]dear, \built my [F]life [G]up[C]on,<br>
+        All [G/B]this [Am]world [F]re[C]veres \and [Am]wars to [G]own;
+    </div>
+    The settings page allows you to change whether the optional line breaks are used or not. The optional line breaks
+    are <i>always</i> used in the OpenLP export of a song.
+
+    <br><h2>Optional sub-section splits</h2>
+    <br>To indicate a sub section (for instance a phrase break within a verse) you can use an empty line. This will be
+    used by OpenLP to split pages more sensibly. For example:
+    <div class="code-block">
+        [E][F#m7][B] [A]Heal my heart and make it [B]clean<br>
+        [E]Open up my eyes to the [C#m]things unseen<br>
+        [A]Show me how to love like [B]You have loved me [C#m]<br>
+        <br>
+        [A]Break my heart for what breaks [B]Yours<br>
+        [E]Everything I am for Your [C#m]kingdom's cause<br>
+        [A]As I walk from earth in[B]to eternity [C#m]<br>
+    </div>
 </div>

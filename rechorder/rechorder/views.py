@@ -80,6 +80,14 @@ def _get_or_create_device_name(request):
     return device_name
 
 
+def _get_optional_line_breaks_setting(request):
+    opt_line_breaks = request.session.get('opt_line_breaks')
+    if opt_line_breaks is None or opt_line_breaks not in ('on', 'off'):
+        opt_line_breaks = 'off'
+        request.session['opt_line_breaks'] = opt_line_breaks
+    return opt_line_breaks
+
+
 def _get_header_links(request, **overrides):
     if 'last_visited_song' in request.session:
         songs_link = reverse('song', args=[request.session['last_visited_song']])
@@ -225,6 +233,7 @@ def _get_base_song_context_dict(request, song, set_pk=None, song_in_set=None):
         'key_details': _get_key_details(request, song, set_pk, song_in_set),
         'current_set': set,
         'set_is_editable': set_is_editable,
+        'opt_line_breaks': _get_optional_line_breaks_setting(request) == 'on',
     }
 
 
@@ -479,12 +488,14 @@ def set_show_song(request, set_id, song_index):
         song_index = int(song_index)
         song_in_set = this_set.song_list[song_index]
     except (ValueError, IndexError):
-        return HttpResponseNotFound('<h1>Error: Page not found</h1>')
+        return redirect(reverse('set', args=[this_set.pk]))
 
     request.session['last_song_in_set'] = song_index
-    request.session.modified = True
 
-    song = get_object_or_404(Song, pk=song_in_set['id'])
+    try:
+        song = Song.objects.get(pk=song_in_set['id'])
+    except Song.DoesNotExist:
+        return redirect(reverse('set', args=[this_set.pk]))
 
     # Update beam if applicable
     if _is_beaming(request):
@@ -814,6 +825,7 @@ def settings(request):
         'possible_shapes': [{'name': KEYS[i], 'index': i} for i in range(12)],
         'device_name': _get_or_create_device_name(request),
         'chord_display_style': _get_display_style(request),
+        'opt_line_breaks': _get_optional_line_breaks_setting(request),
         **_get_header_links(request),
     }
     return render(request, 'rechorder/user_settings.html', context)
@@ -824,6 +836,8 @@ def settings_set(request):
         [int(i) for i in json.loads(request.POST.get('permitted_shapes', ''))]
     request.session['chord_display_style'] = json.loads(request.POST.get('display_style', ''))['chord-display-style']
     request.session['device_name'] = request.POST.get('device_name', '["Unnamed Device"]').strip()
+    print(request.POST)
+    request.session['opt_line_breaks'] = json.loads(request.POST.get('opt_line_breaks', ''))['opt-line-breaks-choice']
     request.session.modified = True
 
     # Try to update the user's beam if it exists

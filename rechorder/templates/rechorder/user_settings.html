@@ -20,6 +20,7 @@
         data: {
             'permitted_shapes': JSON.stringify(getFormData($('#shape-selection'))),
             'display_style': JSON.stringify(getFormData($('#chord-display-style'))),
+            'opt_line_breaks': JSON.stringify(getFormData($('#optional-line-breaks'))),
             'device_name': $('#text-device-name').val(),
         },
     });
@@ -36,7 +37,8 @@
         {% endfor %}
 
         $('#check-{{ chord_display_style }}').prop('checked', true);
-        $('#btn-device-name-save').click(update)
+        $('#line-breaks-{{ opt_line_breaks }}').prop('checked', true);
+        $('#btn-device-name-save').click(update);
         $('#text-device-name').val("{{ device_name|escapejs }}");
     });
 {% endblock %}
@@ -72,7 +74,6 @@
     </form>
 
     <h2>Chord display style</h2><br>
-    Select how to display chords:
     <form id="chord-display-style" class="settings-boxes">
         <ul class="yes-no-selection">
             <li>
@@ -86,6 +87,20 @@
             <li>
                 <input class="pressable" type="radio" id="check-roman" name="chord-display-style" value="roman">
                 <label for="check-roman">Roman Numerals</label>
+            </li>
+        </ul>
+    </form>
+
+    <h2>Optional Line Breaks</h2><br>
+    <form id="optional-line-breaks" class="settings-boxes">
+        <ul class="yes-no-selection">
+            <li>
+                <input class="pressable" type="radio" id="line-breaks-on" name="opt-line-breaks-choice" value="on">
+                <label for="line-breaks-on">On</label>
+            </li>
+            <li>
+                <input class="pressable" type="radio" id="line-breaks-off" name="opt-line-breaks-choice" value="off">
+                <label for="line-breaks-off">Off</label>
             </li>
         </ul>
     </form>

@@ -122,6 +122,6 @@ class Chord:
     def __repr__(self):
         return repr({
             'index': self.index,
-            'qualification': self.qualification,
+            'qualification': self.quality,
             'bass_index': self.bass_index
         })

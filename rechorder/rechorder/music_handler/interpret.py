@@ -40,7 +40,7 @@ def interpret_absolute_chord(string):
     s = s[0]
 
 
-    qualifier_search = re.search('(add|sus|m|min|man|aug|dim|[0-9])', s)
+    qualifier_search = re.search(r'(add|sus|m|min|man|aug|dim|[0-9])', s)
     if qualifier_search is None:
         note = s
         qualification = ''
