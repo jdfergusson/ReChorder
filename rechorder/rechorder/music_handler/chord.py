@@ -50,7 +50,7 @@ class Chord:
         """
 
         self._key_ref = key_ref
-        self._display_style = display_style
+        self.display_style = display_style
 
         index, quality, bass_index = interpret_absolute_chord(string)
 
@@ -69,6 +69,14 @@ class Chord:
 
         self.is_minor = bool(re.match(r'm([0-9\u266d\u266f][a-zA-Z0-9\u266d\u266f]*)?$', self._quality))
 
+        self._inversion = None
+        if self.bass_index is not None:
+            if self.bass_index == 7:
+                self._inversion = "c"
+            elif (self.is_minor and self.bass_index == 3) or (not self.is_minor and self.bass_index == 4):
+                self._inversion = "b"
+
+
 
     @property
     def _key_index(self):
@@ -83,21 +91,24 @@ class Chord:
         if self.index is None:
             return ''
 
-        if self._display_style == 'nashville':
-            return CHORD_NAME_NASHVILLE[self.index]
-        if self._display_style == 'roman':
+        if self.display_style == 'nashville':
+            chord_name =  CHORD_NAME_NASHVILLE[self.index]
+        elif self.display_style == 'roman':
             if self.is_minor:
-                return CHORD_NAME_ROMAN[self.index].lower()
+                chord_name = CHORD_NAME_ROMAN[self.index].lower()
             else:
-                return CHORD_NAME_ROMAN[self.index]
+                chord_name = CHORD_NAME_ROMAN[self.index]
+            if self._inversion is not None:
+                chord_name += self._inversion
         else:
-            return KEY_NAMES_LOOKUP[self._key_ref.key][(self.index + self._key_index) % 12]
+            chord_name = KEY_NAMES_LOOKUP[self._key_ref.key][(self.index + self._key_index) % 12]
+        return chord_name
 
     @property
     def quality(self):
         quality = self._quality
 
-        if self._display_style == 'roman' and self.is_minor:
+        if self.display_style == 'roman' and self.is_minor:
             quality = quality.replace('m', '', 1)
 
         return quality
@@ -106,10 +117,13 @@ class Chord:
     def formatted_bass_note(self):
         if self.bass_index is None:
             return ""
-        if self._display_style == 'nashville':
+        if self.display_style == 'nashville':
             return '/{}'.format(CHORD_NAME_NASHVILLE[self.bass_index])
-        elif self._display_style == 'roman':
-            return '/{}'.format(CHORD_NAME_ROMAN[self.bass_index])
+        elif self.display_style == 'roman':
+            if self._inversion is None:
+                return '/{}'.format(CHORD_NAME_ROMAN[self.bass_index])
+            else:
+                return ""
         else:
             return '/{}'.format(KEY_NAMES_LOOKUP[self._key_ref.key][(self.bass_index + self._key_index) % 12])
 

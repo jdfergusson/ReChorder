@@ -63,12 +63,12 @@
         /* Scroll by 1/2 window height each button press */
         var n = window.innerHeight / 2;
 
-        if (e.key == 'PageUp' || e.key == 'ArrowUp') {
+        if (e.key == 'PageUp') {
             e.preventDefault();
             new_scroll_loc = document.body.scrollTop - n;
             $("html, body").animate({ scrollTop: new_scroll_loc });
         }
-        else if (e.key == 'PageDown' || e.key == 'ArrowDown') {
+        else if (e.key == 'PageDown') {
             e.preventDefault();
             new_scroll_loc = document.body.scrollTop + n;
             $("html, body").animate({ scrollTop: new_scroll_loc });

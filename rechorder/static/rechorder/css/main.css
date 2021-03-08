@@ -16,6 +16,25 @@
     font-weight: 700;
 }
 
+@font-face {
+    font-family: "PlayfairDisplay";
+    src:
+        url("../fonts/PlayfairDisplay/PlayfairDisplay-Regular.woff2") format("woff2"),
+        url("../fonts/PlayfairDisplay/PlayfairDisplay-Regular.woff") format("woff"),
+        url("../fonts/PlayfairDisplay/PlayfairDisplay-Regular.ttf") format("truetype");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "PlayfairDisplay";
+    src:
+        url("../fonts/PlayfairDisplay/PlayfairDisplay-Bold.woff2") format("woff2"),
+        url("../fonts/PlayfairDisplay/PlayfairDisplay-Bold.woff") format("woff"),
+        url("../fonts/PlayfairDisplay/PlayfairDisplay-Bold.ttf") format("truetype");
+    font-weight: 700;
+}
+
+
 body, html {
     font-family: 'GothicA1', sans-serif;
     margin: 0;
@@ -396,8 +415,12 @@ h3 {
     min-width: 0;
 }
 
+.block-chord.roman {
+    font-family: 'PlayfairDisplay', serif;
+}
+
 mark {
-    padding-top: 0.3em;
+    padding-top: -0.2em;
     background-color: #c1e6be;
 }
 
