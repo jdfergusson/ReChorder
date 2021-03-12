@@ -77,7 +77,7 @@ class Song(models.Model):
             _lines = None
             if section['is_lyrical'] and section['subsections']:
                 _verse = ElementTree.SubElement(_lyrics, 'verse', {
-                    'name': '{}{}'.format(section['code'], section['number'])
+                    'name': section['id'],
                 })
                 for subsection in section['subsections']:
                     # Set break=optional (can we make it mandatory?)
@@ -135,6 +135,7 @@ class Song(models.Model):
             'code': section_code,
             'number': number,
             'is_lyrical': is_lyrical,
+            'id': '{}{}'.format(section_code, number),
         }
 
         return (
@@ -220,6 +221,40 @@ class Song(models.Model):
     @property
     def sections(self):
         return self._extract_sections(self.raw)
+
+    @property
+    def expanded_sections(self):
+        sections = self._extract_sections(self.raw)
+
+        non_lyrical_sections = {}
+        for i in range(len(sections)):
+            if not sections[i]['is_lyrical']:
+                non_lyrical_sections[sections[i]['id']] = {
+                    'prev': sections[i - 1]['id'] if i > 0 else None,
+                    'next': sections[i + 1]['id'] if i < len(sections) - 1 else None,
+                }
+
+        section_order = self.verse_order.split(" ")
+        intros = [i for i in non_lyrical_sections if i.startswith("i")]
+        outros = [i for i in non_lyrical_sections if i.startswith("o")]
+        section_order = intros + section_order + outros
+
+        non_lyrical_sections = {i: non_lyrical_sections[i] for i in non_lyrical_sections if not (i.startswith("i") or i.startswith("o"))}
+
+        new_section_order = []
+        for section in section_order:
+            for i in non_lyrical_sections:
+                if non_lyrical_sections[i]['prev'] is None and non_lyrical_sections[i]['next'] == section:
+                    new_section_order.append(i)
+            new_section_order.append(section)
+            for i in non_lyrical_sections:
+                if non_lyrical_sections[i]['prev'] == section:
+                    new_section_order.append(i)
+
+        sections = {i['id']: i for i in sections}
+        sections = [sections[i] for i in new_section_order]
+
+        return sections
 
     @property
     def key(self):

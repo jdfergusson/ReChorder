@@ -88,6 +88,14 @@ def _get_optional_line_breaks_setting(request):
     return opt_line_breaks
 
 
+def _get_section_display_order(request):
+    section_display_order = request.session.get('section_display_order')
+    if section_display_order is None or section_display_order not in ('expanded', 'miminal'):
+        section_display_order = 'minimal'
+        request.session['section_display_order'] = section_display_order
+    return section_display_order
+
+
 def _get_header_links(request, **overrides):
     if 'last_visited_song' in request.session:
         songs_link = reverse('song', args=[request.session['last_visited_song']])
@@ -234,6 +242,7 @@ def _get_base_song_context_dict(request, song, set_pk=None, song_in_set=None):
         'current_set': set,
         'set_is_editable': set_is_editable,
         'opt_line_breaks': _get_optional_line_breaks_setting(request) == 'on',
+        'section_display_order': _get_section_display_order(request),
     }
 
 
@@ -826,6 +835,7 @@ def settings(request):
         'device_name': _get_or_create_device_name(request),
         'chord_display_style': _get_display_style(request),
         'opt_line_breaks': _get_optional_line_breaks_setting(request),
+        'section_display_order': _get_section_display_order(request),
         **_get_header_links(request),
     }
     return render(request, 'rechorder/user_settings.html', context)
@@ -836,8 +846,8 @@ def settings_set(request):
         [int(i) for i in json.loads(request.POST.get('permitted_shapes', ''))]
     request.session['chord_display_style'] = json.loads(request.POST.get('display_style', ''))['chord-display-style']
     request.session['device_name'] = request.POST.get('device_name', '["Unnamed Device"]').strip()
-    print(request.POST)
     request.session['opt_line_breaks'] = json.loads(request.POST.get('opt_line_breaks', ''))['opt-line-breaks-choice']
+    request.session['section_display_order'] = json.loads(request.POST.get('section_display_order', ''))['section-disp-ord-choice']
     request.session.modified = True
 
     # Try to update the user's beam if it exists

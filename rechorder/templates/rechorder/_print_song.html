@@ -1,6 +1,8 @@
 {% load rechorder_tags %}
+{% load i18n %}
 
-{% for section in song.sections %}
+
+{% for section in sections %}
     <h3 class="section-title">{{ section.title }}</h3>
     {% for subsection in section.subsections %}
         {% for long_line in subsection %}

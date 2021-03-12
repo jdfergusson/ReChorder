@@ -155,6 +155,10 @@
 
 {% block content %}
     <div id="song">
-        {% include 'rechorder/_print_song.html' %}
+        {% if section_display_order == 'expanded' %}
+            {% include 'rechorder/_print_song.html' with sections=song.expanded_sections %}
+        {% else %}
+            {% include 'rechorder/_print_song.html' with sections=song.sections %}
+        {% endif %}
     </div>
 {% endblock %}
