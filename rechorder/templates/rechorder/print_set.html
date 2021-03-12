@@ -43,11 +43,7 @@
     </h3>
 
     <span id="song">
-        {% if section_display_order == 'expanded' %}
-            {% include 'rechorder/_print_song.html' with sections=song_details.song.expanded_sections song=song_details.song %}
-        {% else %}
-            {% include 'rechorder/_print_song.html' with sections=song_details.song.sections song=song_details.song %}
-        {% endif %}
+        {% include 'rechorder/_print_song.html' with song=song_details.song %}
     </span>
     <p style="page-break-after: always"></p>
 {% endfor %}

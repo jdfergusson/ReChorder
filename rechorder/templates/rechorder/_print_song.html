@@ -1,26 +1,50 @@
 {% load rechorder_tags %}
 {% load i18n %}
 
-
-{% for section in sections %}
-    <h3 class="section-title">{{ section.title }}</h3>
-    {% for subsection in section.subsections %}
-        {% for long_line in subsection %}
-            <div class="container">
-            {% for small_line in long_line %}
-                {% for block in small_line %}
-                    <div class="block">
-                        <div class="block-chord{% if block.chord.display_style == 'roman' %} roman{% endif %}">
-                            <mark>{{ block.chord.id }}<sup>{{ block.chord.quality }}</sup>{{ block.chord.formatted_bass_note }}</mark>
-                        </div><div class="block-lyric">{{ block.lyric | safe}}</div>
-                    </div>
+{% if section_display_order == 'expanded' %}
+    {% for section in song.expanded_sections %}
+        <h3 class="section-title">{{ section.title }}</h3>
+        {% for subsection in section.subsections %}
+            {% for long_line in subsection %}
+                <div class="container">
+                {% for small_line in long_line %}
+                    {% for block in small_line %}
+                        <div class="block">
+                            <div class="block-chord{% if block.chord.display_style == 'roman' %} roman{% endif %}">
+                                <mark>{{ block.chord.id }}<sup>{{ block.chord.quality }}</sup>{{ block.chord.formatted_bass_note }}</mark>
+                            </div><div class="block-lyric">{{ block.lyric | safe}}</div>
+                        </div>
+                    {% endfor %}
+                    {% if opt_line_breaks %}
+                        </div><div class="container">
+                    {% endif %}
                 {% endfor %}
-                {% if opt_line_breaks %}
-                    </div><div class="container">
-                {% endif %}
+                </div>
             {% endfor %}
-            </div>
         {% endfor %}
+        <hr class="song-section-hr">
     {% endfor %}
-    <hr class="song-section-hr">
-{% endfor %}
+{% else %}
+    {% for section in song.sections %}
+        <h3 class="section-title">{{ section.title }}</h3>
+        {% for subsection in section.subsections %}
+            {% for long_line in subsection %}
+                <div class="container">
+                {% for small_line in long_line %}
+                    {% for block in small_line %}
+                        <div class="block">
+                            <div class="block-chord{% if block.chord.display_style == 'roman' %} roman{% endif %}">
+                                <mark>{{ block.chord.id }}<sup>{{ block.chord.quality }}</sup>{{ block.chord.formatted_bass_note }}</mark>
+                            </div><div class="block-lyric">{{ block.lyric | safe}}</div>
+                        </div>
+                    {% endfor %}
+                    {% if opt_line_breaks %}
+                        </div><div class="container">
+                    {% endif %}
+                {% endfor %}
+                </div>
+            {% endfor %}
+        {% endfor %}
+        <hr class="song-section-hr">
+    {% endfor %}
+{% endif %}
