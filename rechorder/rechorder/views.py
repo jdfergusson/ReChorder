@@ -774,7 +774,10 @@ def song_transpose(request):
     song.display_in(key_index, display_style)
 
     return JsonResponse({
-        'song_html': render_to_string('rechorder/_print_song.html', {'song': song}),
+        'song_html': render_to_string(
+            'rechorder/_print_song.html',
+            {'song': song, **_get_base_song_context_dict(request, song)}
+        ),
         'key_details': _get_key_details(request, song, set_id, song_in_set_index),
         'song_meta': {
             'title': song.title,
