@@ -1,5 +1,9 @@
 {% extends 'rechorder/_base.html' %}
 
+{% block subtitle %}
+    Settings -
+{% endblock %}
+
 {% block javascript %}
     function getFormData($form){
         var unindexed_array = $form.serializeArray();

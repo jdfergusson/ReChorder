@@ -1,6 +1,10 @@
 {% extends 'rechorder/_base.html' %}
 {% load static %}
 
+{% block subtitle %}
+    Create Song -
+{% endblock %}
+
 {% block javascript %}
     function saveSong() {
         $('#areyousure').hide();

@@ -1,6 +1,12 @@
 {% extends 'rechorder/_base.html' %}
 {% load static %}
 
+{% block subtitle %}
+    {% if song %}
+        Receiving Beam - {{ song.title }}
+    {% endif %}
+{% endblock %}
+
 {% block javascript %}
     function checkForUpdates() {
        $.ajax({

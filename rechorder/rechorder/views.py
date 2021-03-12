@@ -562,6 +562,8 @@ def set_print(request, set_id):
     context = {
         'songs': songs,
         'set_id': this_set.pk,
+        'opt_line_breaks': _get_optional_line_breaks_setting(request) == 'on',
+        'section_display_order': _get_section_display_order(request),
     }
 
     if request.GET.get('no_personal_keys', False):
@@ -701,6 +703,8 @@ def song_print(request, song_id):
 
     context = {
         'songs': songs,
+        'opt_line_breaks': _get_optional_line_breaks_setting(request) == 'on',
+        'section_display_order': _get_section_display_order(request),
     }
 
     if request.GET.get('no_personal_keys', False):

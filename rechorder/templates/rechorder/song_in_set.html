@@ -1,6 +1,12 @@
 {% extends 'rechorder/_base.html' %}
 {% load static %}
 
+{% block subtitle %}
+    {% if song %}
+        {{ set.name }} - {{ song.title }} -
+    {% endif %}
+{% endblock %}
+
 {% block javascript %}
     function next() {
         {% if current_index < max_index %}

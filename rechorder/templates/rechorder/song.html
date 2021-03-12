@@ -1,6 +1,9 @@
 {% extends 'rechorder/_base.html' %}
 {% load static %}
 
+{% block subtitle %}
+    {{ song.title }} -
+{% endblock %}
 
 {% block javascript %}
     {% if current_set is not None %}

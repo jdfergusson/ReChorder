@@ -2,6 +2,10 @@
 {% load rechorder_tags %}
 {% load static %}
 
+{% block subtitle %}
+    {{ set.name }}
+{% endblock %}
+
 {% block extrahead %}
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
