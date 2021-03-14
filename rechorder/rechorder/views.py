@@ -830,7 +830,10 @@ def download_xml(request):
     response = HttpResponse(content_type='application/zip')
     zip_file = zipfile.ZipFile(response, 'w')
     for song in songs:
-        zip_file.writestr('openlyric-songs/{}-{}.xml'.format(song.pk, slugify(song.title)), song.to_xml())
+        try:
+            zip_file.writestr('openlyric-songs/{}-{}.xml'.format(song.pk, slugify(song.title)), song.to_xml())
+        except Exception:
+            pass
     response['Content-Disposition'] = 'attachment; filename="rechorder_songs.zip"'
     return response
 

@@ -81,11 +81,11 @@ class Song(models.Model):
                 })
                 for subsection in section['subsections']:
                     # Set break=optional (can we make it mandatory?)
-                    line_texts = []
                     for long_line in subsection:
                         for line in long_line:
                             line = ''.join([i['lyric'] for i in line])
                             line = line.replace('&nbsp;', ' ').strip()
+                            line = re.sub(r' {2,}', ' ', line)
                             _lines = ElementTree.SubElement(_verse, 'lines')
                             _lines.text = line
                     _lines.set("break", "optional")
@@ -147,7 +147,7 @@ class Song(models.Model):
         )
 
     def _extract_sections(self, text):
-        section_header_re = re.compile(r'^\{([vcbmiop])([0-9]*)(\!?)\}', flags=re.IGNORECASE|re.MULTILINE)
+        section_header_re = re.compile(r'\{([vcbmiop])([0-9]*)(\!?)\}', flags=re.IGNORECASE|re.MULTILINE)
         sections = []
         remaining_text = text
         while True:
