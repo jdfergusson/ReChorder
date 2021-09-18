@@ -2,7 +2,6 @@
 
 <script type="text/javascript">
     function saveSong() {
-        validateOrder();
         $('#areyousure').hide();
         $.ajax({
             type: 'POST',
@@ -20,24 +19,26 @@
             success: function(data) {
                 $('#success').show();
                 transposeSettingsChanged();
+                $('#editor-verse-order').prop('value', data.verse_order);
+                validateOrder();
             },
         });
     }
 
     function validateOrder() {
-        verse_order = $('#editor-verse-order').val();
+        verse_order = $('#editor-verse-order').val().trim();
+        $('#editor-verse-order').value = verse_order;
         var problem = false;
         var feedback_obj = $('#verse-order-error-list');
         feedback_obj.empty();
 
-        if (verse_order.trim() != "")
+        if (verse_order != "")
         {
 
             var verses_in_order = new Object();
             verse_order.split(' ').forEach((i) => {
                 verses_in_order[i] = 0;
             });
-            console.log(verses_in_order);
 
             const regex = /\{[a-zA-Z0-9]+\}/g;
             searchtext = $('#editor-song-content').val();
@@ -46,7 +47,7 @@
                 section = result[0].replace('{', '').replace('}','');
                 if (!(section in verses_in_order)) {
                     problem = true;
-                    feedback_obj.append("<li>Section " + section + " not found in verse order</li>");
+                    feedback_obj.append("<li>Section '" + section + "' not found in verse order</li>");
                 } else {
                     verses_in_order[section]++;
                 }
@@ -55,7 +56,7 @@
             for (const [ i, v ] of Object.entries(verses_in_order)) {
                 if (v == 0) {
                     problem = true;
-                    feedback_obj.append("<li>Section " + i + " not found in song</li>");
+                    feedback_obj.append("<li>Section '" + i + "' not found in song</li>");
                 }
             }
 
@@ -76,6 +77,9 @@
         );
 
         $('#btn-ays-yes').click(function() {
+            $('#areyousure-message').hide();
+            $('#btn-editor-delete').html('Deleting...');
+            $('#btn-editor-delete').prop('disabled', true);
             $.ajax({
                 type: 'POST',
                 headers: { "X-CSRFToken": '{{ csrf_token }}' },
