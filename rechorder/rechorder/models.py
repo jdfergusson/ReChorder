@@ -258,8 +258,12 @@ class Song(models.Model):
                 if non_lyrical_sections[i]['prev'] == section:
                     new_section_order.append(i)
 
-        sections = {i['id']: i for i in sections}
-        sections = [sections[i] for i in new_section_order if i in sections]
+
+        try:
+            sections = {i['id']: i for i in sections}
+            sections = [sections[i] for i in new_section_order if i in sections]
+        except Exception:
+            sections = ['Error rendering song - check the verse order is okay']
 
         return sections
 

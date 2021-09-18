@@ -7,6 +7,8 @@
 
 {% block javascript %}
     function saveSong() {
+        $('#btn-create').html('Creating...');
+        $('#btn-create').prop('disabled', true);
         $('#areyousure').hide();
         $.ajax({
             type: 'POST',
@@ -22,6 +24,7 @@
             },
             dataType: 'json',
             success: function(data) {
+
                 if (data.success == true) {
                     window.location = data.new_song_url;
                 }

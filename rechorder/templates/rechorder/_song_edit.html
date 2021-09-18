@@ -76,6 +76,9 @@
         );
 
         $('#btn-ays-yes').click(function() {
+            $('#areyousure-message').hide();
+            $('#btn-editor-delete').html('Deleting...');
+            $('#btn-editor-delete').prop('disabled', true);
             $.ajax({
                 type: 'POST',
                 headers: { "X-CSRFToken": '{{ csrf_token }}' },
