@@ -60,24 +60,6 @@
         $('#btn-toggle-' + tab).toggleClass('img-action-selected');
     }
 
-    function processKeyPress(e) {
-        e = e || window.event;
-
-        /* Scroll by 1/2 window height each button press */
-        var n = window.innerHeight / 2;
-
-        if (e.key == 'PageUp') {
-            e.preventDefault();
-            new_scroll_loc = document.body.scrollTop - n;
-            $("html, body").animate({ scrollTop: new_scroll_loc });
-        }
-        else if (e.key == 'PageDown') {
-            e.preventDefault();
-            new_scroll_loc = document.body.scrollTop + n;
-            $("html, body").animate({ scrollTop: new_scroll_loc });
-        }
-    }
-
     $(function() {
         $('#adder').hide();
         $('#btn-toggle-adder').click(function() {toggleTab('adder');});
