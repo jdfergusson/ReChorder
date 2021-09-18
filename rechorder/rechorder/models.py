@@ -45,6 +45,13 @@ class Song(models.Model):
     def get_absolute_url(self):
         return reverse('song', args=[str(self.id)])
 
+    def save(self, *args, **kwargs):
+        # Let's make sure the set has a name while we're here
+        self.verse_order = self.verse_order.strip().lower()
+        print("Saving: '{}'".format(self.verse_order))
+
+        super().save(*args, **kwargs)
+
     ###########################################
     # NON-DATABASE FUNCTIONS
     ###########################################
@@ -252,7 +259,7 @@ class Song(models.Model):
                     new_section_order.append(i)
 
         sections = {i['id']: i for i in sections}
-        sections = [sections[i] for i in new_section_order]
+        sections = [sections[i] for i in new_section_order if i in sections]
 
         return sections
 
