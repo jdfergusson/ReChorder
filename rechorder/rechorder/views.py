@@ -678,7 +678,7 @@ def song_update(request, song_id):
         song.raw = content
         song.save()
 
-        return JsonResponse({})
+        return JsonResponse({'verse_order': song.verse_order})
     return HttpResponseBadRequest('Invalid POST data')
 
 

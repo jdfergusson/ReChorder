@@ -47,7 +47,7 @@ class Song(models.Model):
 
     def save(self, *args, **kwargs):
         # Let's make sure the set has a name while we're here
-        self.verse_order = self.verse_order.strip().lower()
+        self.verse_order = self.verse_order.strip().lower().replace(',', '')
         print("Saving: '{}'".format(self.verse_order))
 
         super().save(*args, **kwargs)
