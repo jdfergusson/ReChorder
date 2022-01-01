@@ -41,7 +41,7 @@
             });
 
             const regex = /\{[a-zA-Z0-9]+\}/g;
-            searchtext = $('#editor-song-content').val();
+            searchtext = $('#editor-song-content').val().toLowerCase();
 
             while (result = regex.exec(searchtext)) {
                 section = result[0].replace('{', '').replace('}','');
