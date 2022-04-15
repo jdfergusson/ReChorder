@@ -18,57 +18,23 @@
             dataType: 'json',
             success: function(data) {
                 $('#success').show();
-                transposeSettingsChanged();
                 $('#editor-verse-order').prop('value', data.verse_order);
-                validateOrder();
+                transposeSettingsChanged();
+                fetchVerseOrderErrors();
             },
         });
     }
 
-    function validateOrder() {
-        verse_order = $('#editor-verse-order').val().trim();
-        $('#editor-verse-order').value = verse_order;
-        var problem = false;
-        var feedback_obj = $('#verse-order-error-list');
-        feedback_obj.empty();
-
-        if (verse_order != "")
-        {
-
-            var verses_in_order = new Object();
-            verse_order.split(' ').forEach((i) => {
-                verses_in_order[i] = 0;
-            });
-
-            const regex = /\{[a-zA-Z0-9]+\}/g;
-            searchtext = $('#editor-song-content').val().toLowerCase();
-
-            while (result = regex.exec(searchtext)) {
-                section = result[0].replace('{', '').replace('}','');
-                if (!(section in verses_in_order)) {
-                    problem = true;
-                    feedback_obj.append("<li>Section '" + section + "' not found in verse order</li>");
-                } else {
-                    verses_in_order[section]++;
-                }
-            }
-
-            for (const [ i, v ] of Object.entries(verses_in_order)) {
-                if (v == 0) {
-                    problem = true;
-                    feedback_obj.append("<li>Section '" + i + "' not found in song</li>");
-                }
-            }
-
-        }
-        console.log(problem);
-        if (problem) {
-            $('#verse-order-error').show();
-        }
-        else
-        {
-            $('#verse-order-error').hide();
-        }
+    function fetchVerseOrderErrors() {
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url 'song.verse_order_errors' song.id %}',
+            dataType: 'json',
+            success: function(data) {
+                $('#verse-order-errors').html(data.errors_html);
+            },
+        });
     }
 
     function deleteSong() {
@@ -144,7 +110,7 @@
         $('#btn-key-unlocked').click(lockKey);
         $('#btn-key-locked').click(unlockKey);
 
-        validateOrder();
+        fetchVerseOrderErrors();
     });
 </script>
 
@@ -172,7 +138,7 @@
         <tr><td>Advice on key: </td><td><input id="editor-key-notes"></td></tr>
         <tr><td>Verse order: </td><td><input id="editor-verse-order"></td></tr>
     </table>
-    <div id="verse-order-error" class="error-box"><h2>Errors in verse order:</h2><br><ul id="verse-order-error-list"></ul></div>
+    <div id="verse-order-errors"></div>
     <textarea class="song-content-edit" id="editor-song-content"></textarea>
     <br>
 

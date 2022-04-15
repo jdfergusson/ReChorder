@@ -1,0 +1,7 @@
+{% if errors %}
+    <div class="error-box"><h2>Errors in verse order:</h2><br><ul id="verse-order-error-list">
+        {% for error in errors %}
+            <li>{{error}}</li>
+        {% endfor %}
+    </ul></div>
+{% endif %}

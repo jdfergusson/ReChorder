@@ -10,6 +10,7 @@ urlpatterns = [
     re_path(r'^song/(?P<song_id>[0-9]+)/delete$', views.song_delete, name='song.delete'),
     re_path(r'^song/(?P<song_id>[0-9]+)/print$', views.song_print, name='song.print'),
     re_path(r'^song/(?P<song_id>[0-9]+)/xml', views.song_xml, name='song.xml'),
+    re_path(r'^song/(?P<song_id>[0-9]+)/verse_order_errors$', views.song_get_verse_order_errors, name='song.verse_order_errors'),
     re_path(r'^song/create', views.song_create, name='song.create'),
     re_path(r'^song/transpose$', views.song_transpose, name='song.transpose'),
     re_path(r'^song/downloadxml$', views.download_xml, name='songs.download_xml'),

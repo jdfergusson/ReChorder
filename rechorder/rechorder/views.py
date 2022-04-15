@@ -243,6 +243,7 @@ def _get_base_song_context_dict(request, song, set_pk=None, song_in_set=None):
         'set_is_editable': set_is_editable,
         'opt_line_breaks': _get_optional_line_breaks_setting(request) == 'on',
         'section_display_order': _get_section_display_order(request),
+        'is_verse_order_okay': not bool(song.check_verse_order()),
     }
 
 
@@ -678,7 +679,9 @@ def song_update(request, song_id):
         song.raw = content
         song.save()
 
-        return JsonResponse({'verse_order': song.verse_order})
+        verse_order_errors = render_to_string('rechorder/_verse_order_errors.html', {'errors': song.check_verse_order})
+
+        return JsonResponse({'verse_order': song.verse_order, 'verse_order_errors': verse_order_errors})
     return HttpResponseBadRequest('Invalid POST data')
 
 
@@ -742,6 +745,18 @@ def song_create(request):
         return render(request, 'rechorder/song_create.html', context)
 
 
+def song_get_verse_order_errors(request, song_id):
+    _song = get_object_or_404(Song, pk=song_id)
+    verse_order_errors = _song.check_verse_order()
+    verse_order_errors_html = render_to_string('rechorder/_verse_order_errors.html', {'errors': verse_order_errors}),
+
+    return JsonResponse({
+        'errors_html': verse_order_errors_html,
+        'errors_list': verse_order_errors,
+        'is_verse_order_okay': not bool(verse_order_errors),
+    })
+
+
 def song_transpose(request):
     transpose_data = json.loads(request.POST['transpose_data'])
     song_id = int(request.POST['song_id'])
@@ -789,6 +804,16 @@ def song_transpose(request):
 def songs(request):
     _songs = Song.objects.order_by('title')
 
+
+    # In this case, the current set is only wanted if it's owned by the current user.
+    song_ids_in_set = []
+    try:
+        this_set = Set.objects.get(pk=_get_current_set_id(request), owner=_get_or_create_user_uuid(request))
+        song_ids_in_set = [i['id'] for i in this_set.song_list]
+        current_set_id = this_set.pk
+    except Set.DoesNotExist:
+        current_set_id = -1
+
     try:
         request.session.pop('last_visited_song')
         request.session.modified = True
@@ -798,6 +823,8 @@ def songs(request):
     context = {
         'songs': _songs,
         'keys': KEYS,
+        'current_set_id': current_set_id,
+        'song_ids_in_set': song_ids_in_set,
         **_get_header_links(request, header_link_songs=reverse('songs'))
     }
     return render(request, 'rechorder/songs.html', context)
