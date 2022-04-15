@@ -48,13 +48,44 @@ class Song(models.Model):
     def save(self, *args, **kwargs):
         # Let's make sure the set has a name while we're here
         self.verse_order = self.verse_order.strip().lower().replace(',', '')
-        print("Saving: '{}'".format(self.verse_order))
 
         super().save(*args, **kwargs)
 
     ###########################################
     # NON-DATABASE FUNCTIONS
     ###########################################
+
+    def check_verse_order(self):
+        problems = []
+
+        if self.verse_order == "":
+            problems.append("Verse order empty")
+
+
+        verses_in_order = {}
+
+        for i in self.verse_order.split(' '):
+            verses_in_order[i] = 0
+
+        for i in re.findall(r'\{[a-zA-Z0-9]+\}', self.raw.lower()):
+            section = i[1:-1]
+            if section not in verses_in_order:
+                problems.append("Section '{}' in song but not in verse order.".format(section))
+            else:
+                verses_in_order[section] += 1
+            if re.sub(r'[0-9]+', '', section) not in SECTION_NAMES:
+                problems.append("Section '{}' not a valid section type (see syntax help for full list).".format(section))
+
+        for i in re.findall(r'\{[a-zA-Z0-9]+!\}', self.raw.lower()):
+            section = i[1:-2]
+            if section in verses_in_order:
+                verses_in_order[section] += 1
+
+        for i in verses_in_order:
+            if verses_in_order[i] == 0:
+                problems.append("Section '{}' found in the verse order but doesn't exist in the song".format(i))
+
+        return problems
 
     def to_xml(self):
         _song = ElementTree.Element('song', {
