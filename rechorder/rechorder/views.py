@@ -804,6 +804,16 @@ def song_transpose(request):
 def songs(request):
     _songs = Song.objects.order_by('title')
 
+
+    # In this case, the current set is only wanted if it's owned by the current user.
+    song_ids_in_set = []
+    try:
+        this_set = Set.objects.get(pk=_get_current_set_id(request), owner=_get_or_create_user_uuid(request))
+        song_ids_in_set = [i['id'] for i in this_set.song_list]
+        current_set_id = this_set.pk
+    except Set.DoesNotExist:
+        current_set_id = -1
+
     try:
         request.session.pop('last_visited_song')
         request.session.modified = True
@@ -813,6 +823,8 @@ def songs(request):
     context = {
         'songs': _songs,
         'keys': KEYS,
+        'current_set_id': current_set_id,
+        'song_ids_in_set': song_ids_in_set,
         **_get_header_links(request, header_link_songs=reverse('songs'))
     }
     return render(request, 'rechorder/songs.html', context)

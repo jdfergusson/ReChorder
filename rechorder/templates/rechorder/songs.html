@@ -9,6 +9,26 @@
 {% block javascript %}
     var current_key_filter = -1;
 
+    {% if current_set_id >= 0 %}
+        function addSongToSet() {
+            source_element = event.srcElement
+            song_id = source_element.id.split("-")[2];
+            var data = {'song_id': song_id, 'go_live': false};
+
+            $.ajax({
+                type: 'POST',
+                url: '{% url 'set.add_song' current_set_id %}',
+                headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                data: data,
+                dataType: 'json',
+                success: function() {
+                    source_element.src = "{% static 'rechorder/icons/mdi-playlist-check.svg' %}";
+                    source_element.className = "add-song-to-set-button-added";
+                },
+            });
+        }
+    {% endif %}
+
     function setUpAlphabetIndex() {
         var previous = "";
 
@@ -58,7 +78,12 @@
         {
             $('#filterByKey' + i).click(function() {filterByKey(i, $(this));});
         }
+
+        $('.add-song-to-set-button').on('click', function() {addSongToSet()});
+
+
     });
+
 {% endblock %}
 
 {% block header %}
@@ -98,25 +123,35 @@
     <ul id="songlist" class="main-content-list">
         {% for song in songs %}
         <li>
-            <span class="song-anchor"><a name="song{{ song.id }}"></a></span>
-            <a href="{% url 'song' song.id %}">
-                <div class="song-in-list">
-                    <span class="list-primary">{{ song }}</span><br>
-                    <span class="list-secondary">{{ song.artist }}</span><br>
-                    <span class="list-tertiary">Original key: {{ song.original_key|num2chord }}</span>
-                    <span class="song-key-index" style="display: none">{{ song.original_key }}</span>
+            <div class="song-list-song-container">
+                <div class="song-list-song-details">
+                    <span class="song-anchor"><a name="song{{ song.id }}"></a></span>
+                    <a href="{% url 'song' song.id %}">
+                        <div class="song-in-list">
+                            <span class="list-primary">{{ song }}</span><br>
+                            <span class="list-secondary">{{ song.artist }}</span><br>
+                            <span class="list-tertiary">Original key: {{ song.original_key|num2chord }}</span>
+                            <span class="song-key-index" style="display: none">{{ song.original_key }}</span>
+                        </div>
+                    </a>
                 </div>
-            </a>
+                {% if current_set_id >= 0 %}
+                    <div class="song-list-add-to-set">
+                        <!-- The format of this ID is important,
+                            do not change unless you also change the addSongToSet function -->
+                        {% if song.id in song_ids_in_set %}
+                            <input type='image' id="img-addsongtoset-{{ song.id }}"
+                                    class="add-song-to-set-button-added"
+                                    src="{% static 'rechorder/icons/mdi-playlist-check.svg' %}">
+                        {% else %}
+                            <input type='image' id="img-addsongtoset-{{ song.id }}"
+                                    class="add-song-to-set-button"
+                                    src="{% static 'rechorder/icons/mdi-playlist-plus.svg' %}">
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
         </li>
         {% endfor %}
     </ul>
 {% endblock %}
-
-
-
-
-
-
-
-
-

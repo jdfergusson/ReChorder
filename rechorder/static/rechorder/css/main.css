@@ -90,12 +90,14 @@ form {
     justify-content: space-around;
 }
 
+
 #div-header img {
     padding: 10px;
     min-height: 2em;
     min-width: 2em;
     max-width: 15vw;
     transition: 0.3s;
+    display: block;
 }
 
 #div-header img:hover {
@@ -452,7 +454,6 @@ mark {
 .key-filter-button-selected, .key-filter-button-selected:hover {
     background-color: #ced1ec;
 }
-
 /**********************************************************
  * Song list
  **********************************************************/
@@ -500,6 +501,34 @@ mark {
 .song-anchor {
     position: absolute;
     transform: translateY(-30vh);
+}
+
+.song-list-add-to-set {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.song-list-song-container {
+    display: flex;
+    width: 100%;
+}
+
+.song-list-song-details {
+    flex-grow: 100;
+}
+
+
+.add-song-to-set-button:hover {
+    background-color: #cee0ec;
+}
+
+.add-song-to-set-button {
+    min-width: 3em;
+}
+
+.add-song-to-set-button-added {
+    min-width: 3em;
+    background-color: #c1e6be;
 }
 
 /**********************************************************
