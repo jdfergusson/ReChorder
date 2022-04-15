@@ -28,7 +28,7 @@ function processKeyPress(e) {
             else
             {
                 new_scroll_loc = document.body.scrollTop - n;
-                $("html, body").animate({ scrollTop: new_scroll_loc });
+                $("html, body").animate({ scrollTop: new_scroll_loc }, 200);
             }
         }
         else if (e.key == 'PageDown' || e.key == 'ArrowDown') {
@@ -43,7 +43,7 @@ function processKeyPress(e) {
             else
             {
                 new_scroll_loc = document.body.scrollTop + n;
-                $("html, body").animate({ scrollTop: new_scroll_loc });
+                $("html, body").animate({ scrollTop: new_scroll_loc }, 200);
             }
         }
     }

@@ -10,12 +10,18 @@
     <script src="{% static 'rechorder/js/jquery-3.1.0.min.js' %}"></script>
     <script src="{% static 'rechorder/js/common.js' %}"></script>
 
+    <script type="text/javascript">
+        $(function() {
+            document.onkeydown = processKeyPress;
+        });
+    </script>
+
 </head>
 <body>
 
     <div class="no-print">
         <a href="javascript:history.back()">Back</a><br>
-        <a href="javascript:window.print()">Print</a>
+        <a href="javascript:window.print()">Print</a><br>
         {% if set_id %}
             {% if no_personal_keys %}
                 <a href="?">Use personal key choices</a>
