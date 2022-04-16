@@ -22,8 +22,26 @@
                 data: data,
                 dataType: 'json',
                 success: function() {
-                    source_element.src = "{% static 'rechorder/icons/mdi-playlist-check.svg' %}";
-                    source_element.className = "add-song-to-set-button-added";
+                    $("#img-addsongtoset-" + song_id).hide();
+                    $("#img-removesongfromset-" + song_id).show();
+                },
+            });
+        }
+
+        function removeSongFromSet() {
+            source_element = event.srcElement
+            song_id = source_element.id.split("-")[2];
+            var data = {'song_id': song_id, 'go_live': false};
+
+            $.ajax({
+                type: 'POST',
+                url: '{% url 'set.remove_song' current_set_id %}',
+                headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                data: data,
+                dataType: 'json',
+                success: function() {
+                    $("#img-removesongfromset-" + song_id).hide();
+                    $("#img-addsongtoset-" + song_id).show();
                 },
             });
         }
@@ -80,8 +98,7 @@
         }
 
         $('.add-song-to-set-button').on('click', function() {addSongToSet()});
-
-
+        $('.remove-song-from-set-button').on('click', function() {removeSongFromSet()});
     });
 
 {% endblock %}
@@ -139,15 +156,20 @@
                     <div class="song-list-add-to-set">
                         <!-- The format of this ID is important,
                             do not change unless you also change the addSongToSet function -->
-                        {% if song.id in song_ids_in_set %}
-                            <input type='image' id="img-addsongtoset-{{ song.id }}"
-                                    class="add-song-to-set-button-added"
-                                    src="{% static 'rechorder/icons/mdi-playlist-check.svg' %}">
-                        {% else %}
                             <input type='image' id="img-addsongtoset-{{ song.id }}"
                                     class="add-song-to-set-button"
-                                    src="{% static 'rechorder/icons/mdi-playlist-plus.svg' %}">
-                        {% endif %}
+                                    src="{% static 'rechorder/icons/mdi-playlist-plus.svg' %}"
+                                    {% if song.id in song_ids_in_set %}
+                                        style="display: none"
+                                    {% endif %}
+                                    >
+                            <input type='image' id="img-removesongfromset-{{ song.id }}"
+                                    class="remove-song-from-set-button"
+                                    src="{% static 'rechorder/icons/mdi-playlist-check.svg' %}"
+                                    {% if song.id not in song_ids_in_set %}
+                                        style="display: none"
+                                    {% endif %}
+                                    >
                     </div>
                 {% endif %}
             </div>

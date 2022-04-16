@@ -20,6 +20,7 @@ urlpatterns = [
     re_path(r'^set/new$', views.set_new, name='set.new'),
     re_path(r'^set/(?P<set_id>[0-9]+)$', views.set, name='set'),
     re_path(r'^set/(?P<set_id>[0-9]+)/addsong$', views.set_add_song, name='set.add_song'),
+    re_path(r'^set/(?P<set_id>[0-9]+)/removesong$', views.set_remove_song, name='set.remove_song'),
     re_path(r'^set/(?P<set_id>[0-9]+)/duplicate', views.set_duplicate, name='set.duplicate'),
     re_path(r'^set/(?P<set_id>[0-9]+)/update$', views.set_update, name='set.update'),
     re_path(r'^set/(?P<set_id>[0-9]+)/delete$', views.set_delete, name='set.delete'),
