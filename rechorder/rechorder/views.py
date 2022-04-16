@@ -373,6 +373,14 @@ def set_duplicate(request, set_id):
     return redirect(reverse('set', args=[this_set.pk]))
 
 
+def set_remove_song(request, set_id):
+    this_set = get_object_or_404(Set, pk=set_id)
+    song_id = int(request.POST.get('song_id'))
+    this_set.song_list = [i for i in this_set.song_list if i['id'] != song_id]
+    this_set.save()
+    return JsonResponse({'success': True})
+
+
 def set_add_song(request, set_id):
     song = Song.objects.get(pk=int(request.POST.get('song_id')))
 

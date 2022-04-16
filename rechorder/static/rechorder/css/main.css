@@ -526,7 +526,7 @@ mark {
     min-width: 3em;
 }
 
-.add-song-to-set-button-added {
+.remove-song-from-set-button {
     min-width: 3em;
     background-color: #c1e6be;
 }
