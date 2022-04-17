@@ -36,6 +36,9 @@ urlpatterns = [
     re_path(r'^slave/(?P<beam_id>[0-9]+)/token$', views.slave_get_update_token, name='slave_token'),
     re_path(r'^settings$', views.settings, name='settings'),
     re_path(r'^settings/set$', views.settings_set, name='settings.set'),
+    re_path(r'^user/login', views.user_login, name='user.login'),
+    re_path(r'^user/create', views.user_create, name='user.create'),
+    re_path(r'^user/logout', views.user_logout, name='user.logout'),
 
     # These aren't so user facing...
     re_path(r'^upload$', views.upload, name='_upload'),

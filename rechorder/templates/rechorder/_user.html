@@ -1,0 +1,226 @@
+{% load static %}
+
+<script type="text/javascript">
+    var username = "{{ user.name | escapejs }}";
+
+    function saveSong() {
+        $('#areyousure').hide();
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url 'songs'  %}',
+            data: {
+                'title': $('#editor-song-title').val(),
+                'artist': $('#editor-song-artist').val(),
+                'original_key': $('#editor-original-key').val(),
+                'key_notes': $('#editor-key-notes').val(),
+                'verse_order': $('#editor-verse-order').val(),
+                'content': $('#editor-song-content').val(),
+            },
+            dataType: 'json',
+            success: function(data) {
+                $('#success').show();
+                $('#editor-verse-order').prop('value', data.verse_order);
+                transposeSettingsChanged();
+                fetchVerseOrderErrors();
+            },
+            complete: function() {
+                $('#btn-user-login').prop('disabled', false);
+            }
+        });
+    }
+
+    function login() {
+        $('#btn-user-login').prop('disabled', true);
+        $('#btn-user-switch-to-create').prop('disabled', true);
+        $("#user-login-errors").hide();
+
+        new_username = $('#user-login-username').val().trim();
+
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url 'user.login'  %}',
+            data: {
+                'username': new_username,
+                'password': $('#user-login-password').val(),
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data['success']) {
+                    username = new_username;
+                    $("#text-username").text(new_username);
+                    switchToLoggedIn();
+                } else {
+                    $("#user-login-errors").text("Username or password invalid");
+                    $("#user-login-errors").show();
+                }
+            },
+            error: function() {
+                $("#user-login-errors").text("Failed to contact server properly");
+                $("#user-login-errors").show();
+            },
+            complete: function() {
+                $('#btn-user-login').prop('disabled', false);
+                $('#btn-user-switch-to-create').prop('disabled', false);
+            },
+        });
+    }
+
+    function showCreateError(message)
+    {
+        $("#user-create-errors").text(message);
+        $("#user-create-errors").show();
+    }
+
+    function createUser() {
+        $("#user-create-errors").hide();
+
+        new_username = $('#user-create-username').val().trim();
+
+        /* Some basic validation */
+        if (new_username.length < 3)
+        {
+            showCreateError("Username must be at least 3 characters long");
+            return;
+        }
+
+        if ($('#user-create-password').val() != $('#user-create-password-2').val())
+        {
+            showCreateError("Passwords don't match");
+            return;
+        }
+
+        $('#btn-user-create').prop('disabled', true);
+        $('#btn-user-switch-to-login').prop('disabled', true);
+
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url 'user.create'  %}',
+            data: {
+                'username': new_username,
+                'password': $('#user-create-password').val(),
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data['success']) {
+                    username = new_username;
+                    $("#text-username").text(username);
+                    switchToLoggedIn();
+                } else {
+                    showCreateError(data['error_message']);
+                }
+            },
+            error: function() {
+                $("#user-create-errors").text("Failed to contact server properly. User not created.");
+                $("#user-create-errors").show();
+            },
+            complete: function() {
+                $('#btn-user-create').prop('disabled', false);
+                $('#btn-user-switch-to-login').prop('disabled', false);
+            },
+        });
+    }
+
+    function logout() {
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url 'user.logout'  %}',
+            data: {},
+            dataType: 'json',
+            success: function(data) {
+                if (data['success']) {
+                    username = "";
+                    $("#text-username").text(username);
+                    switchToLogin();
+                }
+            },
+        });
+    }
+
+    function switchToCreate() {
+        $("#user-create-errors").hide();
+        $("#user-login-errors").hide();
+        $("#user-create-username").val($("#user-login-username").val());
+        $("#user-login").hide();
+        $("#user-create").show();
+        $("#user-logged-in").hide();
+    }
+
+    function switchToLogin() {
+        $("#user-create-errors").hide();
+        $("#user-login-errors").hide();
+        $("#user-login").show();
+        $("#user-create").hide();
+        $("#user-logged-in").hide();
+    }
+
+    function switchToLoggedIn() {
+        $("#user-create-errors").hide();
+        $("#user-login-errors").hide();
+        $("#user-login").hide();
+        $("#user-create").hide();
+        $("#user-logged-in").show();
+    }
+
+    $(function() {
+        $("#user-create-errors").hide();
+        $("#user-login-errors").hide();
+        $("#user-create").hide();
+        if (username == "")
+        {
+            $("#user-logged-in").hide();
+        }
+        else
+        {
+            $("#user-login").hide();
+        }
+
+        $("#text-username").text(username);
+
+        $("#btn-user-switch-to-create").click(switchToCreate);
+        $("#btn-user-switch-to-login").click(switchToLogin);
+        $("#btn-user-login").click(login);
+        $("#btn-user-create").click(createUser);
+        $("#btn-user-logout").click(logout);
+    });
+</script>
+
+<div id="user-logged-in">
+    Currently logged in as: <span id="text-username"></span>
+    <br>
+    <button type="button" id="btn-user-logout">Logout</button>
+</div>
+
+<div id="user-login">
+    Log in:<br>
+    <table>
+        <tr>
+            <td>Username:</td><td><input id="user-login-username" /></td>
+        </tr><tr>
+            <td>Password:</td><td><input type=password id="user-login-password" /></td>
+        </tr>
+    </table>
+    <div class="error-box" id="user-login-errors"></div>
+    <button type="button" id="btn-user-login">Log In</button>
+    <button type="button" id="btn-user-switch-to-create">Create New User</button>
+</div>
+
+<div id="user-create">
+    Create a User:
+    <table>
+        <tr>
+            <td>Username:</td><td><input id="user-create-username" /></td>
+        </tr><tr>
+            <td>Password:</td><td><input type=password id="user-create-password" /></td>
+        </tr><tr>
+            <td>Re-type password:</td><td><input type=password id="user-create-password-2" /></td>
+        </tr>
+    </table>
+    <div class="error-box" id="user-create-errors">
+    </div>
+    <button type="button" id="btn-user-create">Create</button>
+    <button type="button" id="btn-user-switch-to-login">Log in to existing user</button>
+</div>

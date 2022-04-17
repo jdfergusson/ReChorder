@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.db.models import JSONField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
+from django.contrib.auth.hashers import make_password, check_password
 
 from xml.etree import ElementTree
 from xml.dom import minidom
@@ -348,3 +349,16 @@ class Beam(models.Model):
         self.has_changed_count = self.has_changed_count + 1 % 10000
 
         super().save(*args, **kwargs)
+
+
+class User(models.Model):
+    uuid = models.CharField(max_length=36, null=False, unique=True, primary_key=True)
+    name = models.CharField(max_length=64, null=False, unique=True)
+    password = models.CharField(max_length=256, null=False)
+    is_admin = models.BooleanField(default=False)
+
+    def set_password(self, plain_text_password):
+        self.password = make_password(plain_text_password)
+
+    def check_password(self, plain_text_attempt):
+        return check_password(plain_text_attempt, self.password)
