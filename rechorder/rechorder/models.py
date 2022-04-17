@@ -321,6 +321,13 @@ class Set(models.Model):
 
         super().save(*args, **kwargs)
 
+    @property
+    def user(self):
+        try:
+            return User.objects.get(uuid=self.owner)
+        except User.DoesNotExist:
+            return None
+
     def check_list_integrity(self):
         """
         This is basically a hack for not having implemented a properly relational song list

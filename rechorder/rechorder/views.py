@@ -84,6 +84,10 @@ def _get_or_create_device_name(request):
     device_name = request.session.get('device_name')
     if device_name is None:
         device_name = 'Unnamed Device'
+    if device_name == 'Unnamed Device':
+        user = _get_user(request)
+        if user:
+            device_name = "{}'s Device".format(user.name)
         request.session['device_name'] = device_name
     return device_name
 
