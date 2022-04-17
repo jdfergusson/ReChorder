@@ -1,0 +1,56 @@
+{% load static %}
+
+<script type="text/javascript">
+
+    function saveNotes() {
+        var notes = $('#notes-textarea').val().trim();
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url 'set.song.update_notes' set.id current_index %}',
+            data: {
+                'notes': notes,
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data["success"])
+                {
+                    updateNotesOnPage();
+                }
+            },
+        });
+    }
+
+    function clearNotes() {
+        $('#notes-textarea').val("");
+        saveNotes();
+    }
+
+    function updateNotesOnPage() {
+        var notes = $('#notes-textarea').val().trim();
+        $("#notes-text").text(notes);
+        if (notes == "")
+        {
+            $("#notes-section-container").hide();
+        }
+        else {
+            $("#notes-section-container").show()
+        }
+    }
+
+    $(function() {
+        $("#btn-notes-editor-save").click(saveNotes);
+        $("#btn-notes-editor-clear").click(clearNotes);
+        updateNotesOnPage();
+    });
+</script>
+
+<h2>Edit Notes:</h2><br>
+<form>
+    <textarea class="notes-textarea" id="notes-textarea">{{ notes }}</textarea>
+    <br>
+    <div class=editor-buttons">
+        <button id="btn-notes-editor-save" type="button">Save</button>
+        <button id="btn-notes-editor-clear" type="button">Clear</button>
+    </div>
+</form>

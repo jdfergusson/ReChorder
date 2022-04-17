@@ -392,6 +392,7 @@ def set_add_song(request, set_id):
     song_in_set = {
         'id': song.pk,
         'key_index': sounding_key_index,
+        'notes': '',
     }
 
     # Copy un-setted key settings to set settings
@@ -450,6 +451,7 @@ def set(request, set_id):
             'id': s.pk,
             'key_index': song['key_index'],
             'title': s.title,
+            'notes': song.get('notes') or "",
         }
         set_songs.append(set_song)
 
@@ -495,6 +497,17 @@ def set_delete_all_old(request):
     return redirect(reverse('sets'))
 
 
+def set_song_update_notes(request, set_id, song_index):
+    this_set = get_object_or_404(Set, pk=set_id)
+    song_index = int(song_index)
+    try:
+        this_set.song_list[song_index]['notes'] = request.POST.get('notes')
+        this_set.save()
+    except KeyError:
+        return JsonResponse({'success': False})
+    return JsonResponse({'success': True})
+
+
 def set_show_song(request, set_id, song_index):
     try:
         this_set = Set.objects.get(pk=set_id)
@@ -515,6 +528,8 @@ def set_show_song(request, set_id, song_index):
     except Song.DoesNotExist:
         return redirect(reverse('set', args=[this_set.pk]))
 
+    notes = song_in_set.get('notes') or ""
+
     # Update beam if applicable
     if _is_beaming(request):
         beam = _get_or_create_beam(request, this_set)
@@ -533,6 +548,7 @@ def set_show_song(request, set_id, song_index):
         'set_length': len(this_set.song_list),
         'max_index': len(this_set.song_list) - 1,
         'am_i_owner': this_set.owner == _get_or_create_user_uuid(request),
+        'notes': notes,
         **_get_base_song_context_dict(request, song, this_set.pk, song_index),
         **_get_header_links(
             request,

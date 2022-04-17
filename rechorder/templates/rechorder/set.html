@@ -18,7 +18,8 @@
         {% for song in set_songs %}
             {
                 song_id: {{ song.id }},
-                key_index: {{ song.key_index }}
+                key_index: {{ song.key_index }},
+                notes: "{{ song.notes | escapejs }}"
             },
         {% endfor %}
     ];
@@ -35,7 +36,8 @@
 
             new_set.push({
                 id: parseInt(song_id),
-                key_index: parseInt($("#target-key_" + index)[0].value)
+                key_index: parseInt($("#target-key_" + index)[0].value),
+                notes: $("#notes_" + index).text()
             });
         }
 
@@ -265,7 +267,7 @@
                     </td>
                 </tr>
             </table>
-            <div id="editor-buttons">
+            <div class="editor-buttons">
                 <button id="btn-editor-save" type="button">Save</button>
                 <button id="btn-editor-delete" type="button">Delete</button>
             </div>
@@ -315,6 +317,8 @@
                             <img src="{% static 'rechorder/icons/mdi-delete-outline.svg' %}">
                         </button>
                     </div>
+
+                    <div id="notes_{{ forloop.counter0 }}" style="display: none;">{{ song.notes }}</div>
                 {% endif %}
 
             </li>
@@ -330,4 +334,3 @@
         {% if am_i_owner %}Why not add some <a href="{% url 'songs' %}">songs</a>?{% endif %}
     {% endif %}
 {% endblock %}
-
