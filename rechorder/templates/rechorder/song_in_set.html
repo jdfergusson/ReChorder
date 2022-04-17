@@ -36,6 +36,11 @@
             $('#btn-toggle-beam-settings').removeClass('img-action-selected');
         }
 
+        if (tab != 'notes-editor') {
+            $('#notes-editor').hide();
+            $('#btn-toggle-notes-editor').removeClass('img-action-selected');
+        }
+
         $('#' + tab).toggle();
         $('#btn-toggle-' + tab).toggleClass('img-action-selected');
     }
@@ -49,6 +54,9 @@
 
         $('#beam-settings').hide();
         $('#btn-toggle-beam-settings').click(function() {toggleTab('beam-settings');});
+
+        $('#notes-editor').hide();
+        $('#btn-toggle-notes-editor').click(function() {toggleTab('notes-editor');});
 
         document.onkeydown = processKeyPress;
     });
@@ -88,6 +96,8 @@
         </li><li>
             <img class='img-actions' id="btn-toggle-font-resizer" src="{% static 'rechorder/icons/mdi-format-font.svg' %}">
         </li><li>
+            <img class='img-actions' id="btn-toggle-notes-editor" src="{% static 'rechorder/icons/mdi-comment-edit-outline.svg' %}">
+        </li><li>
             <img class='img-actions' id="btn-toggle-beam-settings" src="{% static 'rechorder/icons/mdi-cellphone-text.svg' %}">
         </li>
     </ul>
@@ -101,6 +111,10 @@
     <div class="tab-container" id="beam-settings">
         {% include 'rechorder/_beaming_toggle.html' with set_pk=set.pk song_index=current_index %}
     </div>
+    <div class="tab-container" id="notes-editor">
+        {% include 'rechorder/_notes_editor.html' %}
+        <textbox />
+    </div>
 {% else %}
     <h1>No song. Waiting for beaming to start...</h1>
 {% endif %}
@@ -108,6 +122,13 @@
 
 {% block content %}
 {% if song %}
+    <div id="notes-section-container">
+        <h2>Notes:</h2><br>
+        <span id="notes-text" class="notes">
+            {{ notes }}
+        </span>
+    </div>
+
     <span id="song">
         {% include 'rechorder/_print_song.html' %}
     </span>

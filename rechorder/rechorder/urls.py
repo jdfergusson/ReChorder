@@ -28,6 +28,7 @@ urlpatterns = [
     re_path(r'^set/(?P<set_id>[0-9]+)/rename$', views.set_rename, name='set.rename'),
     re_path(r'^set/(?P<set_id>[0-9]+)/print$', views.set_print, name='set.print'),
     re_path(r'^set/(?P<set_id>[0-9]+)/song/(?P<song_index>[0-9]+)$', views.set_show_song, name='set.song'),
+    re_path(r'^set/(?P<set_id>[0-9]+)/song/(?P<song_index>[0-9]+)/updatenotes$', views.set_song_update_notes, name='set.song.update_notes'),
     re_path(r'^beaming/toggle', views.beaming_toggle, name='beaming.toggle'),
     re_path(r'^beaming/status', views.beaming_status, name='beaming.status'),
     re_path(r'^slave/$', views.get_beams, name='slave'),
