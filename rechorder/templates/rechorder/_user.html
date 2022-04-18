@@ -187,7 +187,6 @@
         $("#btn-user-logout").click(logout);
     });
 </script>
-
 <div id="user-logged-in">
     Currently logged in as: <span id="text-username"></span>
     <br>
@@ -195,21 +194,19 @@
 </div>
 
 <div id="user-login">
-    Log in:<br>
     <table>
         <tr>
             <td>Username:</td><td><input id="user-login-username" /></td>
         </tr><tr>
-            <td>Password:</td><td><input type=password id="user-login-password" /></td>
+            <td>Password:</td><td><input type="password" id="user-login-password" /></td>
         </tr>
     </table>
     <div class="error-box" id="user-login-errors"></div>
-    <button type="button" id="btn-user-login">Log In</button>
+    <button type="button" id="btn-user-login">Log In</button><br><br>
     <button type="button" id="btn-user-switch-to-create">Create New User</button>
 </div>
 
 <div id="user-create">
-    Create a User:
     <table>
         <tr>
             <td>Username:</td><td><input id="user-create-username" /></td>
@@ -221,6 +218,7 @@
     </table>
     <div class="error-box" id="user-create-errors">
     </div>
-    <button type="button" id="btn-user-create">Create</button>
+    <button type="button" id="btn-user-create">Create A New User</button>
+    <br><br>
     <button type="button" id="btn-user-switch-to-login">Log in to existing user</button>
 </div>
