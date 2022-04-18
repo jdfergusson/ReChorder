@@ -74,7 +74,8 @@
                             {{ set.song_list|length }} song{% if set.song_list|length != 1 %}s{% endif %}
                         </span><br>
                         <span class="list-tertiary">
-                            Modified {{ set.last_updated|naturaltime }}
+                            Modified {{ set.last_updated|naturaltime }} 
+                            {% if set.user %} | Created by {{ set.user.name }} {% endif %}
                         </span>
                     </div>
                 </a>
@@ -114,4 +115,3 @@
     </div>
 
 {% endblock %}
-

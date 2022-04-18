@@ -2,6 +2,7 @@ from django.http import (
     HttpResponse,
     HttpResponseNotFound,
     HttpResponseBadRequest,
+    HttpResponseForbidden,
     JsonResponse,
 )
 from django.urls import reverse
@@ -14,6 +15,8 @@ from django.shortcuts import (
 )
 from django.template.loader import render_to_string
 from django.utils.text import slugify
+from django.db.utils import IntegrityError
+from django.db.models.functions import Lower
 
 from copy import deepcopy
 
@@ -26,7 +29,7 @@ import zipfile
 from rechorder.music_handler.interpret import KEYS, ABSOLUTE_LOOKUP, interpret_absolute_chord, song_from_onsong_text
 
 
-from .models import Song, Set, Beam
+from .models import Song, Set, Beam, User
 
 
 def _get_selected_chord_shapes(request):
@@ -64,7 +67,7 @@ def _clear_current_set(request):
     request.session['current_set_id'] = None
 
 
-def _get_or_create_user_uuid(request):
+def _get_user_uuid(request):
     user_uuid = request.session.get('user_uuid')
     if user_uuid is None:
         user_uuid = str(uuid.uuid4())
@@ -72,10 +75,21 @@ def _get_or_create_user_uuid(request):
     return user_uuid
 
 
+def _get_user(request):
+    try:
+        return User.objects.get(uuid=request.session.get('user_uuid'))
+    except User.DoesNotExist:
+        return None
+
+
 def _get_or_create_device_name(request):
     device_name = request.session.get('device_name')
     if device_name is None:
         device_name = 'Unnamed Device'
+    if device_name == 'Unnamed Device':
+        user = _get_user(request)
+        if user:
+            device_name = "{}'s Device".format(user.name)
         request.session['device_name'] = device_name
     return device_name
 
@@ -96,7 +110,7 @@ def _get_section_display_order(request):
     return section_display_order
 
 
-def _get_header_links(request, **overrides):
+def _get_base_context(request, **overrides):
     if 'last_visited_song' in request.session:
         songs_link = reverse('song', args=[request.session['last_visited_song']])
     else:
@@ -111,12 +125,20 @@ def _get_header_links(request, **overrides):
     else:
         set_link = reverse('sets')
 
+    user = _get_user(request)
+    if user and user.is_admin:
+        users_link = reverse('users')
+    else:
+        users_link = ""
+
     links = {
         'header_link_back': '#',
         'header_link_songs': songs_link,
         'header_link_set': set_link,
         'header_link_receive': reverse('slave'),
-        'header_link_settings': reverse('settings')
+        'header_link_users': users_link,
+        'header_link_settings': reverse('settings'),
+        'user': user,
     }
 
     for override in overrides:
@@ -224,7 +246,7 @@ def _get_base_song_context_dict(request, song, set_pk=None, song_in_set=None):
     if current_set_id is not None:
         try:
             set = Set.objects.get(pk=current_set_id)
-            set_is_editable = set.owner == _get_or_create_user_uuid(request)
+            set_is_editable = set.owner == _get_user_uuid(request)
         except Set.DoesNotExist:
             pass
 
@@ -263,7 +285,7 @@ def _is_beaming(request):
 
 
 def _get_or_create_beam(request, set, song_index=None):
-    owner = _get_or_create_user_uuid(request)
+    owner = _get_user_uuid(request)
     if _is_beaming(request):
         beams = Beam.objects.filter(owner=owner)
 
@@ -294,7 +316,7 @@ def _get_or_create_beam(request, set, song_index=None):
 
 
 def _delete_beam(request):
-    owner = _get_or_create_user_uuid(request)
+    owner = _get_user_uuid(request)
     beams = Beam.objects.filter(owner=owner)
     beams.delete()
 
@@ -307,12 +329,17 @@ def index(request):
     return redirect(reverse('songs'))
 
 
+##########################################################################################
+# Sets
+##########################################################################################
+
+
 def sets_mine(request):
     # If we're here we don't have a current set
     _clear_current_set(request)
 
     # Find all sets we have permission to see
-    sets_queryset = Set.objects.filter(owner=_get_or_create_user_uuid(request))
+    sets_queryset = Set.objects.filter(owner=_get_user_uuid(request))
 
     paginator = Paginator(sets_queryset.order_by('-last_updated'), 20)
     page_num = request.GET.get('page', 1)
@@ -320,7 +347,7 @@ def sets_mine(request):
 
     return render(request, 'rechorder/sets_mine.html', {
         'sets': _sets,
-        **_get_header_links(
+        **_get_base_context(
             request,
             header_link_back=reverse('sets')),
     })
@@ -332,7 +359,7 @@ def sets_others(request):
 
     # Find all sets we have permission to see
     sets_queryset = \
-        Set.objects.filter(is_public=True).exclude(owner=_get_or_create_user_uuid(request))
+        Set.objects.filter(is_public=True).exclude(owner=_get_user_uuid(request))
 
     paginator = Paginator(sets_queryset.order_by('-last_updated'), 20)
     page_num = request.GET.get('page', 1)
@@ -340,7 +367,7 @@ def sets_others(request):
 
     return render(request, 'rechorder/sets_others.html', {
         'sets': _sets,
-        **_get_header_links(
+        **_get_base_context(
             request,
             header_link_back=reverse('sets')),
     })
@@ -350,12 +377,12 @@ def sets(request):
     _clear_current_set(request)
 
     return render(request, 'rechorder/sets_choose_view.html', {
-        **_get_header_links(request),
+        **_get_base_context(request),
     })
 
 
 def set_new(request):
-    new_set = Set(owner=_get_or_create_user_uuid(request))
+    new_set = Set(owner=_get_user_uuid(request))
     new_set.save()
     new_set.name = 'New Set {}'.format(new_set.pk)
     new_set.save()
@@ -365,7 +392,7 @@ def set_new(request):
 def set_duplicate(request, set_id):
     this_set = get_object_or_404(Set, pk=set_id)
     this_set.pk = None
-    this_set.owner = _get_or_create_user_uuid(request)
+    this_set.owner = _get_user_uuid(request)
     this_set.is_public = True
     this_set.save()
     this_set.name = "{} Copy of '{}'".format(this_set.pk, this_set.name)
@@ -433,7 +460,7 @@ def set(request, set_id):
     set_songs = []
 
     # Check permissions etc.
-    am_i_owner = this_set.owner == _get_or_create_user_uuid(request)
+    am_i_owner = this_set.owner == _get_user_uuid(request)
     is_viewable = this_set.is_public | am_i_owner
 
     # Make this the current set
@@ -461,7 +488,7 @@ def set(request, set_id):
         'keys': KEYS,
         'am_i_owner': am_i_owner,
         'is_viewable': is_viewable,
-        **_get_header_links(
+        **_get_base_context(
             request,
             header_link_back=reverse('sets_mine') if am_i_owner else reverse('sets_others')),
     })
@@ -547,10 +574,10 @@ def set_show_song(request, set_id, song_index):
         'set': this_set,
         'set_length': len(this_set.song_list),
         'max_index': len(this_set.song_list) - 1,
-        'am_i_owner': this_set.owner == _get_or_create_user_uuid(request),
+        'am_i_owner': this_set.owner == _get_user_uuid(request),
         'notes': notes,
         **_get_base_song_context_dict(request, song, this_set.pk, song_index),
-        **_get_header_links(
+        **_get_base_context(
             request,
             header_link_back=reverse('set', args=[this_set.pk]),
             header_link_set=reverse('set', args=[this_set.pk]),
@@ -582,6 +609,7 @@ def set_print(request, set_id):
             'sounding_key_index': song_in_set['key_index'],
             'key_index': key_index,
             'capo_fret_number': capo_fret_number,
+            'notes': song_in_set['notes'],
         })
 
     context = {
@@ -595,6 +623,11 @@ def set_print(request, set_id):
        context['no_personal_keys'] = True
 
     return render(request, 'rechorder/print_set.html', context)
+
+
+##########################################################################################
+# Beaming
+##########################################################################################
 
 
 def beaming_toggle(request):
@@ -633,7 +666,7 @@ def get_beams(request):
     context = {
         # Will get all sets that have a beamed song index
         'masters': Beam.objects.all().order_by('-last_updated'),
-        **_get_header_links(request),
+        **_get_base_context(request),
     }
     return render(request, 'rechorder/beam_masters.html', context)
 
@@ -644,7 +677,7 @@ def slave_to_master(request, beam_id):
     context_base = {
         'capo_fret_number': 0,
         'beam': beam,
-        **_get_header_links(request, header_link_back=reverse('slave')),
+        **_get_base_context(request, header_link_back=reverse('slave')),
     }
 
     if beam.current_song_index is not None and \
@@ -682,6 +715,11 @@ def slave_to_master(request, beam_id):
 def slave_get_update_token(request, beam_id):
     beam = get_object_or_404(Beam, pk=beam_id)
     return JsonResponse({'update_token': beam.has_changed_count})
+
+
+##########################################################################################
+# Songs
+##########################################################################################
 
 
 def song_update(request, song_id):
@@ -764,7 +802,7 @@ def song_create(request):
     else:
         context = {
             'keys': KEYS,
-            **_get_header_links(request, header_link_back=reverse('songs')),
+            **_get_base_context(request, header_link_back=reverse('songs')),
         }
         return render(request, 'rechorder/song_create.html', context)
 
@@ -832,7 +870,7 @@ def songs(request):
     # In this case, the current set is only wanted if it's owned by the current user.
     song_ids_in_set = []
     try:
-        this_set = Set.objects.get(pk=_get_current_set_id(request), owner=_get_or_create_user_uuid(request))
+        this_set = Set.objects.get(pk=_get_current_set_id(request), owner=_get_user_uuid(request))
         song_ids_in_set = [i['id'] for i in this_set.song_list]
         current_set_id = this_set.pk
     except Set.DoesNotExist:
@@ -849,7 +887,7 @@ def songs(request):
         'keys': KEYS,
         'current_set_id': current_set_id,
         'song_ids_in_set': song_ids_in_set,
-        **_get_header_links(request, header_link_songs=reverse('songs'))
+        **_get_base_context(request, header_link_songs=reverse('songs'))
     }
     return render(request, 'rechorder/songs.html', context)
 
@@ -867,7 +905,7 @@ def song(request, song_id):
     context = {
         'song': song,
         **_get_base_song_context_dict(request, song),
-        **_get_header_links(
+        **_get_base_context(
             request,
             header_link_songs=reverse('songs'),
             header_link_back='{}#song{}'.format(reverse('songs'), song.id),
@@ -875,6 +913,9 @@ def song(request, song_id):
     }
     return render(request, 'rechorder/song.html', context)
 
+##########################################################################################
+# Settings
+##########################################################################################
 
 def download_xml(request):
     songs = Song.objects.all()
@@ -897,9 +938,9 @@ def settings(request):
         'chord_display_style': _get_display_style(request),
         'opt_line_breaks': _get_optional_line_breaks_setting(request),
         'section_display_order': _get_section_display_order(request),
-        **_get_header_links(request),
+        **_get_base_context(request),
     }
-    return render(request, 'rechorder/user_settings.html', context)
+    return render(request, 'rechorder/settings.html', context)
 
 
 def settings_set(request):
@@ -913,13 +954,150 @@ def settings_set(request):
 
     # Try to update the user's beam if it exists
     try:
-        beam = Beam.objects.get(owner=_get_or_create_user_uuid(request))
+        beam = Beam.objects.get(owner=_get_user_uuid(request))
         beam.beamer_device_name = request.session['device_name']
         beam.save()
     except Beam.DoesNotExist:
         pass
 
     return JsonResponse({'success': True})
+
+##########################################################################################
+# Users
+##########################################################################################
+
+
+def user_login(request):
+    username = request.POST['username']
+    password = request.POST['password']
+
+    try:
+        user = User.objects.get(name=username)
+    except User.DoesNotExist:
+        return JsonResponse({'success': False})
+
+    if not user.check_password(password):
+        return JsonResponse({'success': False})
+
+    request.session['user_uuid'] = user.uuid
+    request.session.modified = True
+
+    return JsonResponse({'success': True})
+
+
+def user_create(request):
+    username = request.POST['username']
+    password = request.POST['password']
+    # By using the current uuid, we make the new user the owner of the sets that the device making the request owns.
+    uuid = _get_user_uuid(request)
+
+    # Test for a current user with the same username
+    try:
+        User.objects.get(name=username)
+        return JsonResponse({'success': False, 'error_message': 'A user with that name already exists'})
+    except User.DoesNotExist:
+        pass
+
+    # Check that the UUID hasn't come from a user that's already logged in
+    try:
+        User.objects.get(uuid=uuid)
+        return JsonResponse({'success': False, 'error_message': 'Something went wrong. Do you need to logout?'})
+    except User.DoesNotExist:
+        pass
+
+    try:
+        user = User(uuid=uuid, name=username)
+        user.set_password(password)
+        user.save()
+    except IntegrityError:
+        return JsonResponse({'success': False, 'error_message': 'Something went wrong, please try different values'})
+
+    request.session['user_uuid'] = user.uuid
+    request.session.modified = True
+
+    return JsonResponse({'success': True})
+
+
+def user_logout(request):
+    request.session.pop('user_uuid')
+    request.session.modified = True
+    return JsonResponse({'success': True})
+
+
+def users(request):
+    current_user = get_object_or_404(User, uuid=_get_user_uuid(request))
+
+    if not current_user.is_admin:
+        return redirect(reverse('user', args=[current_user.id]))
+
+    paginator = Paginator(User.objects.all().order_by(Lower('name')), 10)
+    page_num = request.GET.get('page', 1)
+    _users = paginator.get_page(page_num)
+
+    context = {
+        'users': _users,
+        **_get_base_context(
+            request,
+            header_link_back="javascript:history.back()"
+        ),
+    }
+    return render(request, 'rechorder/users.html', context)
+
+
+def user(request, user_id=None, user_name=None):
+    current_user = _get_user(request)
+
+    if user_id is not None:
+        user = get_object_or_404(User, id=user_id)
+    else:
+        user = get_object_or_404(User, name=user_name)
+
+    if not (current_user and (current_user == user or current_user.is_admin)):
+        return HttpResponseForbidden()
+
+    context = {
+        'this_user': user,
+        **_get_base_context(
+            request,
+            header_link_back="javascript:history.back()"
+        ),
+    }
+    return render(request, 'rechorder/user.html', context)
+
+
+def user_update(request, user_id):
+    current_user = get_object_or_404(User, uuid=_get_user_uuid(request))
+    this_user = get_object_or_404(User, id=user_id)
+
+    if current_user != this_user and not current_user.is_admin:
+        return HttpResponseForbidden()
+
+    if 'username' in request.POST:
+        this_user.name = request.POST['username'].strip()
+        this_user.save()
+        return JsonResponse({'success': True})
+
+    elif 'password' in request.POST:
+        this_user.set_password(request.POST['password'])
+        this_user.save()
+        return JsonResponse({'success': True})
+
+    elif 'is_admin' in request.POST:
+        if not current_user.is_admin:
+            return HttpResponseForbidden()
+        this_user.is_admin = request.POST['is_admin'] == "true"
+        this_user.save()
+        return JsonResponse({'success': True})
+
+    else:
+        return HttpResponseBadRequest()
+
+    return JsonResponse({'success': False})
+
+
+##########################################################################################
+# Admin
+##########################################################################################
 
 
 def upload(request):

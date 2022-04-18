@@ -28,7 +28,12 @@
 
     function updateNotesOnPage() {
         var notes = $('#notes-textarea').val().trim();
-        $("#notes-text").text(notes);
+        $("#notes-text").html(notes.replace(/&/g, '&amp;')
+                                   .replace(/>/g, '&gt;')
+                                   .replace(/</g, '&lt;')
+                                   .replace(/"/g, '&quot;')
+                                   .replace(/'/g, '&apos;')
+                                   .replace('\n', '<br />'));
         if (notes == "")
         {
             $("#notes-section-container").hide();

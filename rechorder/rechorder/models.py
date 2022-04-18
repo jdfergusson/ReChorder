@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.db.models import JSONField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
+from django.contrib.auth.hashers import make_password, check_password
 
 from xml.etree import ElementTree
 from xml.dom import minidom
@@ -60,7 +61,6 @@ class Song(models.Model):
 
         if self.verse_order == "":
             problems.append("Verse order empty")
-
 
         verses_in_order = {}
 
@@ -307,6 +307,7 @@ class Set(models.Model):
     song_list = JSONField(null=False, default=list)
     last_updated = models.DateTimeField(auto_now=True)
     # Owner is a UUID, but the UUID django field has a bug, so we'll just store it as a string
+    # The UUID may match an actual User object, or it may just point to someone's local session.
     owner = models.CharField(max_length=36, default='')
     name = models.CharField(max_length=200, default='')
     is_public = models.BooleanField(default=True)
@@ -319,6 +320,13 @@ class Set(models.Model):
             self.name = "Unnamed set"
 
         super().save(*args, **kwargs)
+
+    @property
+    def user(self):
+        try:
+            return User.objects.get(uuid=self.owner)
+        except User.DoesNotExist:
+            return None
 
     def check_list_integrity(self):
         """
@@ -348,3 +356,23 @@ class Beam(models.Model):
         self.has_changed_count = self.has_changed_count + 1 % 10000
 
         super().save(*args, **kwargs)
+
+
+class User(models.Model):
+    uuid = models.CharField(max_length=36, null=False, unique=True)
+    name = models.CharField(max_length=64, null=False, unique=True)
+    password = models.CharField(max_length=256, null=False)
+    is_admin = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+    def set_password(self, plain_text_password):
+        self.password = make_password(plain_text_password)
+
+    def check_password(self, plain_text_attempt):
+        return check_password(plain_text_attempt, self.password)
+
+    @property
+    def sets(self):
+        return Set.objects.filter(owner=self.uuid)

@@ -39,6 +39,18 @@
             >
         </a>
 
+        {% if user.is_admin %}
+            <a href="{{ header_link_users }}">
+                <img
+                        id="img-header-users"
+                        src="{% static 'rechorder/icons/mdi-account-multiple-outline.svg' %}"
+                        {% if selected == 'users' %}
+                            class="selected"
+                        {% endif %}
+                >
+            </a>
+        {% endif %}
+
         <a href="{{ header_link_settings }}">
             <img
                     id="img-header-settings"

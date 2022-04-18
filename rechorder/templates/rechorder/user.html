@@ -1,0 +1,153 @@
+{% extends 'rechorder/_base.html' %}
+{% load static %}
+
+{% block subtitle %}
+    Edit User -
+{% endblock %}
+
+{% block javascript %}
+    function showError(message)
+    {
+        $("#errors").text(message);
+        $("#errors").show();
+    }
+
+    function changeUsername() {
+        $("#errors").hide();
+
+        username = $('#text-username').val().trim();
+        if (username.length < 3) {
+            showError("Username should be 3 characters or longer");
+            return;
+        }
+
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url 'user.update' this_user.id  %}',
+            data: {
+                'username': username
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data['success']) {
+                    $('#btn-change-username').addClass('btn-successful');
+                    $('#title').text(username);
+                }
+                else {
+                    showError("Something went wrong");
+                }
+            },
+            error: function() {
+                showError("Something went wrong");
+            }
+        });
+    }
+
+    function changePassword() {
+        $("#errors").hide();
+
+        password = $('#text-password').val();
+        if (password != $('#text-password-2').val()) {
+            showError("Passwords don't match");
+            return;
+        }
+
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url 'user.update' this_user.id  %}',
+            data: {
+                'password': password
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data['success']) {
+                    $('#btn-change-password').addClass('btn-successful');
+                }
+                else {
+                    showError("Something went wrong");
+                }
+            },
+            error: function() {
+                showError("Something went wrong");
+            }
+        });
+    }
+
+    function changeIsAdmin() {
+        is_admin = $('#check-is-admin').prop('checked');
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url 'user.update' this_user.id  %}',
+            data: {
+                'is_admin': is_admin
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (!data['success']) {
+                    showError("Something went wrong");
+                    $('#check-is-admin').prop('checked', !is_admin);
+                }
+            },
+            error: function() {
+                showError("Something went wrong");
+                $('#check-is-admin').prop('checked', !is_admin);
+            }
+        });
+    }
+
+    $(function() {
+        $("#btn-change-username").click(changeUsername);
+        $("#btn-change-password").click(changePassword);
+
+        {% if user.is_admin %}
+            $("#check-is-admin").click(changeIsAdmin);
+        {% endif %}
+
+        $("#errors").hide();
+
+        {% if user.is_admin %}
+            {% if this_user.is_admin %}
+                $('#check-is-admin').prop('checked', true);
+            {% else %}
+                $('#check-is-admin').prop('checked', false);
+            {% endif %}
+        {% endif %}
+    });
+{% endblock %}
+
+{% block header %}
+    {% include 'rechorder/_header.html' with selected="users" %}
+{% endblock %}
+
+{% block title %}
+    <h1 id="title">{{ this_user.name }}</h1><br>
+    <h2>Edit User Details</h2>
+
+{% endblock %}
+
+{% block content %}
+<div class="error-box" id="errors">
+</div>
+<form class="spacious-form">
+    <h2>Username</h2><br>
+    <input id="text-username" type="text" value="{{ this_user.name }}"/><br>
+    <button id="btn-change-username" type="button">Change</button>
+    <hr>
+    <h2>Password</h2><br>
+    <input id="text-password" type="password" /><br>
+    <input id="text-password-2" type="password" /><br>
+    <button id="btn-change-password" type="button">Change</button>
+</form>
+
+    {% if user.is_admin %}
+        <form class="settings-boxes yes-no-selection">
+            <hr>
+            <input class="pressable" type="checkbox" id="check-is-admin" name="check-is-admin">
+            <label for="check-is-admin" class="key-label">Admin</label>
+        </form>
+    {% endif %}
+
+{% endblock %}
