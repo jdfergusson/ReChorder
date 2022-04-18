@@ -1025,7 +1025,10 @@ def user_logout(request):
 
 
 def users(request):
-    current_user = get_object_or_404(User, uuid=_get_user_uuid(request), is_admin=True)
+    current_user = get_object_or_404(User, uuid=_get_user_uuid(request))
+
+    if not current_user.is_admin:
+        return redirect(reverse('user', args=[current_user.id]))
 
     paginator = Paginator(User.objects.all().order_by(Lower('name')), 10)
     page_num = request.GET.get('page', 1)

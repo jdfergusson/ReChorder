@@ -185,11 +185,14 @@
         $("#btn-user-login").click(login);
         $("#btn-user-create").click(createUser);
         $("#btn-user-logout").click(logout);
+        $("#btn-go-to-edit").click(function() {window.location.href = "{% url 'users' %}";});
+
     });
 </script>
 <div id="user-logged-in">
-    Currently logged in as: <span id="text-username"></span>
+    Currently logged in as: <span id="text-username"></span><br>
     <br>
+    <button type="button" id="btn-go-to-edit">Edit User</button>
     <button type="button" id="btn-user-logout">Logout</button>
 </div>
 
