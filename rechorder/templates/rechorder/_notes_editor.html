@@ -28,12 +28,13 @@
 
     function updateNotesOnPage() {
         var notes = $('#notes-textarea').val().trim();
-        $("#notes-text").html(notes.replace(/&/g, '&amp;')
-                                   .replace(/>/g, '&gt;')
-                                   .replace(/</g, '&lt;')
-                                   .replace(/"/g, '&quot;')
-                                   .replace(/'/g, '&apos;')
-                                   .replace('\n', '<br />'));
+        console.log(notes);
+        $("#notes-text").html(notes.replaceAll(/&/g, '&amp;')
+                                   .replaceAll(/>/g, '&gt;')
+                                   .replaceAll(/</g, '&lt;')
+                                   .replaceAll(/"/g, '&quot;')
+                                   .replaceAll(/'/g, '&apos;')
+                                   .replaceAll('\n', '<br />'));
         if (notes == "")
         {
             $("#notes-section-container").hide();
