@@ -50,7 +50,7 @@
                 if (data['success']) {
                     username = new_username;
                     $("#text-username").text(new_username);
-                    switchToLoggedIn();
+                    window.location.reload();
                 } else {
                     $("#user-login-errors").text("Username or password invalid");
                     $("#user-login-errors").show();
@@ -107,7 +107,7 @@
                 if (data['success']) {
                     username = new_username;
                     $("#text-username").text(username);
-                    switchToLoggedIn();
+                    window.location.reload();
                 } else {
                     showCreateError(data['error_message']);
                 }
@@ -134,7 +134,7 @@
                 if (data['success']) {
                     username = "";
                     $("#text-username").text(username);
-                    switchToLogin();
+                    window.location.reload();
                 }
             },
         });
@@ -165,6 +165,12 @@
         $("#user-logged-in").show();
     }
 
+    function loginOnEnter(event) {
+        if (event.keyCode == 13) {
+            login();
+        }
+    }
+
     $(function() {
         $("#user-create-errors").hide();
         $("#user-login-errors").hide();
@@ -180,6 +186,9 @@
 
         $("#text-username").text(username);
 
+        $("#user-login-password").keyup(loginOnEnter);
+        $("#user-login-username").keyup(loginOnEnter);
+
         $("#btn-user-switch-to-create").click(switchToCreate);
         $("#btn-user-switch-to-login").click(switchToLogin);
         $("#btn-user-login").click(login);
@@ -190,7 +199,7 @@
     });
 </script>
 <div id="user-logged-in">
-    Currently logged in as: <span id="text-username"></span><br>
+    Currently logged in as: <span class="contains-username" id="text-username"></span><br>
     <br>
     <button type="button" id="btn-go-to-edit">Edit User</button>
     <button type="button" id="btn-user-logout">Logout</button>

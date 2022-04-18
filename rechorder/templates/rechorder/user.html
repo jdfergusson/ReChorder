@@ -119,7 +119,11 @@
 {% endblock %}
 
 {% block header %}
-    {% include 'rechorder/_header.html' with selected="users" %}
+    {% if user.is_admin %}
+        {% include 'rechorder/_header.html' with selected="users" %}
+    {% else %}
+        {% include 'rechorder/_header.html' with selected="settings" %}
+    {% endif %}
 {% endblock %}
 
 {% block title %}
