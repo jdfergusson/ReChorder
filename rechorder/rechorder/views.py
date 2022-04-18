@@ -2,6 +2,7 @@ from django.http import (
     HttpResponse,
     HttpResponseNotFound,
     HttpResponseBadRequest,
+    HttpResponseForbidden,
     JsonResponse,
 )
 from django.urls import reverse
@@ -15,6 +16,7 @@ from django.shortcuts import (
 from django.template.loader import render_to_string
 from django.utils.text import slugify
 from django.db.utils import IntegrityError
+from django.db.models.functions import Lower
 
 from copy import deepcopy
 
@@ -108,7 +110,7 @@ def _get_section_display_order(request):
     return section_display_order
 
 
-def _get_header_links(request, **overrides):
+def _get_base_context(request, **overrides):
     if 'last_visited_song' in request.session:
         songs_link = reverse('song', args=[request.session['last_visited_song']])
     else:
@@ -123,12 +125,20 @@ def _get_header_links(request, **overrides):
     else:
         set_link = reverse('sets')
 
+    user = _get_user(request)
+    if user and user.is_admin:
+        users_link = reverse('users')
+    else:
+        users_link = ""
+
     links = {
         'header_link_back': '#',
         'header_link_songs': songs_link,
         'header_link_set': set_link,
         'header_link_receive': reverse('slave'),
-        'header_link_settings': reverse('settings')
+        'header_link_users': users_link,
+        'header_link_settings': reverse('settings'),
+        'user': user,
     }
 
     for override in overrides:
@@ -337,7 +347,7 @@ def sets_mine(request):
 
     return render(request, 'rechorder/sets_mine.html', {
         'sets': _sets,
-        **_get_header_links(
+        **_get_base_context(
             request,
             header_link_back=reverse('sets')),
     })
@@ -357,7 +367,7 @@ def sets_others(request):
 
     return render(request, 'rechorder/sets_others.html', {
         'sets': _sets,
-        **_get_header_links(
+        **_get_base_context(
             request,
             header_link_back=reverse('sets')),
     })
@@ -367,7 +377,7 @@ def sets(request):
     _clear_current_set(request)
 
     return render(request, 'rechorder/sets_choose_view.html', {
-        **_get_header_links(request),
+        **_get_base_context(request),
     })
 
 
@@ -478,7 +488,7 @@ def set(request, set_id):
         'keys': KEYS,
         'am_i_owner': am_i_owner,
         'is_viewable': is_viewable,
-        **_get_header_links(
+        **_get_base_context(
             request,
             header_link_back=reverse('sets_mine') if am_i_owner else reverse('sets_others')),
     })
@@ -567,7 +577,7 @@ def set_show_song(request, set_id, song_index):
         'am_i_owner': this_set.owner == _get_user_uuid(request),
         'notes': notes,
         **_get_base_song_context_dict(request, song, this_set.pk, song_index),
-        **_get_header_links(
+        **_get_base_context(
             request,
             header_link_back=reverse('set', args=[this_set.pk]),
             header_link_set=reverse('set', args=[this_set.pk]),
@@ -599,6 +609,7 @@ def set_print(request, set_id):
             'sounding_key_index': song_in_set['key_index'],
             'key_index': key_index,
             'capo_fret_number': capo_fret_number,
+            'notes': song_in_set['notes'],
         })
 
     context = {
@@ -655,7 +666,7 @@ def get_beams(request):
     context = {
         # Will get all sets that have a beamed song index
         'masters': Beam.objects.all().order_by('-last_updated'),
-        **_get_header_links(request),
+        **_get_base_context(request),
     }
     return render(request, 'rechorder/beam_masters.html', context)
 
@@ -666,7 +677,7 @@ def slave_to_master(request, beam_id):
     context_base = {
         'capo_fret_number': 0,
         'beam': beam,
-        **_get_header_links(request, header_link_back=reverse('slave')),
+        **_get_base_context(request, header_link_back=reverse('slave')),
     }
 
     if beam.current_song_index is not None and \
@@ -791,7 +802,7 @@ def song_create(request):
     else:
         context = {
             'keys': KEYS,
-            **_get_header_links(request, header_link_back=reverse('songs')),
+            **_get_base_context(request, header_link_back=reverse('songs')),
         }
         return render(request, 'rechorder/song_create.html', context)
 
@@ -876,7 +887,7 @@ def songs(request):
         'keys': KEYS,
         'current_set_id': current_set_id,
         'song_ids_in_set': song_ids_in_set,
-        **_get_header_links(request, header_link_songs=reverse('songs'))
+        **_get_base_context(request, header_link_songs=reverse('songs'))
     }
     return render(request, 'rechorder/songs.html', context)
 
@@ -894,7 +905,7 @@ def song(request, song_id):
     context = {
         'song': song,
         **_get_base_song_context_dict(request, song),
-        **_get_header_links(
+        **_get_base_context(
             request,
             header_link_songs=reverse('songs'),
             header_link_back='{}#song{}'.format(reverse('songs'), song.id),
@@ -927,8 +938,7 @@ def settings(request):
         'chord_display_style': _get_display_style(request),
         'opt_line_breaks': _get_optional_line_breaks_setting(request),
         'section_display_order': _get_section_display_order(request),
-        'user': _get_user(request),
-        **_get_header_links(request),
+        **_get_base_context(request),
     }
     return render(request, 'rechorder/settings.html', context)
 
@@ -966,8 +976,6 @@ def user_login(request):
     except User.DoesNotExist:
         return JsonResponse({'success': False})
 
-    print(user)
-
     if not user.check_password(password):
         return JsonResponse({'success': False})
 
@@ -1001,8 +1009,7 @@ def user_create(request):
         user = User(uuid=uuid, name=username)
         user.set_password(password)
         user.save()
-    except IntegrityError as e:
-        print(e)
+    except IntegrityError:
         return JsonResponse({'success': False, 'error_message': 'Something went wrong, please try different values'})
 
     request.session['user_uuid'] = user.uuid
@@ -1015,6 +1022,74 @@ def user_logout(request):
     request.session.pop('user_uuid')
     request.session.modified = True
     return JsonResponse({'success': True})
+
+
+def users(request):
+    current_user = get_object_or_404(User, uuid=_get_user_uuid(request), is_admin=True)
+
+    paginator = Paginator(User.objects.all().order_by(Lower('name')), 10)
+    page_num = request.GET.get('page', 1)
+    _users = paginator.get_page(page_num)
+
+    context = {
+        'users': _users,
+        **_get_base_context(
+            request,
+            header_link_back="javascript:history.back()"
+        ),
+    }
+    return render(request, 'rechorder/users.html', context)
+
+
+def user(request, user_id=None, user_name=None):
+    current_user = _get_user(request)
+
+    if user_id is not None:
+        user = get_object_or_404(User, id=user_id)
+    else:
+        user = get_object_or_404(User, name=user_name)
+
+    if not (current_user and (current_user == user or current_user.is_admin)):
+        return HttpResponseForbidden()
+
+    context = {
+        'this_user': user,
+        **_get_base_context(
+            request,
+            header_link_back="javascript:history.back()"
+        ),
+    }
+    return render(request, 'rechorder/user.html', context)
+
+
+def user_update(request, user_id):
+    current_user = get_object_or_404(User, uuid=_get_user_uuid(request))
+    this_user = get_object_or_404(User, id=user_id)
+
+    if current_user != this_user and not current_user.is_admin:
+        return HttpResponseForbidden()
+
+    if 'username' in request.POST:
+        this_user.name = request.POST['username'].strip()
+        this_user.save()
+        return JsonResponse({'success': True})
+
+    elif 'password' in request.POST:
+        this_user.set_password(request.POST['password'])
+        this_user.save()
+        return JsonResponse({'success': True})
+
+    elif 'is_admin' in request.POST:
+        if not current_user.is_admin:
+            return HttpResponseForbidden()
+        this_user.is_admin = request.POST['is_admin'] == "true"
+        this_user.save()
+        return JsonResponse({'success': True})
+
+    else:
+        return HttpResponseBadRequest()
+
+    return JsonResponse({'success': False})
 
 
 ##########################################################################################

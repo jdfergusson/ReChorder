@@ -45,11 +45,21 @@
     <h2>{{ song_details.song.artist }}</h2><br>
     <h3>
         Sounding key: {{ song_details.sounding_key_index|num2chord }}<br>
-        Shown in {{ song_details.key_index|num2chord }} Capo: {{ song_details.capo_fret_number}}
+        Shown in {{ song_details.key_index|num2chord }} Capo: {{ song_details.capo_fret_number}}<br>
     </h3>
+    <br>
+
+    {% if song_details.notes %}
+        <h2>
+            Notes:<br>
+        </h2>
+        <i> {{ song_details.notes | linebreaksbr }} </i>
+        <br>
+        <br>
+    {% endif %}
 
     <span id="song">
-        {% include 'rechorder/_print_song.html' with song=song_details.song %}
+        {% include 'rechorder/_print_song.html' with song=song_details.song is_verse_order_okay=True %}
     </span>
     <p style="page-break-after: always"></p>
 {% endfor %}

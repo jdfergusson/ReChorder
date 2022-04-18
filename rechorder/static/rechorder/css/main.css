@@ -244,6 +244,22 @@ textarea {
     width: 100%;
 }
 
+hr {
+    height: 0px;
+    border: 0px;
+    border-bottom: 1px solid #626262;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.spacious-form button {
+    margin-top: 5px;
+}
+
+.spacious-form input {
+    margin-top: 5px;
+}
+
 /**********************************************************
  * Song notes
  *********************************************************/
@@ -268,7 +284,6 @@ textarea {
 #notes-section-container h2 {
     font-style: italic;
 }
-
 
 /**********************************************************
  * Error box

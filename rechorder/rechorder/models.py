@@ -62,7 +62,6 @@ class Song(models.Model):
         if self.verse_order == "":
             problems.append("Verse order empty")
 
-
         verses_in_order = {}
 
         for i in self.verse_order.split(' '):
@@ -308,6 +307,7 @@ class Set(models.Model):
     song_list = JSONField(null=False, default=list)
     last_updated = models.DateTimeField(auto_now=True)
     # Owner is a UUID, but the UUID django field has a bug, so we'll just store it as a string
+    # The UUID may match an actual User object, or it may just point to someone's local session.
     owner = models.CharField(max_length=36, default='')
     name = models.CharField(max_length=200, default='')
     is_public = models.BooleanField(default=True)
@@ -359,13 +359,20 @@ class Beam(models.Model):
 
 
 class User(models.Model):
-    uuid = models.CharField(max_length=36, null=False, unique=True, primary_key=True)
+    uuid = models.CharField(max_length=36, null=False, unique=True)
     name = models.CharField(max_length=64, null=False, unique=True)
     password = models.CharField(max_length=256, null=False)
     is_admin = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
 
     def set_password(self, plain_text_password):
         self.password = make_password(plain_text_password)
 
     def check_password(self, plain_text_attempt):
         return check_password(plain_text_attempt, self.password)
+
+    @property
+    def sets(self):
+        return Set.objects.filter(owner=self.uuid)
