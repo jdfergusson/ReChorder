@@ -124,8 +124,9 @@ class Song(models.Model):
                             line = ''.join([i['lyric'] for i in line])
                             line = line.replace('&nbsp;', ' ').strip()
                             line = re.sub(r' {2,}', ' ', line)
-                            _lines = ElementTree.SubElement(_verse, 'lines')
-                            _lines.text = line
+                            if line.strip():
+                                _lines = ElementTree.SubElement(_verse, 'lines')
+                                _lines.text = line
                     _lines.set("break", "optional")
             if _lines is not None:
                 _lines.attrib.pop("break")
