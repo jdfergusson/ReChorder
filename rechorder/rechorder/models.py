@@ -47,8 +47,10 @@ class Song(models.Model):
         return reverse('song', args=[str(self.id)])
 
     def save(self, *args, **kwargs):
-        # Let's make sure the set has a name while we're here
         self.verse_order = self.verse_order.strip().lower().replace(',', '')
+
+        # Remove double blank lines from text
+        self.raw = re.sub(r"^([\s]*\n){2,}", "\n", self.raw, flags=re.MULTILINE)
 
         super().save(*args, **kwargs)
 
@@ -124,8 +126,9 @@ class Song(models.Model):
                             line = ''.join([i['lyric'] for i in line])
                             line = line.replace('&nbsp;', ' ').strip()
                             line = re.sub(r' {2,}', ' ', line)
-                            _lines = ElementTree.SubElement(_verse, 'lines')
-                            _lines.text = line
+                            if line.strip():
+                                _lines = ElementTree.SubElement(_verse, 'lines')
+                                _lines.text = line
                     _lines.set("break", "optional")
             if _lines is not None:
                 _lines.attrib.pop("break")
