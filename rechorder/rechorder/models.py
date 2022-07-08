@@ -47,8 +47,10 @@ class Song(models.Model):
         return reverse('song', args=[str(self.id)])
 
     def save(self, *args, **kwargs):
-        # Let's make sure the set has a name while we're here
         self.verse_order = self.verse_order.strip().lower().replace(',', '')
+
+        # Remove double blank lines from text
+        self.raw = re.sub(r"^([\s]*\n){2,}", "\n", self.raw, flags=re.MULTILINE)
 
         super().save(*args, **kwargs)
 
