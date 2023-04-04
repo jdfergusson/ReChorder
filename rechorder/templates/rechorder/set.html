@@ -50,19 +50,6 @@
         });
     }
 
-
-    function clearList() {
-        $.ajax({
-            url: '{% url 'set.clear' set.pk %}',
-            /* It seems ajax requires some data for it to work correctly */
-            data: {clear: true},
-            dataType: 'json',
-            success: function (data) {
-                location.reload();
-            }
-        });
-    }
-
     function getObjInList(obj) {
         while (true) {
             if (obj.is('li')) {
@@ -135,8 +122,6 @@
                 }
                 onListChange();
             });
-
-            $("#btn-clear-set-list").click(clearList);
 
             for (let i = 0; i < initial_set_list.length; i++) {
                 $("#target-key_" + i)[0].value = initial_set_list[i].key_index;
@@ -327,7 +312,6 @@
 
 
     {% if set_songs %}
-        {% if am_i_owner %}<button id="btn-clear-set-list">Clear set list</button>{% endif %}
         <a href="{% url 'set.print' set.pk %}"><img class="img-btn right-aligned-img" src="{% static 'rechorder/icons/mdi-printer.svg' %}"></a>
     {% else %}
         Set list currently empty.

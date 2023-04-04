@@ -446,14 +446,6 @@ def set_add_song(request, set_id):
         return JsonResponse({'success': True})
 
 
-def set_clear(request, set_id):
-    this_set = get_object_or_404(Set, pk=set_id)
-    this_set.song_list = []
-    this_set.beamed_song_index = -1
-    this_set.save()
-    return JsonResponse({'success': True})
-
-
 def set(request, set_id):
     this_set = get_object_or_404(Set, pk=set_id)
     this_set.check_list_integrity()
@@ -594,7 +586,6 @@ def set_print(request, set_id):
     for i in range(len(this_set.song_list)):
         song_in_set = this_set.song_list[i]
         song = Song.objects.get(pk=song_in_set['id'])
-        request.GET.get('no_personal_keys', False)
         if request.GET.get('no_personal_keys', False):
             key_index =  song_in_set['key_index']
             capo_fret_number = 0
