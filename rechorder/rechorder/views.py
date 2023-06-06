@@ -716,6 +716,7 @@ def slave_get_update_token(request, beam_id):
 def song_update(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
 
+    # Can't be None
     title = request.POST.get('title')
     artist = request.POST.get('artist')
     original_key = int(request.POST.get('original_key'))
@@ -723,9 +724,16 @@ def song_update(request, song_id):
     verse_order = request.POST.get('verse_order')
     content = request.POST.get('content')
 
+    # Can be None
+    try:
+        ccli_number = int(request.POST.get('ccli_number'))
+    except (ValueError, TypeError):
+        ccli_number = None
+
     if None not in (title, artist, original_key, key_notes, content):
         song.title = title
         song.artist = artist
+        song.ccli_number = ccli_number
         song.original_key = original_key
         song.key_notes = key_notes
         song.verse_order = verse_order
@@ -779,6 +787,7 @@ def song_create(request):
         song = Song(
             title=request.POST.get('title'),
             artist=request.POST.get('artist'),
+            ccli_number=request.POST.get('ccli_number'),
             original_key=request.POST.get('original_key'),
             key_notes=request.POST.get('key_notes', ''),
             verse_order=request.POST.get('verse_order', ''),

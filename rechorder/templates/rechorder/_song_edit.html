@@ -3,6 +3,7 @@
 <script type="text/javascript">
     function saveSong() {
         $('#areyousure').hide();
+        console.log($('#editor-song-ccli-number').val());
         $.ajax({
             type: 'POST',
             headers: { "X-CSRFToken": '{{ csrf_token }}' },
@@ -10,6 +11,7 @@
             data: {
                 'title': $('#editor-song-title').val(),
                 'artist': $('#editor-song-artist').val(),
+                'ccli_number': $('#editor-song-ccli-number').val(),
                 'original_key': $('#editor-original-key').val(),
                 'key_notes': $('#editor-key-notes').val(),
                 'verse_order': $('#editor-verse-order').val(),
@@ -86,6 +88,7 @@
     $(function() {
         $('#editor-song-title').val("{{ song.title|escapejs }}");
         $('#editor-song-artist').val("{{ song.artist|escapejs }}");
+        $('#editor-song-ccli-number').val("{{ song.ccli_number|escapejs }}");
         $('#editor-original-key').val("{{ song.original_key }}");
         $('#editor-key-notes').val("{{ song.key_notes|escapejs }}");
         $('#editor-verse-order').val("{{ song.verse_order|escapejs }}");
@@ -101,6 +104,7 @@
 
         $('#editor-song-title').focus(onEdit);
         $('#editor-song-artist').focus(onEdit);
+        $('#editor-song-ccli-number').focus(onEdit);
         $('#editor-original-key').focus(onEdit);
         $('#editor-key-notes').focus(onEdit);
         $('#editor-song-content').focus(onEdit);
@@ -119,6 +123,7 @@
     <table>
         <tr><td>Title: </td><td><input id="editor-song-title"></td></tr>
         <tr><td>Artist: </td><td><input id="editor-song-artist"></td></tr>
+        <tr><td>CCLI Number: </td><td><input id="editor-song-ccli-number" type="number"></td></tr>
         <tr>
             <td>Original Key:</td>
             <td>

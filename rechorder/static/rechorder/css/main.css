@@ -502,6 +502,11 @@ mark {
 .key-filter-button-selected, .key-filter-button-selected:hover {
     background-color: #ced1ec;
 }
+
+.footnote {
+    font-size: x-small;
+}
+
 /**********************************************************
  * Song list
  **********************************************************/

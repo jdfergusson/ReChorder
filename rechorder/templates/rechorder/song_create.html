@@ -17,6 +17,7 @@
             data: {
                 'title': $('#song-title').val(),
                 'artist':  $('#song-artist').val(),
+                'ccli_number':  $('#song-ccli-number').val(),
                 'original_key':  $('#original-key').val(),
                 'key_notes': $('#editor-key-notes').val(),
                 'verse_order': $('#editor-verse-order').val(),
@@ -24,7 +25,6 @@
             },
             dataType: 'json',
             success: function(data) {
-
                 if (data.success == true) {
                     window.location = data.new_song_url;
                 }
@@ -71,7 +71,8 @@
     <table>
         <tr><td>Title: </td><td><input id="song-title"></td></tr>
         <tr><td>Artist: </td><td><input id="song-artist"></td></tr>
-            <tr><td>Original Key:</td>
+        <tr><td>CCLI Number: </td><td><input id="song-ccli-number"></td></tr>
+        <tr><td>Original Key:</td>
         <td><select id="original-key">
             {% for key in keys %}
                 <option value="{{ forloop.counter0 }}">{{ key }}</option>
