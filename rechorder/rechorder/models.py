@@ -129,7 +129,12 @@ class Song(models.Model):
                             if line.strip():
                                 _lines = ElementTree.SubElement(_verse, 'lines')
                                 _lines.text = line
-                    _lines.set("break", "optional")
+                    if _lines is not None:
+                        _lines.set("break", "optional")
+                # For some reason, casting an element to boolean will reveal whether it has any children.
+                # This will remove a verse that has no lyrics in
+                if not _verse:
+                    _lyrics.remove(_verse)
             if _lines is not None:
                 _lines.attrib.pop("break")
 
