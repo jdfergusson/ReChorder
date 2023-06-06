@@ -54,4 +54,7 @@
             <hr class="song-section-hr">
         {% endfor %}
     {% endif %}
+    {% if song.ccli_number %}
+        <div class="footnote">CCLI number: {{ song.ccli_number }}</div>
+    {% endif %}
 {% endif %}

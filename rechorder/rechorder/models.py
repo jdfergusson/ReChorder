@@ -34,6 +34,7 @@ class Song(models.Model):
     verse_order = models.CharField(max_length=200, null=False, default="")
     created_at = models.DateTimeField(auto_now_add=True)
     raw = models.TextField()
+    ccli_number = models.IntegerField(null=True, default=None)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
