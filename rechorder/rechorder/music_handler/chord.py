@@ -62,7 +62,7 @@ class Chord:
 
         self._quality = quality
 
-        if bass_index:
+        if bass_index is not None:
             self.bass_index = (bass_index - self._original_key_index + 12) % 12
         else:
             self.bass_index = None

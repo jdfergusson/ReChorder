@@ -39,7 +39,6 @@ def interpret_absolute_chord(string):
     bass_string = s[1] if len(s) > 1 else ''
     s = s[0]
 
-
     qualifier_search = re.search(r'(add|sus|m|min|man|aug|dim|[0-9])', s)
     if qualifier_search is None:
         note = s
@@ -60,7 +59,7 @@ def interpret_absolute_chord(string):
         # Invalid note - no bass
         bass_index = None
 
-    return (index, qualification, bass_index)
+    return index, qualification, bass_index
 
 
 def _extract_keyword(keyword, text):
