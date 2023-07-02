@@ -787,7 +787,7 @@ def song_create(request):
         song = Song(
             title=request.POST.get('title'),
             artist=request.POST.get('artist'),
-            ccli_number=request.POST.get('ccli_number'),
+            ccli_number=request.POST.get('ccli_number') or None,
             original_key=request.POST.get('original_key'),
             key_notes=request.POST.get('key_notes', ''),
             verse_order=request.POST.get('verse_order', ''),
