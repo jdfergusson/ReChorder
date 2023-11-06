@@ -171,15 +171,15 @@ def _get_transpose_data(request, song_pk, item_in_set=None):
     return request.session.get('keys_in_sets', {}).get('{}'.format(item_in_set.pk))
 
 
-def _set_transpose_data(request, song_pk, transpose_data, item_in_set=None,):
+def _set_transpose_data(request, song_pk, transpose_data, item_in_set=None):
     if item_in_set is None:
         keys_dict = request.session.get('keys', {})
         keys_dict['{}'.format(song_pk)] = deepcopy(transpose_data)
         request.session['keys'] = keys_dict
     else:
-        keys_dict = request.session.get('keys_in_set', {})
-        keys_dict['{}'.format(song_pk)] = deepcopy(transpose_data)
-        request.session['keys_in_set'] = keys_dict
+        keys_dict = request.session.get('keys_in_sets', {})
+        keys_dict['{}'.format(item_in_set.pk)] = deepcopy(transpose_data)
+        request.session['keys_in_sets'] = keys_dict
     request.session.modified = True
 
 
@@ -716,7 +716,7 @@ def slave_to_master(request, beam_id):
     if beam.current_item is not None:
         song = beam.current_item.song
 
-        # TODO: Why are we pasing the song and the current item, when the current item contains the song
+        # TODO: Why are we passing the song and the current item, when the current item contains the song
         key_index, capo_fret_number = _get_song_key_index(
             request,
             song,
@@ -884,12 +884,11 @@ def song_transpose(request):
             # Default to original key
             sounding_key_index = song.original_key
         transpose_data['sounding_key_index'] = sounding_key_index
-        item_in_set=None
+        item_in_set = None
     else:
         transpose_data['sounding_key_index'] = request.POST['sounding_key_index']
+        # This looks fragile, but if we've got bad data we want to throw an error
         item_in_set = ItemInSet.objects.filter(set=set_id, index_in_set=song_in_set_index)[0]
-
-    # This looks fragile, but if we've got bad data we want to throw an error
 
     # Save the key information
     _set_transpose_data(request, song_id, transpose_data, item_in_set=item_in_set)
@@ -901,7 +900,7 @@ def song_transpose(request):
     return JsonResponse({
         'song_html': render_to_string(
             'rechorder/_print_song.html',
-            {'song': song, **_get_base_song_context_dict(request, song)}
+            {'song': song, **_get_base_song_context_dict(request, song, item_in_set=item_in_set)}
         ),
         'key_details': _get_key_details(request, song, item_in_set=item_in_set),
         'song_meta': {
