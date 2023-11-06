@@ -551,15 +551,10 @@ def set_delete_all_old(request):
     return redirect(reverse('sets'))
 
 
-def set_song_update_notes(request, set_id, song_index):
-    # TODO this should take ItemInSet id
-    this_set = get_object_or_404(Set, pk=set_id)
-    song_index = int(song_index)
-    try:
-        this_set.song_list[song_index]['notes'] = request.POST.get('notes')
-        this_set.save()
-    except KeyError:
-        return JsonResponse({'success': False})
+def set_song_update_notes(request, item_in_set_id):
+    item_in_set = get_object_or_404(ItemInSet, pk=item_in_set_id)
+    item_in_set.notes = request.POST.get('notes')
+    item_in_set.save()
     return JsonResponse({'success': True})
 
 
@@ -608,6 +603,7 @@ def set_show_song(request, set_id, song_index):
         'song': song,
         'current_index': song_index,
         'set': this_set,
+        'item_in_set': set_item,
         'set_length': set_length,
         'max_index': set_length - 1,
         'am_i_owner': this_set.owner == _get_user_uuid(request),
@@ -912,7 +908,6 @@ def song_transpose(request):
 
 def songs(request):
     _songs = Song.objects.order_by('title')
-
 
     # In this case, the current set is only wanted if it's owned by the current user.
     song_ids_in_set = []
