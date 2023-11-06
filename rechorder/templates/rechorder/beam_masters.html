@@ -21,16 +21,18 @@
             <li id="song-in-list">
                 <div class="list-expander">
                     <a href="{% url 'slave_to' master.pk %}">
-                        <span class="list-primary">{{ master.set.name }}</span><br>
+                        <span class="list-primary">{% if  master.current_item %}{{ master.current_item.set.name }}{% else %}No Set{% endif %}</span><br>
                         <span class="list-secondary">Beamed by: {{ master.beamer_device_name }}</span><br>
                         <span class="list-tertiary">last used {{ master.last_updated|naturaltime }}</span>
                     </a>
                 </div>
-                <div>
-                    <a href="{% url 'set.print' master.set.pk %}">
-                        <img class="img-btn" src="{% static 'rechorder/icons/mdi-printer.svg' %}">
-                    </a>
-                </div>
+                {% if master.current_item %}
+                    <div>
+                        <a href="{% url 'set.print' master.current_item.set.pk %}">
+                            <img class="img-btn" src="{% static 'rechorder/icons/mdi-printer.svg' %}">
+                        </a>
+                    </div>
+                {% endif %}
             </li>
         {% endfor %}
     </ul>

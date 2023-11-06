@@ -313,8 +313,8 @@ class Song(models.Model):
 
 
 class Set(models.Model):
-    song_list = JSONField(null=False, default=list)
     last_updated = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     # Owner is a UUID, but the UUID django field has a bug, so we'll just store it as a string
     # The UUID may match an actual User object, or it may just point to someone's local session.
     owner = models.CharField(max_length=36, default='')
@@ -337,31 +337,31 @@ class Set(models.Model):
         except User.DoesNotExist:
             return None
 
-    def check_list_integrity(self):
-        """
-        This is basically a hack for not having implemented a properly relational song list
-        """
-        self.song_list = [song for song in self.song_list if Song.objects.filter(pk=song['id']).exists()]
-        # Don't update the has_changed_count here
-        super().save()
-
     def __str__(self):
-        return '"{}" containing {} songs'.format(self.name, len(self.song_list))
+        return '"{}" containing {} songs'.format(self.name, self.num_of_songs)
+
+    @property
+    def num_of_songs(self):
+        return self.items.count()
+
+
+class ItemInSet(models.Model):
+    set = models.ForeignKey(Set, null=False, on_delete=models.CASCADE, related_name='items')
+    index_in_set = models.IntegerField(null=False)
+    song = models.ForeignKey(Song, null=False, on_delete=models.CASCADE)
+    sounding_key_index = models.IntegerField(null=False)
+    notes = models.TextField()
 
 
 class Beam(models.Model):
-    set = models.ForeignKey(Set, null=False, on_delete=models.CASCADE)
     last_updated = models.DateTimeField(auto_now=True)
     # Owner is a UUID, but the UUID django field has a bug, so we'll just store it as a string
     owner = models.CharField(max_length=36, default='')
-    current_song_index = models.IntegerField(null=True, default=None)
+    current_item = models.ForeignKey(ItemInSet, null=True, on_delete=models.SET_NULL, default=None)
     has_changed_count = models.IntegerField(default=0)
     beamer_device_name = models.CharField(max_length=200, default='Unknown')
 
     def save(self, *args, **kwargs):
-        if self.current_song_index is not None:
-            if not 0 <= self.current_song_index < len(self.set.song_list):
-                self.current_song_index = None
         self.has_changed_count = self.has_changed_count + 1 % 10000
 
         super().save(*args, **kwargs)

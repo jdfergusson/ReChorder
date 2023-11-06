@@ -14,38 +14,42 @@
 {% endblock %}
 
 {% block javascript %}
-    var initial_set_list = [
-        {% for song in set_songs %}
-            {
-                song_id: {{ song.id }},
-                key_index: {{ song.key_index }},
-                notes: "{{ song.notes | escapejs }}"
-            },
-        {% endfor %}
-    ];
+    function deleteItem()
+    {
+        var obj_in_list = getObjInList($(this));
+
+        item_pk = getDbRefFromObj(obj_in_list);
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url 'set.item.delete' %}.',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            data: {item_id: item_pk},
+            dataType: 'json',
+            success: function(data) {
+                if (obj_in_list)
+                {
+                    obj_in_list.remove()
+                }
+            }
+        });
+    }
 
     function onListChange()
     {
         var idsInOrder = $("#set-list").sortable("toArray");
 
-        var new_set = [];
+        var new_order = [];
         for (let i = 0; i < idsInOrder.length; i++)
         {
-            song_id = idsInOrder[i].split("_")[2];
-            index = idsInOrder[i].split("_")[1];
-
-            new_set.push({
-                id: parseInt(song_id),
-                key_index: parseInt($("#target-key_" + index)[0].value),
-                notes: $("#notes_" + index).text()
-            });
+            new_order.push(parseInt(idsInOrder[i].split("_")[1]));
         }
 
         $.ajax({
             type: 'POST',
-            url: '{% url 'set.update' set.pk %}',
+            url: '{% url 'set.update_order' set.pk %}',
             headers: { "X-CSRFToken": '{{ csrf_token }}' },
-            data: {new_set: JSON.stringify(new_set)},
+            data: {new_order: JSON.stringify(new_order)},
             dataType: 'json'
         });
     }
@@ -62,6 +66,10 @@
                 obj = obj.parent();
             }
         }
+    }
+
+    function getDbRefFromObj(obj) {
+        return obj.attr("id").split("_")[1];
     }
 
     function toggleTab(tab) {
@@ -90,7 +98,6 @@
             },
             dataType: 'json',
             success: function(data) {
-                console.log("Hello");
                 $('#success').show();
                 $('#name-read-only').text(data.new_name);
                 $('#input-set-name').val(data.new_name);
@@ -98,7 +105,7 @@
         });
     }
 
-    function delete_set() {
+    function deleteSet() {
         $('#success').hide();
         $('#areyousure-message').text(
             "Are you sure you want to delete this set? This is non-reversible."
@@ -106,27 +113,32 @@
         $('#areyousure').show();
     }
 
+    function setKey() {
+        item_in_set_id = getDbRefFromObj(getObjInList($(this)));
+        key_index = $("#target-key_" + item_in_set_id).val();
+        $.ajax({
+            type: 'POST',
+            url: '{% url 'item_in_set.set_key' 9999 %}'.replace("9999", item_in_set_id),
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            data: {sounding_key_index: key_index},
+            dataType: 'json'
+        });
+    }
+
     $( function() {
-        {% if am_i_owner %}
+        {% if can_edit %}
             /* Set up sortable list */
             $("#set-list").sortable({
                 update: onListChange,
                 handle: '.sortable-list-handle'
             });
             $("#set-list").disableSelection();
-            $("#set-list .set-item-delete").click(function() {
-                var obj_in_list = getObjInList($(this));
-                if (obj_in_list)
-                {
-                    obj_in_list.remove()
-                }
-                onListChange();
-            });
+            $("#set-list .set-item-delete").click(deleteItem);
 
-            for (let i = 0; i < initial_set_list.length; i++) {
-                $("#target-key_" + i)[0].value = initial_set_list[i].key_index;
-                $("#target-key_" + i).change(onListChange);
-            }
+            {% for item in set_items %}
+                $("#target-key_{{ item.id }}")[0].value = {{ item.sounding_key_index }};
+                $("#target-key_{{ item.id }}").change(setKey);
+            {% endfor %}
 
 
             $('#editor').hide();
@@ -145,7 +157,7 @@
             $('#success').hide();
 
             $('#btn-editor-save').click(save);
-            $('#btn-editor-delete').click(delete_set);
+            $('#btn-editor-delete').click(deleteSet);
 
             $('#btn-ays-yes').click(function() {
                 $.ajax({
@@ -174,11 +186,9 @@
         });
 
         /* If the set has no songs and we're the owner, we can assume it's new - focus on the set name */
-        {% if not set_songs %}
-            {% if am_i_owner %}
-                toggleTab('editor');
-                $('#input-set-name').focus();
-            {% endif %}
+        {% if not set_items and can_edit %}
+            toggleTab('editor');
+            $('#input-set-name').focus();
         {% endif %}
 
     });
@@ -189,8 +199,8 @@
 {% endblock %}
 
 {% block title %}
-    {% if am_i_owner %}
-        {% if set_songs %}
+    {% if can_edit %}
+        {% if set_items %}
             <a href="{% url 'set.song' set.pk 0 %}">
                 <img class="img-btn right-aligned-img"
                      src="{% static 'rechorder/icons/mdi-chevron-right-box-outline.svg' %}">
@@ -217,8 +227,7 @@
         &#8594;</h2><br>
     <h1><span id="name-read-only">{{ set.name }}</span></h1>
 
-    <!-- Only edit if we've got ownership of the set -->
-    {% if am_i_owner %}
+    {% if can_edit %}
         <ul class="tab-list">
             <li>
                 <img class="img-actions" id='btn-toggle-editor' src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
@@ -269,14 +278,14 @@
 
 {% block content %}
     <ul id="set-list"
-        {% if am_i_owner %}
+        {% if can_edit %}
             class="main-content-list sortable-list"
         {% else %}
             class="main-content-list"
         {% endif %}
     >
-        {% for song in set_songs %}
-            <li id="set-item_{{ forloop.counter0 }}_{{ song.id }}">
+        {% for item in set_items %}
+            <li id="set-item_{{ item.pk }}">
                 {% if am_i_owner %}
                     <div>
                         <img class="sortable-list-handle" src="{% static 'rechorder/icons/mdi-drag.svg' %}">
@@ -284,13 +293,13 @@
                 {% endif %}
                 <div class="list-expander">
                     <a class="song-in-set-link" href="#">
-                        <span class="list-primary">{{ song.title }}</span><br>
-                        <span class="list-secondary">Sounding key: {{ song.key_index|num2chord }}</span>
+                        <span class="list-primary">{{ item.song.title }}</span><br>
+                        <span class="list-secondary">Sounding key: {{ item.sounding_key_index|num2chord }}</span>
                     </a>
                 </div>
                 {% if am_i_owner %}
                     <div>
-                        <select id="target-key_{{ forloop.counter0 }}">
+                        <select id="target-key_{{ item.pk }}">
                             {% for key in keys %}
                                 <option value="{{ forloop.counter0 }}">{{ key }}</option>
                             {% endfor %}
@@ -298,12 +307,10 @@
                     </div>
 
                     <div>
-                        <button class="img-btn set-item-delete">
+                        <button class="img-btn set-item-delete" id="set-item-delete_{{ item.pk }}">
                             <img src="{% static 'rechorder/icons/mdi-delete-outline.svg' %}">
                         </button>
                     </div>
-
-                    <div id="notes_{{ forloop.counter0 }}" style="display: none;">{{ song.notes }}</div>
                 {% endif %}
 
             </li>
@@ -311,10 +318,11 @@
     </ul>
 
 
-    {% if set_songs %}
+    <!-- TODO: Does this still work? -->
+    {% if set_items %}
         <a href="{% url 'set.print' set.pk %}"><img class="img-btn right-aligned-img" src="{% static 'rechorder/icons/mdi-printer.svg' %}"></a>
     {% else %}
         Set list currently empty.
-        {% if am_i_owner %}Why not add some <a href="{% url 'songs' %}">songs</a>?{% endif %}
+        {% if can_edit %}Why not add some <a href="{% url 'songs' %}">songs</a>?{% endif %}
     {% endif %}
 {% endblock %}

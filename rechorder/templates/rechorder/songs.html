@@ -31,7 +31,7 @@
         function removeSongFromSet() {
             source_element = event.srcElement
             song_id = source_element.id.split("-")[2];
-            var data = {'song_id': song_id, 'go_live': false};
+            var data = {'song_id': song_id};
 
             $.ajax({
                 type: 'POST',

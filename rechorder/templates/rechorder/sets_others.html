@@ -71,7 +71,7 @@
                     <div class="song-in-list">
                         <span class="list-primary">{{ set.name }}</span><br>
                         <span class="list-secondary">
-                            {{ set.song_list|length }} song{% if set.song_list|length != 1 %}s{% endif %}
+                            {{ set.num_of_songs }} song{% if set.num_of_songs != 1 %}s{% endif %}
                         </span><br>
                         <span class="list-tertiary">
                             Modified {{ set.last_updated|naturaltime }} 
