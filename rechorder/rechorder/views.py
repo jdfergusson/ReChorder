@@ -350,7 +350,7 @@ def sets_mine(request):
     # Find all sets we have permission to see
     sets_queryset = Set.objects.filter(owner=_get_user_uuid(request))
 
-    paginator = Paginator(sets_queryset.order_by('-last_updated'), 20)
+    paginator = Paginator(sets_queryset.order_by('-created_at'), 20)
     page_num = request.GET.get('page', 1)
     _sets = paginator.get_page(page_num)
 
@@ -370,7 +370,7 @@ def sets_others(request):
     sets_queryset = \
         Set.objects.filter(is_public=True).exclude(owner=_get_user_uuid(request))
 
-    paginator = Paginator(sets_queryset.order_by('-last_updated'), 20)
+    paginator = Paginator(sets_queryset.order_by('-created_at'), 20)
     page_num = request.GET.get('page', 1)
     _sets = paginator.get_page(page_num)
 

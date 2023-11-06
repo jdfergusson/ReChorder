@@ -74,8 +74,8 @@
                             {{ set.num_of_songs }} song{% if set.num_of_songs != 1 %}s{% endif %}
                         </span><br>
                         <span class="list-tertiary">
-                            Modified {{ set.last_updated|naturaltime }} 
-                            {% if set.user %} | Created by {{ set.user.name }} {% endif %}
+                            Created {{ set.created_at|naturaltime }}
+                            {% if set.user %} by {{ set.user.name }} {% endif %}
                         </span>
                     </div>
                 </a>
