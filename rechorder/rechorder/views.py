@@ -480,7 +480,7 @@ def set_add_song(request, set_id):
         return JsonResponse({'success': True})
 
 
-def set(request, set_id):
+def view_set(request, set_id):
     this_set = get_object_or_404(Set, pk=set_id)
     set_songs = []
 
