@@ -27,7 +27,7 @@ function processKeyPress(e) {
             }
             else
             {
-                new_scroll_loc = document.body.scrollTop - n;
+                new_scroll_loc = windows.scrollY - n;
                 $("html, body").animate({ scrollTop: new_scroll_loc }, 200);
             }
         }
@@ -42,7 +42,7 @@ function processKeyPress(e) {
             }
             else
             {
-                new_scroll_loc = document.body.scrollTop + n;
+                new_scroll_loc = window.scrollY + n;
                 $("html, body").animate({ scrollTop: new_scroll_loc }, 200);
             }
         }
