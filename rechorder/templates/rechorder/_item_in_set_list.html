@@ -1,0 +1,47 @@
+{% load static %}
+{% load rechorder_tags %}
+
+<li id="set-item_{{ item.pk }}">
+    {% if can_edit %}
+        <div>
+            <img class="sortable-list-handle" src="{% static 'rechorder/icons/mdi-drag.svg' %}">
+        </div>
+    {% endif %}
+    {% if item.item_type == ItemInSetType.SONG %}
+        <div class="list-expander">
+            <a class="song-in-set-link" href="#">
+                <span class="list-primary">{{ item.song.title }}</span><br>
+                <span class="list-secondary">Sounding key: {{ item.sounding_key_index|num2chord }}</span>
+            </a>
+        </div>
+        {% if can_edit %}
+            <div>
+                <select id="target-key_{{ item.pk }}">
+                    {% for key in keys %}
+                        <option value="{{ forloop.counter0 }}">{{ key }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+    {% elif item.item_type == ItemInSetType.TEXT %}
+        <div class="list-expander">
+            <span class="list-primary text-item-in-set" id="set-item-title_{{ item.pk }}">{{ item.title }}</span>
+            <input id="set-item-text-input_{{ item.pk }}"><br>
+        </div>
+        <div>
+            <button class="img-btn set-item-edit" id="set-item-edit_{{ item.pk }}">
+                <img src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
+            </button>
+            <button class="img-btn set-item-edit" id="set-item-edit-done_{{ item.pk }}">
+                <img src="{% static 'rechorder/icons/mdi-content-save-outline.svg' %}">
+            </button>
+        </div>
+    {% endif %}
+    {% if can_edit %}
+        <div>
+            <button class="img-btn set-item-delete" id="set-item-delete_{{ item.pk }}">
+                <img src="{% static 'rechorder/icons/mdi-delete-outline.svg' %}">
+            </button>
+        </div>
+    {% endif %}
+</li>

@@ -605,6 +605,10 @@ mark {
     padding-left: 0;
 }
 
+.text-item-in-set {
+    font-style: italic;
+}
+
 
 /**********************************************************
  * Song in set specifics

@@ -55,7 +55,7 @@
 {% endblock %}
 
 {% block title %}
-{% if song %}
+{% if item_in_set.item_type == ItemInSetType.SONG %}
      <a href="{% url 'song' song.id %}">
         <img class="img-btn right-aligned-img"
              src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
@@ -86,6 +86,8 @@
     <div class="tab-container" id="font-resizer">
         {% include 'rechorder/_font_resizer.html' %}
     </div>
+{% elif item_in_set.item_type == ItemInSetType.TEXT %}
+    <h1>{{ item_in_set.title }}</h1>
 {% else %}
     <h1>No song. Waiting for beaming to start...</h1>
 {% endif %}

@@ -28,7 +28,6 @@
 
     function updateNotesOnPage() {
         var notes = $('#notes-textarea').val().trim();
-        console.log(notes);
         $("#notes-text").html(notes.replaceAll(/&/g, '&amp;')
                                    .replaceAll(/>/g, '&gt;')
                                    .replaceAll(/</g, '&lt;')

@@ -67,7 +67,7 @@
 {% endblock %}
 
 {% block title %}
-{% if song %}
+{% if item_in_set.item_type == ItemInSetType.SONG %}
      <a href="{% url 'song' song.id %}">
         <img class="img-btn right-aligned-img"
              src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
@@ -112,41 +112,43 @@
         {% include 'rechorder/_beaming_toggle.html' with set_pk=set.pk song_index=current_index %}
     </div>
     <div class="tab-container" id="notes-editor">
-        {% include 'rechorder/_notes_editor.html' %}
+        {% include 'rechorder/_notes_editor.html' with notes=item_in_set.notes%}
     </div>
+{% elif item_in_set.item_type == ItemInSetType.TEXT %}
+    <h1>{{ item_in_set.title }}</h1>
 {% else %}
-    <h1>No song. Waiting for beaming to start...</h1>
+    Whoops
 {% endif %}
+
 {% endblock %}
 
 {% block content %}
-{% if song %}
+{% if item_in_set.item_type == ItemInSetType.SONG %}
     <div id="notes-section-container">
         <h2>Notes:</h2><br>
         <span id="notes-text" class="notes">
-            {{ notes }}
+            {{ item_in_set.notes }}
         </span>
     </div>
 
     <span id="song">
         {% include 'rechorder/_print_song.html' %}
     </span>
-
-    <div id="set-nav-btns">
-        {% if current_index > 0 %}
-            <a href="{% url 'set.song' set.id current_index|add:'-1' %}">
-                <img src="{% static 'rechorder/icons/mdi-chevron-left-box-outline.svg' %}">
-            </a>
-        {% endif %}
-
-
-        {% if current_index < max_index %}
-            <a href="{% url 'set.song' set.id current_index|add:'1' %}">
-                <img class="right-aligned-img" src="{% static 'rechorder/icons/mdi-chevron-right-box-outline.svg' %}">
-            </a>
-        {% endif %}
-    </div>
 {% endif %}
 
+<div id="set-nav-btns">
+    {% if current_index > 0 %}
+        <a href="{% url 'set.song' set.id current_index|add:'-1' %}">
+            <img src="{% static 'rechorder/icons/mdi-chevron-left-box-outline.svg' %}">
+        </a>
+    {% endif %}
+
+
+    {% if current_index < max_index %}
+        <a href="{% url 'set.song' set.id current_index|add:'1' %}">
+            <img class="right-aligned-img" src="{% static 'rechorder/icons/mdi-chevron-right-box-outline.svg' %}">
+        </a>
+    {% endif %}
+</div>
 
 {% endblock %}

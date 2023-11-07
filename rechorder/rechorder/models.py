@@ -341,16 +341,25 @@ class Set(models.Model):
         return '"{}" containing {} songs'.format(self.name, self.num_of_songs)
 
     @property
-    def num_of_songs(self):
+    def num_of_items(self):
         return self.items.count()
 
 
 class ItemInSet(models.Model):
+    class ItemInSetType(models.IntegerChoices):
+        SONG = 1
+        TEXT = 2
     set = models.ForeignKey(Set, null=False, on_delete=models.CASCADE, related_name='items')
     index_in_set = models.IntegerField(null=False)
-    song = models.ForeignKey(Song, null=False, on_delete=models.CASCADE)
-    sounding_key_index = models.IntegerField(null=False)
-    notes = models.TextField()
+    item_type = models.IntegerField(choices=ItemInSetType.choices, null=False)
+
+    # Song info
+    song = models.ForeignKey(Song, null=True, blank=True, on_delete=models.CASCADE)
+    sounding_key_index = models.IntegerField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+
+    # Text info
+    title = models.CharField(max_length=200, blank=True, null=True)
 
 
 class Beam(models.Model):
