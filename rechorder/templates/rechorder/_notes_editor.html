@@ -7,7 +7,7 @@
         $.ajax({
             type: 'POST',
             headers: { "X-CSRFToken": '{{ csrf_token }}' },
-            url: '{% url 'set.song.update_notes' set.id current_index %}',
+            url: '{% url 'item_in_set.update_notes' item_in_set.id %}',
             data: {
                 'notes': notes,
             },
