@@ -159,6 +159,7 @@
             dataType: 'json',
             success: function(data) {
                 $('#set-list').append(data.html);
+                setItemInSetLinks();
                 setUpNewTextItem(data.item_pk, data.title);
                 textItemStartEdit(data.item_pk);
                 $("#set-item-text-input_" + data.item_pk).select();
@@ -184,6 +185,17 @@
                     textItemCompleteEdit(item_pk);
                 }
             });
+    }
+
+    function setItemInSetLinks() {
+        $('.song-in-set-link').click(function() {
+            obj_in_list = getObjInList($(this));
+
+            if (obj_in_list)
+            {
+                window.location.href = "{% url 'set.song' set.pk 9999 %}".replace('9999', obj_in_list.index());
+            }
+        });
     }
 
     $( function() {
@@ -242,14 +254,7 @@
             });
         {% endif %}
 
-        $('.song-in-set-link').click(function() {
-            obj_in_list = getObjInList($(this));
-
-            if (obj_in_list)
-            {
-                window.location.href = "{% url 'set.song' set.pk 9999 %}".replace('9999', obj_in_list.index());
-            }
-        });
+        setItemInSetLinks();
 
         /* If the set has no songs and we're the owner, we can assume it's new - focus on the set name */
         {% if not set_items and can_edit %}

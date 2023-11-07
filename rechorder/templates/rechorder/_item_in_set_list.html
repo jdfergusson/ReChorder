@@ -25,17 +25,24 @@
         {% endif %}
     {% elif item.item_type == ItemInSetType.TEXT %}
         <div class="list-expander">
-            <span class="list-primary text-item-in-set" id="set-item-title_{{ item.pk }}">{{ item.title }}</span>
-            <input id="set-item-text-input_{{ item.pk }}"><br>
+            <a class="song-in-set-link" href="#">
+                <span class="list-primary text-item-in-set" id="set-item-title_{{ item.pk }}">{{ item.title }}</span>
+            </a>
+            {% if can_edit %}
+                <input id="set-item-text-input_{{ item.pk }}">
+            {% endif %}
+            <br>
         </div>
-        <div>
-            <button class="img-btn set-item-edit" id="set-item-edit_{{ item.pk }}">
-                <img src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
-            </button>
-            <button class="img-btn set-item-edit" id="set-item-edit-done_{{ item.pk }}">
-                <img src="{% static 'rechorder/icons/mdi-content-save-outline.svg' %}">
-            </button>
-        </div>
+        {% if can_edit %}
+            <div>
+                <button class="img-btn set-item-edit" id="set-item-edit_{{ item.pk }}">
+                    <img src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
+                </button>
+                <button class="img-btn set-item-edit" id="set-item-edit-done_{{ item.pk }}">
+                    <img src="{% static 'rechorder/icons/mdi-content-save-outline.svg' %}">
+                </button>
+            </div>
+        {% endif %}
     {% endif %}
     {% if can_edit %}
         <div>
