@@ -344,6 +344,10 @@ class Set(models.Model):
     def num_of_items(self):
         return self.items.count()
 
+    @property
+    def num_of_songs(self):
+        return ItemInSet.objects.filter(set=self, item_type=ItemInSet.ItemInSetType.SONG).count()
+
 
 class ItemInSet(models.Model):
     class ItemInSetType(models.IntegerChoices):
