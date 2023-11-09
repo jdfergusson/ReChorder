@@ -114,14 +114,87 @@
     }
 
     function setKey() {
-        item_in_set_id = getDbRefFromObj(getObjInList($(this)));
+        item_id = getDbRefFromObj(getObjInList($(this)));
         key_index = $("#target-key_" + item_in_set_id).val();
         $.ajax({
             type: 'POST',
-            url: '{% url 'item_in_set.set_key' 9999 %}'.replace("9999", item_in_set_id),
+            url: '{% url 'item_in_set.set_key' 9999 %}'.replace("9999", item_id),
             headers: { "X-CSRFToken": '{{ csrf_token }}' },
             data: {sounding_key_index: key_index},
             dataType: 'json'
+        });
+    }
+
+    function textItemStartEdit(item_id) {
+        $("#set-item-title_" + item_id).hide();
+        $("#set-item-edit_" + item_id).hide();
+        $("#set-item-edit-done_" + item_id).show();
+        $("#set-item-text-input_" + item_id).show();
+        $("#set-item-text-input_" + item_id).focus();
+    }
+
+    function textItemCompleteEdit(item_id) {
+        new_title = $("#set-item-text-input_" + item_id).val();
+        $.ajax({
+            type: 'POST',
+            url: '{% url 'item_in_set.set_title' 9999 %}'.replace("9999", item_id),
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            data: {new_title: new_title},
+            dataType: 'json',
+            success: function(data) {
+                $("#set-item-title_" + item_id).html(new_title);
+                $("#set-item-title_" + item_id).show();
+                $("#set-item-edit_" + item_id).show();
+                $("#set-item-edit-done_" + item_id).hide();
+                $("#set-item-text-input_" + item_id).hide();
+            }
+        });
+    }
+
+    function addNewTextItem() {
+        $.ajax({
+            type: 'POST',
+            url: '{% url 'set.add_text_item' set.pk %}',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            dataType: 'json',
+            success: function(data) {
+                $('#set-list').append(data.html);
+                setItemInSetLinks();
+                setUpNewTextItem(data.item_pk, data.title);
+                textItemStartEdit(data.item_pk);
+                $("#set-item-text-input_" + data.item_pk).select();
+            }
+        });
+    }
+
+    function setUpNewTextItem(item_pk, text) {
+            $("#set-item-edit-done_" + item_pk).hide();
+            $("#set-item-edit-done_" + item_pk).click(function () {
+                item_id = getDbRefFromObj(getObjInList($(this)));
+                textItemCompleteEdit(item_id);
+            });
+            $("#set-item-text-input_" + item_pk).hide();
+            $("#set-item-text-input_" + item_pk).val(text);
+            $("#set-item-edit_" + item_pk).click(function () {
+                item_id = getDbRefFromObj(getObjInList($(this)));
+                textItemStartEdit(item_id);
+            });
+            $("#set-item-text-input_" + item_pk).keydown(function(e) {
+                if (e.keyCode == 13)
+                {
+                    textItemCompleteEdit(item_pk);
+                }
+            });
+    }
+
+    function setItemInSetLinks() {
+        $('.song-in-set-link').click(function() {
+            obj_in_list = getObjInList($(this));
+
+            if (obj_in_list)
+            {
+                window.location.href = "{% url 'set.song' set.pk 9999 %}".replace('9999', obj_in_list.index());
+            }
         });
     }
 
@@ -136,13 +209,18 @@
             $("#set-list .set-item-delete").click(deleteItem);
 
             {% for item in set_items %}
-                $("#target-key_{{ item.id }}")[0].value = {{ item.sounding_key_index }};
-                $("#target-key_{{ item.id }}").change(setKey);
+                {% if item.item_type == ItemInSetType.SONG %}
+                    $("#target-key_{{ item.id }}")[0].value = {{ item.sounding_key_index }};
+                    $("#target-key_{{ item.id }}").change(setKey);
+                {% elif item.item_type == ItemInSetType.TEXT %}
+                    setUpNewTextItem({{ item.id }}, "{{ item.title|escapejs }}");
+                {% endif %}
             {% endfor %}
-
 
             $('#editor').hide();
             $('#btn-toggle-editor').click(function() {toggleTab('editor');});
+
+            $('#btn-add-text-item').click(addNewTextItem);
 
             $('#name-read-only').text("{{ set.name|escapejs }}");
             $('#input-set-name').val("{{ set.name|escapejs }}");
@@ -176,14 +254,7 @@
             });
         {% endif %}
 
-        $('.song-in-set-link').click(function() {
-            obj_in_list = getObjInList($(this));
-
-            if (obj_in_list)
-            {
-                window.location.href = "{% url 'set.song' set.pk 9999 %}".replace('9999', obj_in_list.index());
-            }
-        });
+        setItemInSetLinks();
 
         /* If the set has no songs and we're the owner, we can assume it's new - focus on the set name */
         {% if not set_items and can_edit %}
@@ -230,7 +301,10 @@
     {% if can_edit %}
         <ul class="tab-list">
             <li>
-                <img class="img-actions" id='btn-toggle-editor' src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
+                <img class="img-actions" id="btn-toggle-editor" src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
+            </li>
+            <li>
+                <img class="img-actions" id="btn-add-text-item" src="{% static 'rechorder/icons/mdi-text-box-plus-outline.svg' %}">
             </li>
         </ul>
 
@@ -285,35 +359,7 @@
         {% endif %}
     >
         {% for item in set_items %}
-            <li id="set-item_{{ item.pk }}">
-                {% if am_i_owner %}
-                    <div>
-                        <img class="sortable-list-handle" src="{% static 'rechorder/icons/mdi-drag.svg' %}">
-                    </div>
-                {% endif %}
-                <div class="list-expander">
-                    <a class="song-in-set-link" href="#">
-                        <span class="list-primary">{{ item.song.title }}</span><br>
-                        <span class="list-secondary">Sounding key: {{ item.sounding_key_index|num2chord }}</span>
-                    </a>
-                </div>
-                {% if am_i_owner %}
-                    <div>
-                        <select id="target-key_{{ item.pk }}">
-                            {% for key in keys %}
-                                <option value="{{ forloop.counter0 }}">{{ key }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div>
-                        <button class="img-btn set-item-delete" id="set-item-delete_{{ item.pk }}">
-                            <img src="{% static 'rechorder/icons/mdi-delete-outline.svg' %}">
-                        </button>
-                    </div>
-                {% endif %}
-
-            </li>
+            {% include 'rechorder/_item_in_set_list.html' %}
         {% endfor %}
     </ul>
 

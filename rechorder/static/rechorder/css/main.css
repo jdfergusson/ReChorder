@@ -491,6 +491,10 @@ mark {
     padding-top: 0.3em;
 }
 
+.text-item-title {
+    font-style: italic;
+}
+
 /**********************************************************
  * Songs
  **********************************************************/
@@ -603,6 +607,10 @@ mark {
 
 .sortable-list li {
     padding-left: 0;
+}
+
+.text-item-in-set {
+    font-style: italic;
 }
 
 

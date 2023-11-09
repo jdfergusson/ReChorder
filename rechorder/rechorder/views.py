@@ -131,20 +131,25 @@ def _get_base_context(request, **overrides):
     else:
         users_link = ""
 
-    links = {
+    links =  {
         'header_link_back': '#',
         'header_link_songs': songs_link,
         'header_link_set': set_link,
         'header_link_receive': reverse('slave'),
         'header_link_users': users_link,
         'header_link_settings': reverse('settings'),
-        'user': user,
     }
 
     for override in overrides:
         links[override] = overrides[override]
 
-    return links
+    context = {
+        **links,
+        'user': user,
+        'ItemInSetType': ItemInSet.ItemInSetType,
+    }
+
+    return context
 
 
 def _get_sounding_key_index(request, song, item_in_set=None):
@@ -514,8 +519,8 @@ def view_set(request, set_id):
 
 
 def set_delete(request, set_id):
-    set = get_object_or_404(Set, pk=set_id)
-    set.delete()
+    this_set = get_object_or_404(Set, pk=set_id)
+    this_set.delete()
     _clear_current_set(request)
     return JsonResponse({'success': True})
 
@@ -558,14 +563,48 @@ def set_song_update_notes(request, item_in_set_id):
     return JsonResponse({'success': True})
 
 
-def set_song_set_key(request, item_in_set_id):
+def set_add_text_item(request, set_id):
+    this_set = get_object_or_404(Set, pk=set_id)
+    # Insert onto set, so make sure set indices are in order first
+    _fix_set_indices(this_set)
+    new_text_item = ItemInSet(
+        set=this_set,
+        index_in_set=this_set.num_of_items,
+        item_type=ItemInSet.ItemInSetType.TEXT,
+        # Default new title name
+        title="New Non-song item",
+    )
+    new_text_item.save()
+
+    return JsonResponse({
+        'html': render_to_string(
+            'rechorder/_item_in_set_list.html',
+            {
+                'can_edit': True,
+                'item': new_text_item,
+                'ItemInSetType': ItemInSet.ItemInSetType,
+            }
+        ),
+        'item_pk': new_text_item.pk,
+        'title': new_text_item.title,
+    })
+
+
+def item_set_key(request, item_in_set_id):
     item_in_set = get_object_or_404(ItemInSet, pk=item_in_set_id)
-    print(request.POST)
     new_key_index = request.POST.get('sounding_key_index')
     if new_key_index is None:
         # Will cause a 500 error to be returned to the client
         raise IndexError("Invalid Key Index")
     item_in_set.sounding_key_index = new_key_index
+    item_in_set.save()
+    return JsonResponse({'success': True})
+
+
+def item_set_title(request, item_in_set_id):
+    item_in_set = get_object_or_404(ItemInSet, pk=item_in_set_id)
+    new_title = request.POST['new_title']
+    item_in_set.title = new_title
     item_in_set.save()
     return JsonResponse({'success': True})
 
@@ -592,30 +631,47 @@ def set_show_song(request, set_id, song_index):
         beam.current_item = set_item
         beam.save()
 
-    song = set_item.song
-    key_index, capo_fret_number = _get_song_key_index(request, song, item_in_set=set_item)
-    display_style = _get_display_style(request)
-    song.display_in(key_index, display_style)
-
     set_length = this_set.items.count()
 
-    context = {
-        'song': song,
-        'current_index': song_index,
-        'set': this_set,
-        'item_in_set': set_item,
-        'set_length': set_length,
-        'max_index': set_length - 1,
-        'am_i_owner': this_set.owner == _get_user_uuid(request),
-        'notes': set_item.notes,
-        **_get_base_song_context_dict(request, song, item_in_set=set_item),
-        **_get_base_context(
-            request,
-            header_link_back=reverse('set', args=[this_set.pk]),
-            header_link_set=reverse('set', args=[this_set.pk]),
-            header_link_songs=reverse('songs')),
-    }
-    return render(request, 'rechorder/song_in_set.html', context)
+    if set_item.item_type == ItemInSet.ItemInSetType.SONG:
+        song = set_item.song
+        key_index, capo_fret_number = _get_song_key_index(request, song, item_in_set=set_item)
+        display_style = _get_display_style(request)
+        song.display_in(key_index, display_style)
+
+        context = {
+            'song': song,
+            'current_index': song_index,
+            'set': this_set,
+            'item_in_set': set_item,
+            'set_length': set_length,
+            'max_index': set_length - 1,
+            'am_i_owner': this_set.owner == _get_user_uuid(request),
+
+            **_get_base_song_context_dict(request, song, item_in_set=set_item),
+            **_get_base_context(
+                request,
+                header_link_back=reverse('set', args=[this_set.pk]),
+                header_link_set=reverse('set', args=[this_set.pk]),
+                header_link_songs=reverse('songs')),
+        }
+        return render(request, 'rechorder/song_in_set.html', context)
+
+    elif set_item.item_type == ItemInSet.ItemInSetType.TEXT:
+        context = {
+            'current_index': song_index,
+            'set': this_set,
+            'item_in_set': set_item,
+            'set_length': set_length,
+            'max_index': set_length - 1,
+            'am_i_owner': this_set.owner == _get_user_uuid(request),
+            **_get_base_context(
+                request,
+                header_link_back=reverse('set', args=[this_set.pk]),
+                header_link_set=reverse('set', args=[this_set.pk]),
+                header_link_songs=reverse('songs')),
+        }
+        return render(request, 'rechorder/song_in_set.html', context)
 
 
 def set_print(request, set_id):
@@ -623,23 +679,24 @@ def set_print(request, set_id):
 
     songs = []
     for item in this_set.items.order_by('index_in_set'):
-        song = item.song
-        if request.GET.get('no_personal_keys', False):
-            key_index = item.sounding_key_index
-            capo_fret_number = 0
-        else:
-            key_index, capo_fret_number = _get_song_key_index(request, song, item_in_set=item)
+        if item.item_type == ItemInSet.ItemInSetType.SONG:
+            song = item.song
+            if request.GET.get('no_personal_keys', False):
+                key_index = item.sounding_key_index
+                capo_fret_number = 0
+            else:
+                key_index, capo_fret_number = _get_song_key_index(request, song, item_in_set=item)
 
-        display_style = _get_display_style(request)
-        song.display_in(key_index, display_style)
+            display_style = _get_display_style(request)
+            song.display_in(key_index, display_style)
 
-        songs.append({
-            'song': song,
-            'sounding_key_index': item.sounding_key_index,
-            'key_index': key_index,
-            'capo_fret_number': capo_fret_number,
-            'notes': item.notes,
-        })
+            songs.append({
+                'song': song,
+                'sounding_key_index': item.sounding_key_index,
+                'key_index': key_index,
+                'capo_fret_number': capo_fret_number,
+                'notes': item.notes,
+            })
 
     context = {
         'songs': songs,
@@ -709,7 +766,13 @@ def slave_to_master(request, beam_id):
         **_get_base_context(request, header_link_back=reverse('slave')),
     }
 
-    if beam.current_item is not None:
+    if beam.current_item is None:
+        context = {
+            **context_base,
+            'item_in_set': None,
+            'update_token': -1,
+        }
+    elif beam.current_item.item_type == ItemInSet.ItemInSetType.SONG:
         song = beam.current_item.song
 
         # TODO: Why are we passing the song and the current item, when the current item contains the song
@@ -722,20 +785,25 @@ def slave_to_master(request, beam_id):
 
         context = {
             **context_base,
+            'item_in_set': beam.current_item,
+            'ItemInSetType': ItemInSet.ItemInSetType,
             'song': song,
             'update_token': beam.has_changed_count,
             'capo_fret_number': capo_fret_number,
-            # TODO: The below will break when num_of_songs doesn't match the number of items
-            'set_length': beam.current_item.set.num_of_songs,
+            'set_length': beam.current_item.set.num_of_items,
             'current_index': beam.current_item.index_in_set,
             **_get_base_song_context_dict(request, song, item_in_set=beam.current_item),
         }
-    else:
+    elif beam.current_item.item_type == ItemInSet.ItemInSetType.TEXT:
         context = {
             **context_base,
-            'song': None,
-            'update_token': -1,
+            'item_in_set': beam.current_item,
+            'update_token': beam.has_changed_count,
+            'ItemInSetType': ItemInSet.ItemInSetType,
         }
+    else:
+        # This should cause an error
+        return None
 
     return render(request, 'rechorder/song_as_slave.html', context)
 
