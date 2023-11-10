@@ -1,3 +1,20 @@
+@use 'sass:color';
+
+$col-good: #c1e6be;
+$col-bad: #e6bec1;
+
+$col-base: #bed5e6;
+$col-base-transparent: #bed5e600;
+
+$col-highlight: #bec1e6;
+$col-highlight-transparent: #bec1e600;
+
+$col-light-gray: #c4c4c4;
+$col-mid-gray: #626262;
+$col-dark-gray: #303539;
+$col-btn-hover: #cee0ec;
+$col-disabled: #ffffffa0;
+
 @font-face {
     font-family: "GothicA1";
     src:
@@ -80,8 +97,26 @@ form {
     position: fixed;
     top: 0;
     left: 0;
-    background-color: #bec1e6;
+    background-color: $col-highlight;
     z-index: 100;
+
+    img {
+        padding: 10px;
+        min-height: 2em;
+        min-width: 2em;
+        max-width: 15vw;
+        transition: 0.3s;
+        display: block;
+    }
+
+    img:hover {
+        background-image: linear-gradient($col-base-transparent, $col-base);
+    }
+
+    .selected {
+        background-color: $col-base;
+    }
+
 }
 
 #div-header-images {
@@ -90,23 +125,6 @@ form {
     justify-content: space-around;
 }
 
-
-#div-header img {
-    padding: 10px;
-    min-height: 2em;
-    min-width: 2em;
-    max-width: 15vw;
-    transition: 0.3s;
-    display: block;
-}
-
-#div-header img:hover {
-    background-image: linear-gradient(#bed5e600, #bed5e6ff);
-}
-
-#div-header .selected {
-    background-color: #bed5e6;
-}
 
 #div-content {
     padding: 5px;
@@ -117,7 +135,7 @@ form {
     padding: 5px;
     padding-top: 3.5em;
     margin: 0;
-    background-color: #bed5e6;
+    background-color: $col-base;
     overflow: hidden;
 }
 
@@ -132,49 +150,45 @@ form {
 }
 
 .tran-rad-label {
-
-    color: #626262;
-}
-
-.tran-rad:checked ~ label {
-    color: black;
+    color: $col-mid-gray;
+    :checked ~ label {
+        color: black;
+    }
 }
 
 button, select {
     font-size: large;
-    color: #626262;
+    color: $col-mid-gray;
     font-variant: small-caps;
     text-decoration: none;
-    border: 2px solid #626262;
+    border: 2px solid $col-mid-gray;
     background-color: white;
     padding: 5px;
     transition: 0.2s;
 }
 
 .btn-successful {
-    background-color: #c1e6be;
+    background-color: $col-good;
 }
 
 .btn-unsuccessful {
-    background-color: #e6bec1;
+    background-color: $col-bad;
 }
 
 @media (hover:hover) {
     button:hover, select:hover, a:hover {
-        background-color: #cee0ec;
+        background-color: $col-btn-hover;
     }
 }
 
-button:selected, select:selected {
-    border: 2px solid #303539;
-    color: #303539;
-    background-color: #ced1ec;
-}
-
 button:disabled, select:disabled {
-    border: 2px solid #c4c4c4;
-    color: #c4c4c4;
-    background-color: #d6e5ef;
+    border: 2px solid $col-light-gray;
+    color: $col-light-gray;
+    background-color: $col-disabled;
+
+    :hover {
+        background-color: $col-disabled;
+    }
 }
 
 .song-content-edit {
@@ -188,11 +202,11 @@ button:disabled, select:disabled {
 }
 
 .img-actions:hover {
-    background-image: linear-gradient(#bec1e600, #bec1e6ff);
+    background-image: linear-gradient($col-highlight-transparent, $col-highlight);
 }
 
 .img-action-selected {
-    background-color: #bec1e6;
+    background-color: $col-highlight;
 }
 
 h1 {
@@ -209,11 +223,11 @@ h2 {
     font-variant: small-caps;
     display: inline;
     margin: 0;
-    color: #626262;
+    color: $col-mid-gray;
 }
 
 h2 a {
-    color: #626262;
+    color: $col-mid-gray;
 }
 
 h3 {
@@ -247,7 +261,7 @@ textarea {
 hr {
     height: 0px;
     border: 0px;
-    border-bottom: 1px solid #626262;
+    border-bottom: 1px solid $col-mid-gray;
     margin-top: 5px;
     margin-bottom: 5px;
 }
@@ -283,11 +297,11 @@ hr {
 
 .notes {
     font-style: italic;
-    color: #626262;
+    color: $col-mid-gray;
 }
 
 #notes-section-container {
-    border-left: 2px solid #c4c4c4;
+    border-left: 2px solid $col-light-gray;
     margin-top: 5px;
     margin-bottom: 5px;
     padding-left: 10px;
@@ -305,7 +319,7 @@ hr {
 .error-box {
     border: 2px solid red;
     padding: 0.2em;
-    background-color: #e6bec1;
+    background-color: $col-bad;
 }
 
 .error-box h2 {
@@ -329,7 +343,7 @@ hr {
 }
 
 .img-btn:hover {
-    background-color: #cee0ec;
+    background-color: $col-btn-hover;
 }
 
 .img-btn img {
@@ -371,7 +385,7 @@ hr {
 }
 
 .tab-container {
-    background-color: #bec1e6;
+    background-color: $col-highlight;
     margin: 0;
     padding: 5px;
     z-index: 20;
@@ -393,14 +407,14 @@ hr {
     font-size: normal;
     font-weight: normal;
     font-variant: small-caps;
-    color: #626262;
+    color: $col-mid-gray;
 }
 
 .main-content-list .list-tertiary {
     font-size: small;
     font-weight: normal;
     font-variant: small-caps;
-    color: #626262;
+    color: $col-mid-gray;
 }
 
 .main-content-list li {
@@ -409,7 +423,7 @@ hr {
     padding-bottom: 2px;
     margin-bottom: 5px;
     border-bottom: 1px solid;
-    border-color: #626262;
+    border-color: $col-mid-gray;
     display: flex;
     align-items: center;
     background-color: white;
@@ -417,7 +431,7 @@ hr {
 }
 
 .main-content-list li:hover {
-    border-color:#bed5e6;
+    border-color:$col-base;
 }
 
 .main-content-list {
@@ -484,7 +498,7 @@ hr {
 
 mark {
     padding-top: 0.2em;
-    background-color: #c1e6be;
+    background-color: $col-good;
 }
 
 .block-lyric {
@@ -508,16 +522,16 @@ mark {
 .key-filter-button {
     width: 3em;
     margin: 2px;
-}
 
-/* Horrible hack to get around my inability to get CSS media queries' hover to work properly */
-.key-filter-button:hover {
-    background-color: white;
-    color: black;
+    /* Horrible hack to get around my inability to get CSS media queries' hover to work properly */
+    :hover {
+        background-color: white;
+        color: black;
+    }
 }
 
 .key-filter-button-selected, .key-filter-button-selected:hover {
-    background-color: #ced1ec;
+    background-color: $col-btn-hover;
 }
 
 .footnote {
@@ -534,39 +548,29 @@ mark {
     padding: 0;
 }
 
-.song-in-list .name {
-    font-size: large;
-    font-weight: bold;
-    font-variant: small-caps;
-    color: black;
+.song-in-list {
+    .name {
+        font-size: large;
+        font-weight: bold;
+        font-variant: small-caps;
+        color: black;
+    }
+
+    .artist {
+        font-size: normal;
+        font-weight: normal;
+        font-variant: small-caps;
+        color: $col-mid-gray;
+    }
+
+    .key {
+        font-size: small;
+        font-weight: normal;
+        font-variant: small-caps;
+        color: $col-mid-gray;
+    }
 }
 
-.song-in-list .artist {
-    font-size: normal;
-    font-weight: normal;
-    font-variant: small-caps;
-    color: #626262;
-}
-
-.song-in-list .key {
-    font-size: small;
-    font-weight: normal;
-    font-variant: small-caps;
-    color: #626262;
-}
-
-.song-in-list,  {
-    border-left: 4px solid;
-    padding-left: 1em;
-    padding-bottom: 2px;
-    margin-bottom: 5px;
-    border-bottom: 1px solid;
-    border-color: #626262;
-}
-
-.song-in-list:hover {
-    border-color:#bed5e6;
-}
 
 .song-anchor {
     position: absolute;
@@ -587,18 +591,17 @@ mark {
     flex-grow: 100;
 }
 
-
-.add-song-to-set-button:hover {
-    background-color: #cee0ec;
-}
-
-.add-song-to-set-button {
+.add-song-to-set-button, .remove-song-from-set-button {
     min-width: 3em;
+    transition: 0.2s;
 }
 
 .remove-song-from-set-button {
-    min-width: 3em;
-    background-color: #c1e6be;
+    background-color: $col-good;
+}
+
+.add-song-to-set-button:hover {
+    background-color: $col-btn-hover;
 }
 
 /**********************************************************
@@ -623,26 +626,17 @@ mark {
     bottom: 0;
     z-index: 10;
     width: 100%;
-}
 
-#set-nav-btns img {
-    min-width: 45vw;
-    max-height: 45vh;
-    opacity: 0.1;
+    img {
+        min-width: 45vw;
+        max-height: 45vh;
+        opacity: 0.1;
+    }
 }
-
 
 /**********************************************************
  * Chord shape checkboxes
  **********************************************************/
-
-.settings-boxes ul {
-    display: flex;
-    list-style: None;
-    flex-wrap: wrap;
-    padding-left: 0;
-    justify-content: left;
-}
 
 .key-label {
     width: 3em;
@@ -651,33 +645,43 @@ mark {
     vertical-align: center;
 }
 
-.settings-boxes input {
-    position: absolute;
-    left: -9999px;
-}
+.settings-boxes {
+    ul {
+        display: flex;
+        list-style: None;
+        flex-wrap: wrap;
+        padding-left: 0;
+        justify-content: left;
+    }
 
-.settings-boxes input + label {
-    font-size: large;
-    color: #626262;
-    font-variant: small-caps;
-    text-decoration: none;
-    border: 2px solid #626262;
-    background-color: #e6bec1;
-    height: 1.3em;
-    padding: 5px;
-    transition: 0.2s;
+    input {
+        position: absolute;
+        left: -9999px;
+
+        + label {
+            font-size: large;
+            color: $col-mid-gray;
+            font-variant: small-caps;
+            text-decoration: none;
+            border: 2px solid $col-mid-gray;
+            background-color: $col-bad;
+            height: 1.3em;
+            padding: 5px;
+            transition: 0.2s;
+        }
+    }
 }
 
 .yes-no-selection {
     margin-top: 0.3em;
-}
 
-.yes-no-selection input:checked + label {
-    background-color: #c1e6be;
-}
+    input:checked + label {
+        background-color: $col-good;
+    }
 
-.yes-no-selection li {
-    margin: 2.5px;
+    li {
+        margin: 2.5px;
+    }
 }
 
 /**********************************************************
@@ -688,19 +692,18 @@ mark {
     text-align: center;
     font-variant: small-caps;
     font-size: large;
-}
+    img {
+        height: 2em;
+        vertical-align: middle;
+    }
 
-.paginator img {
-    height: 2em;
-    vertical-align: middle;
-}
+    img:hover {
+        background-color: $col-btn-hover;
+    }
 
-.paginator img:hover {
-    background-color: #cee0ec;
-}
-
-.paginator a:hover {
-    background: none;
+    a:hover {
+        background: none;
+    }
 }
 
 .paginator-spacer {

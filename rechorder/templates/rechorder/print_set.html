@@ -1,11 +1,14 @@
 {% load static %}
+{% load compress %}
 {% load rechorder_tags %}
 
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" type="text/css" href="{% static 'rechorder/css/main.css' %}">
+    {% compress css %}
+        <link rel="stylesheet" type="text/x-scss" href="{% static 'rechorder/css/main.scss' %}?version=3.0.1">
+    {% endcompress %}
 
     <script src="{% static 'rechorder/js/jquery-3.7.0.min.js' %}"></script>
     <script src="{% static 'rechorder/js/common.js' %}"></script>

@@ -1,4 +1,5 @@
 {% load static %}
+{% load compress %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,7 +9,13 @@
 
     <link rel="shortcut icon" href="{% static 'rechorder/icons/favicon.ico' %}" />
 
+    {% compress css %}
+        <link rel="stylesheet" type="text/x-scss" href="{% static 'rechorder/css/main.scss' %}?version=3.0.1">
+    {% endcompress %}
+
+    <!--
     <link rel="stylesheet" type="text/css" href="{% static 'rechorder/css/main.css' %}?version=3.0.1">
+    -->
 
     <script src="{% static 'rechorder/js/jquery-3.7.0.min.js' %}"></script>
     <script src="{% static 'rechorder/js/common.js' %}"></script>

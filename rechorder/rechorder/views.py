@@ -456,6 +456,7 @@ def set_add_song(request, set_id):
         sounding_key_index=sounding_key_index,
         index_in_set=index_in_set,
         notes='',
+        item_type=ItemInSet.ItemInSetType.SONG,
     )
 
     song_in_set.save()
