@@ -4,16 +4,26 @@ $col-good: #c1e6be;
 $col-bad: #e6bec1;
 
 $col-base: #bed5e6;
+$col-base-dark: #32383c;
 $col-base-transparent: #bed5e600;
 
 $col-highlight: #bec1e6;
 $col-highlight-transparent: #bec1e600;
 
-$col-light-gray: #c4c4c4;
-$col-mid-gray: #626262;
-$col-dark-gray: #303539;
+$col-light-grey: #c4c4c4;
+$col-mid-grey: #626262;
+$col-dark-grey: #303539;
 $col-btn-hover: #cee0ec;
+$col-btn-hover-translucent: #cee0ec80;
 $col-disabled: #ffffffa0;
+
+$col-text-light: $col-light-grey;
+
+// Dimensions
+$max-page-width: 1000px;
+
+$fade-time: 0.2s;
+
 
 @font-face {
     font-family: "GothicA1";
@@ -84,6 +94,14 @@ form {
     padding: 0;
 }
 
+.left-and-right {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0;
+}
+
 .right-aligned-img {
     float: right;
     min-width: 2em;
@@ -92,7 +110,7 @@ form {
 }
 
 #div-header {
-    padding: 0px;
+    padding: 0.4em;
     width: 100%;
     position: fixed;
     top: 0;
@@ -100,43 +118,59 @@ form {
     background-color: $col-highlight;
     z-index: 100;
 
+    a {
+        border-radius: 100%;
+        transition: $fade-time;
+        -webkit-tap-highlight-color: $col-btn-hover-translucent;
+    }
+
     img {
-        padding: 10px;
+        padding: 0.4em;
         min-height: 2em;
         min-width: 2em;
         max-width: 15vw;
-        transition: 0.3s;
         display: block;
-    }
-
-    img:hover {
-        background-image: linear-gradient($col-base-transparent, $col-base);
+        border-radius: 100%;
     }
 
     .selected {
         background-color: $col-base;
+        :hover {
+            background-color: $col-btn-hover;
+            transition: $fade-time;
+        }
     }
 
 }
 
 #div-header-images {
-    margin: 0;
+    align: center;
+    max-width: $max-page-width;
+    margin: 0 auto;
     display: flex;
     justify-content: space-around;
 }
 
 
 #div-content {
+    max-width: $max-page-width;
+    margin: 0 auto;
     padding: 5px;
 }
 
-#div-title {
+#div-title-bg {
     width: 100%;
     padding: 5px;
-    padding-top: 3.5em;
+    padding-top: 4em;
     margin: 0;
     background-color: $col-base;
     overflow: hidden;
+}
+
+#div-title {
+    max-width: $max-page-width;
+    margin: 0 auto;
+    padding: 5px;
 }
 
 #adder ul, #transposer ul, #editor ul {
@@ -150,7 +184,7 @@ form {
 }
 
 .tran-rad-label {
-    color: $col-mid-gray;
+    color: $col-mid-grey;
     :checked ~ label {
         color: black;
     }
@@ -158,13 +192,30 @@ form {
 
 button, select {
     font-size: large;
-    color: $col-mid-gray;
+    color: $col-mid-grey;
     font-variant: small-caps;
     text-decoration: none;
-    border: 2px solid $col-mid-gray;
-    background-color: white;
-    padding: 5px;
-    transition: 0.2s;
+    border: 2px solid #00000000;
+    background-color: $col-highlight;
+    padding: 0.3em 1em;
+    transition: $fade-time;
+    border-radius: 100vmax;
+}
+
+input {
+    font-size: large;
+    color: $col-mid-grey;
+    font-variant: small-caps;
+    text-decoration: none;
+    border: 2px solid $col-light-grey;
+    background-color: #ffffff;
+    padding: 0.3em 1em;
+    transition: $fade-time;
+    border-radius: 100vmax;
+}
+
+input:focus {
+    outline: 2px solid $col-mid-grey;
 }
 
 .btn-successful {
@@ -182,8 +233,8 @@ button, select {
 }
 
 button:disabled, select:disabled {
-    border: 2px solid $col-light-gray;
-    color: $col-light-gray;
+    border: 2px solid $col-light-grey;
+    color: $col-light-grey;
     background-color: $col-disabled;
 
     :hover {
@@ -198,7 +249,7 @@ button:disabled, select:disabled {
 
 .img-actions {
     min-width: 2.5em;
-    transition-duration: 0.4s;
+    transition-duration: $fade-time;
 }
 
 .img-actions:hover {
@@ -223,11 +274,11 @@ h2 {
     font-variant: small-caps;
     display: inline;
     margin: 0;
-    color: $col-mid-gray;
+    color: $col-mid-grey;
 }
 
 h2 a {
-    color: $col-mid-gray;
+    color: $col-mid-grey;
 }
 
 h3 {
@@ -261,7 +312,7 @@ textarea {
 hr {
     height: 0px;
     border: 0px;
-    border-bottom: 1px solid $col-mid-gray;
+    border-bottom: 1px solid $col-mid-grey;
     margin-top: 5px;
     margin-bottom: 5px;
 }
@@ -297,11 +348,11 @@ hr {
 
 .notes {
     font-style: italic;
-    color: $col-mid-gray;
+    color: $col-mid-grey;
 }
 
 #notes-section-container {
-    border-left: 2px solid $col-light-gray;
+    border-left: 2px solid $col-light-grey;
     margin-top: 5px;
     margin-bottom: 5px;
     padding-left: 10px;
@@ -342,8 +393,9 @@ hr {
     background: none;
 }
 
-.img-btn:hover {
+.img-btn img:hover {
     background-color: $col-btn-hover;
+    transition: $fade-time;
 }
 
 .img-btn img {
@@ -407,14 +459,14 @@ hr {
     font-size: normal;
     font-weight: normal;
     font-variant: small-caps;
-    color: $col-mid-gray;
+    color: $col-mid-grey;
 }
 
 .main-content-list .list-tertiary {
     font-size: small;
     font-weight: normal;
     font-variant: small-caps;
-    color: $col-mid-gray;
+    color: $col-mid-grey;
 }
 
 .main-content-list li {
@@ -423,11 +475,11 @@ hr {
     padding-bottom: 2px;
     margin-bottom: 5px;
     border-bottom: 1px solid;
-    border-color: $col-mid-gray;
+    border-color: $col-mid-grey;
     display: flex;
     align-items: center;
     background-color: white;
-    transition: 0.2s;
+    transition: $fade-time;
 }
 
 .main-content-list li:hover {
@@ -560,14 +612,14 @@ mark {
         font-size: normal;
         font-weight: normal;
         font-variant: small-caps;
-        color: $col-mid-gray;
+        color: $col-mid-grey;
     }
 
     .key {
         font-size: small;
         font-weight: normal;
         font-variant: small-caps;
-        color: $col-mid-gray;
+        color: $col-mid-grey;
     }
 }
 
@@ -593,7 +645,7 @@ mark {
 
 .add-song-to-set-button, .remove-song-from-set-button {
     min-width: 3em;
-    transition: 0.2s;
+    transition: $fade-time;
 }
 
 .remove-song-from-set-button {
@@ -635,11 +687,11 @@ mark {
 }
 
 /**********************************************************
- * Chord shape checkboxes
+ * Settings
  **********************************************************/
 
 .key-label {
-    width: 3em;
+    width: 1em;
     display: inline-block;
     text-align: center;
     vertical-align: center;
@@ -660,15 +712,35 @@ mark {
 
         + label {
             font-size: large;
-            color: $col-mid-gray;
+            color: $col-dark-grey;
             font-variant: small-caps;
             text-decoration: none;
-            border: 2px solid $col-mid-gray;
+            border: 2px solid #00000000;
             background-color: $col-bad;
-            height: 1.3em;
-            padding: 5px;
-            transition: 0.2s;
+            padding: 0.3em 1em;
+            transition: $fade-time;
+            border-radius: 100vmax;
         }
+    }
+}
+
+.key-label:hover {
+    background-color: $col-btn-hover;
+}
+
+.settings-section {
+    margin: auto;
+    padding-bottom: 10px;
+    border-bottom: solid 2px $col-light-grey;
+    width: 400px;
+
+    input, button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    a:hover {
+        background-color: transparent;
     }
 }
 
@@ -679,9 +751,95 @@ mark {
         background-color: $col-good;
     }
 
+    input:checked + label:hover {
+        background-color: $col-btn-hover;
+    }
+
     li {
         margin: 2.5px;
     }
+}
+
+.section-title {
+    padding-top: 10px;
+    padding-bottom: 5px;
+}
+
+/**********************************************************
+ * Toggle Switch
+ **********************************************************/
+
+ /* The switch - the box around the slider */
+.toggle-switch {
+    vertical-align: middle;
+    font-size: large;
+    position: relative;
+    display: inline-block;
+    width: 3.5em;
+    height: 2em;
+
+    /* Hide default HTML checkbox */
+    input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+}
+
+/* The slider */
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: $col-light-grey;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 1.4em;
+    width: 1.4em;
+    left: 0.3em;
+    bottom: 0.3em;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .toggle-slider {
+    background-color: $col-good;
+}
+
+input:checked + .toggle-slider:hover {
+    background-color: $col-btn-hover;
+}
+
+.toggle-slider:hover {
+    background-color: $col-btn-hover;
+}
+
+input:focus + .toggle-slider {
+    box-shadow: 0 0 1px $col-highlight;
+}
+
+input:checked + .toggle-slider:before {
+    -webkit-transform: translateX(1.4em);
+    -ms-transform: translateX(1.4em);
+    transform: translateX(1.4em);
+}
+
+/* Rounded sliders */
+.toggle-slider.round {
+    border-radius: 100vh;
+}
+
+.toggle-slider.round:before {
+    border-radius: 100vh;
 }
 
 /**********************************************************

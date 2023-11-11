@@ -30,15 +30,17 @@
 
 
 </head>
-<body>
+<body ontouchstart>
     <div id="header">
         {% block header %}
         {% endblock %}
     </div>
 
-    <div id="div-title">
-        {% block title %}
-        {% endblock %}
+    <div id="div-title-bg">
+        <div id="div-title">
+            {% block title %}
+            {% endblock %}
+        </div>
     </div>
 
     <div id="div-content">

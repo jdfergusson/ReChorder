@@ -199,23 +199,18 @@
     });
 </script>
 <div id="user-logged-in">
-    Currently logged in as: <span class="contains-username" id="text-username"></span><br>
-    <br>
-    <button type="button" id="btn-go-to-edit">Edit User</button>
-    <button type="button" id="btn-user-logout">Logout</button>
+    <h1 class="section-title">Welcome <span class="contains-username" id="text-username"></span></h1>
+    <p><button type="button" id="btn-go-to-edit">Edit User</button>
+    <p><button type="button" id="btn-user-logout">Logout</button>
 </div>
 
 <div id="user-login">
-    <table>
-        <tr>
-            <td>Username:</td><td><input id="user-login-username" /></td>
-        </tr><tr>
-            <td>Password:</td><td><input type="password" id="user-login-password" /></td>
-        </tr>
-    </table>
+    <h1 class="section-title">Log in</h1>
+    <p><input id="user-login-username" placeholder="Username"/>
+    <p><input type="password" id="user-login-password" placeholder="Password"/>
+    <p><button type="button" id="btn-user-login">Log In</button>
+    <p><button type="button" id="btn-user-switch-to-create">Create New User</button>
     <div class="error-box" id="user-login-errors"></div>
-    <button type="button" id="btn-user-login">Log In</button><br><br>
-    <button type="button" id="btn-user-switch-to-create">Create New User</button>
 </div>
 
 <div id="user-create">
