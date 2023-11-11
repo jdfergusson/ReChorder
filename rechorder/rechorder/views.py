@@ -978,8 +978,8 @@ def songs(request):
     song_ids_in_set = []
     try:
         this_set = Set.objects.get(pk=_get_current_set_id(request), owner=_get_user_uuid(request))
-        songs_in_set = ItemInSet.objects.filter(set=this_set)
-        song_ids_in_set = [i.pk for i in songs_in_set]
+        items_in_set = ItemInSet.objects.filter(set=this_set, item_type=ItemInSet.ItemInSetType.SONG)
+        song_ids_in_set = [i.song.pk for i in items_in_set]
         current_set_id = this_set.pk
     except Set.DoesNotExist:
         current_set_id = -1

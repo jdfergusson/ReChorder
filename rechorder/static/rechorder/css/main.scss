@@ -499,8 +499,10 @@ hr {
     transition: $fade-time;
 }
 
-.main-content-list li:hover {
-    border-color:$col-base;
+@media(hover:hover) {
+    .main-content-list li:hover {
+        border-color:$col-base;
+    }
 }
 
 .main-content-list {
@@ -519,7 +521,7 @@ hr {
 }
 
 .main-content-list {
-    button, img, input {
+    button, img {
         background-color: transparent;
     }
 
