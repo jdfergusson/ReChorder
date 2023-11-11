@@ -185,6 +185,7 @@
                     textItemCompleteEdit(item_pk);
                 }
             });
+            $("#set-item-delete_" + item_pk).click(deleteItem);
     }
 
     function setItemInSetLinks() {
@@ -277,16 +278,13 @@
                      src="{% static 'rechorder/icons/mdi-chevron-right-box-outline.svg' %}">
             </a>
         {% endif %}
+        <img class="img-btn right-aligned-img" id="btn-add-text-item" src="{% static 'rechorder/icons/mdi-text-box-plus-outline.svg' %}">
     {% else %}
         <a href="{% url 'set.duplicate' set.pk %}">
             <img class="img-btn right-aligned-img"
                  src="{% static 'rechorder/icons/mdi-content-duplicate.svg' %}">
         </a>
     {% endif %}
-    <a href="{% url 'sets' %}">
-        <img class="img-btn right-aligned-img"
-             src="{% static 'rechorder/icons/mdi-close-box-outline.svg' %}">
-    </a>
 
     <h2>
         <a href="{% url 'sets' %}">Sets</a> &#8594;
@@ -302,8 +300,6 @@
         <ul class="tab-list">
             <li>
                 <img class="img-actions" id="btn-toggle-editor" src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
-            </li><li>
-                <img class="img-actions" id="btn-add-text-item" src="{% static 'rechorder/icons/mdi-text-box-plus-outline.svg' %}">
             </li>
         </ul>
 
@@ -311,7 +307,7 @@
             <table>
                 <tr>
                     <td>
-                        Set Name:
+                        Set Name
                     </td>
                     <td>
                         <input id="input-set-name">
@@ -319,18 +315,25 @@
                 </tr>
                 <tr>
                     <td>
-                        Publicly listed:
+                        Publicly listed
                     </td>
                     <td>
-                        <input type="checkbox" id="input-set-is-public">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="input-set-is-public">
+                            <span class="toggle-slider round"></span>
+                        </label>
+
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        Protected from deletion:
+                        Protected from deletion
                     </td>
                     <td>
-                        <input type="checkbox" id="input-set-is-protected">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="input-set-is-protected">
+                            <span class="toggle-slider round"></span>
+                        </label>
                     </td>
                 </tr>
             </table>
@@ -339,12 +342,14 @@
                 <button id="btn-editor-delete" type="button">Delete</button>
             </div>
 
-            <span id="success">Set updated successfully</span>
-            <span id="areyousure">
-                <span id="areyousure-message"></span>
-                <button id="btn-ays-yes" type="button">Yes</button>
-                <button id="btn-ays-no" type="button">No</button>
-            </span>
+            <div class="editor-feedback">
+                <span id="success">Set updated successfully</span>
+                <span id="areyousure">
+                    <span id="areyousure-message"></span><br>
+                    <button id="btn-ays-yes" type="button">Yes</button>
+                    <button id="btn-ays-no" type="button">No</button>
+                </span>
+            </div>
         </div>
     {% endif %}
 {% endblock %}
@@ -362,9 +367,7 @@
         {% endfor %}
     </ul>
 
-
-    <!-- TODO: Does this still work? -->
-    {% if set_items %}
+    {% if set.num_of_items > 0 %}
         <a href="{% url 'set.print' set.pk %}"><img class="img-btn right-aligned-img" src="{% static 'rechorder/icons/mdi-printer.svg' %}"></a>
     {% else %}
         Set list currently empty.

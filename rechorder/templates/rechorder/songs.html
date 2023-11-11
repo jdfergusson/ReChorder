@@ -9,6 +9,19 @@
 {% block javascript %}
     var current_key_filter = -1;
 
+    function toggleTab(tab) {
+        $('#areyousure').hide();
+        $('#success').hide();
+
+        if (tab != 'editor') {
+            $('#editor').hide();
+            $('#btn-toggle-editor').removeClass('img-action-selected');
+        }
+
+        $('#' + tab).toggle();
+        $('#btn-toggle-' + tab).toggleClass('img-action-selected');
+    }
+
     {% if current_set_id >= 0 %}
         function addSongToSet() {
             source_element = event.srcElement
@@ -99,6 +112,9 @@
 
         $('.add-song-to-set-button').on('click', function() {addSongToSet()});
         $('.remove-song-from-set-button').on('click', function() {removeSongFromSet()});
+
+        $('#filters').hide();
+        $('#btn-toggle-filters').click(function() {toggleTab('filters');});
     });
 
 {% endblock %}
@@ -114,25 +130,34 @@
     </a>
 
     <h1>Songs</h1><br>
-    <h2>Filters</h2><br>
-    <table>
-        <tr>
-            <td><h3>Title:</h3></td><td><input id="filtertext" /></td>
-        </tr>
-        <tr>
-            <td>
-                <h3>Key Filter:</h3>
-            </td>
-            <td>
-                <div id="key-filter-list">
-                    {% for key in keys %}
-                        <!-- TODO: Re-implement this with radio buttons! -->
-                        <button class="key-filter-button" id="filterByKey{{ forloop.counter0 }}">{{ key }}</button>
-                    {% endfor %}
-                </div>
-            </td>
-        </tr>
-    </table>
+
+    <ul class="tab-list">
+        <li>
+            <img class="img-actions" id="btn-toggle-filters" src="{% static 'rechorder/icons/mdi-filter-outline.svg' %}">
+        </li>
+    </ul>
+
+    <div class="tab-container" id="filters">
+        <h2>Filters</h2><br>
+        <table>
+            <tr>
+                <td><h3>Title:</h3></td><td><input id="filtertext" /></td>
+            </tr>
+            <tr>
+                <td>
+                    <h3>Key Filter:</h3>
+                </td>
+                <td>
+                    <div id="key-filter-list">
+                        {% for key in keys %}
+                            <!-- TODO: Re-implement this with radio buttons! -->
+                            <button class="key-filter-button" id="filterByKey{{ forloop.counter0 }}">{{ key }}</button>
+                        {% endfor %}
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
 {% endblock %}
 
 {% block content %}
@@ -146,8 +171,7 @@
                     <a href="{% url 'song' song.id %}">
                         <div class="song-in-list">
                             <span class="list-primary">{{ song }}</span><br>
-                            <span class="list-secondary">{{ song.artist }}</span><br>
-                            <span class="list-tertiary">Original key: {{ song.original_key|num2chord }}</span>
+                            <span class="list-secondary">{{ song.artist }}</span>
                             <span class="song-key-index" style="display: none">{{ song.original_key }}</span>
                         </div>
                     </a>

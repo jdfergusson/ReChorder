@@ -21,6 +21,7 @@ $col-text-light: $col-light-grey;
 
 // Dimensions
 $max-page-width: 1000px;
+$thin-section-width: 400px;
 
 $fade-time: 0.2s;
 
@@ -196,7 +197,7 @@ button, select {
     font-variant: small-caps;
     text-decoration: none;
     border: 2px solid #00000000;
-    background-color: $col-highlight;
+    background-color: $col-base;
     padding: 0.3em 1em;
     transition: $fade-time;
     border-radius: 100vmax;
@@ -205,7 +206,7 @@ button, select {
 input {
     font-size: large;
     color: $col-mid-grey;
-    font-variant: small-caps;
+    //font-variant: small-caps;
     text-decoration: none;
     border: 2px solid $col-light-grey;
     background-color: #ffffff;
@@ -238,13 +239,17 @@ button:disabled, select:disabled {
     background-color: $col-disabled;
 
     :hover {
-        background-color: $col-disabled;
+        background-color: transparent;
     }
 }
 
 .song-content-edit {
     width: 100%;
     height: 40vh;
+}
+
+.editor-feedback {
+    margin-top: 0.5em;
 }
 
 .img-actions {
@@ -339,6 +344,17 @@ hr {
 }
 
 /**********************************************************
+ * Font resizer
+ *********************************************************/
+
+.font-resizer-table {
+    td {
+        padding: 0.2em;
+    }
+}
+
+
+/**********************************************************
  * Song notes
  *********************************************************/
 
@@ -390,7 +406,8 @@ hr {
     padding: 0;
     margin: 0;
     border: 0;
-    background: none;
+    min-width: 2em;
+    min-height: 2em;
 }
 
 .img-btn img:hover {
@@ -403,9 +420,8 @@ hr {
 }
 
 .img-btn-header {
-    padding: 0;
+    padding: 0.3em;
     margin: 0;
-    background: white;
 }
 
 .img-btn-header img {
@@ -421,25 +437,26 @@ hr {
     list-style: none;
     padding: 0;
     margin: 0;
-}
 
-.tab-list li {
-    display: inline-block;
-    padding: 0;
-    margin: 0;
-}
+    li {
+        display: inline-block;
+        padding: 0;
+        margin: 0;
+    }
 
-.tab-list img {
-    display: inline;
-    padding: 0;
-    margin: 0;
-    vertical-align: bottom;
+    img {
+        display: inline;
+        padding: 0.2em;
+        margin: 0;
+        vertical-align: bottom;
+    }
 }
 
 .tab-container {
-    background-color: $col-highlight;
+    background-color: white;
+    border: 3px solid $col-highlight;
     margin: 0;
-    padding: 5px;
+    padding: 10px;
     z-index: 20;
     position: relative;
 }
@@ -499,6 +516,17 @@ hr {
 
 .main-content-list .list-expander {
     flex-grow: 10;
+}
+
+.main-content-list {
+    button, img, input {
+        background-color: transparent;
+    }
+
+    select {
+        background-color: transparent;
+        border: 2px solid $col-mid-grey;
+    }
 }
 
 .main-content-list a {
@@ -574,16 +602,17 @@ mark {
 .key-filter-button {
     width: 3em;
     margin: 2px;
-
-    /* Horrible hack to get around my inability to get CSS media queries' hover to work properly */
-    :hover {
-        background-color: white;
-        color: black;
-    }
 }
 
-.key-filter-button-selected, .key-filter-button-selected:hover {
-    background-color: $col-btn-hover;
+.key-filter-button-selected {
+    background-color: $col-good;
+    transition: $fade-time;
+}
+@media (hover:hover) {
+    .key-filter-button-selected:hover {
+        background-color: $col-btn-hover;
+        transition: $fade-time;
+    }
 }
 
 .footnote {
@@ -644,7 +673,10 @@ mark {
 }
 
 .add-song-to-set-button, .remove-song-from-set-button {
-    min-width: 3em;
+    border: 0px;
+    border-radius: 0;
+    padding: 0;
+    min-width: 2.5em;
     transition: $fade-time;
 }
 
@@ -724,23 +756,29 @@ mark {
     }
 }
 
-.key-label:hover {
-    background-color: $col-btn-hover;
-}
-
 .settings-section {
     margin: auto;
     padding-bottom: 10px;
     border-bottom: solid 2px $col-light-grey;
-    width: 400px;
+    width: $thin-section-width;
 
     input, button {
         width: 100%;
         box-sizing: border-box;
     }
+}
 
-    a:hover {
+@media (hover:hover) {
+    .settings-section a:hover {
         background-color: transparent;
+    }
+
+    .yes-no-selection input:checked + label:hover {
+        background-color: $col-btn-hover;
+    }
+
+    .key-label:hover {
+        background-color: $col-btn-hover;
     }
 }
 
@@ -749,10 +787,6 @@ mark {
 
     input:checked + label {
         background-color: $col-good;
-    }
-
-    input:checked + label:hover {
-        background-color: $col-btn-hover;
     }
 
     li {
@@ -814,13 +848,15 @@ mark {
 input:checked + .toggle-slider {
     background-color: $col-good;
 }
+@media (hover:hover) {
 
-input:checked + .toggle-slider:hover {
-    background-color: $col-btn-hover;
-}
+    input:checked + .toggle-slider:hover {
+        background-color: $col-btn-hover;
+    }
 
-.toggle-slider:hover {
-    background-color: $col-btn-hover;
+    .toggle-slider:hover {
+        background-color: $col-btn-hover;
+    }
 }
 
 input:focus + .toggle-slider {

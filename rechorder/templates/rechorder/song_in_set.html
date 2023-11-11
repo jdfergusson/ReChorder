@@ -117,7 +117,7 @@
     </div>
 {% endif %}
 <div class="tab-container" id="beam-settings">
-    {% include 'rechorder/_beaming_toggle.html' with set_pk=set.pk song_index=current_index %}
+    <h2>Beaming</h2> {% include 'rechorder/_beaming_toggle.html' with set_pk=set.pk song_index=current_index %}
 </div>
 <div class="tab-container" id="notes-editor">
     {% include 'rechorder/_notes_editor.html' with notes=item_in_set.notes%}
