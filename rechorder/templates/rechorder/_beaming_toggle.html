@@ -1,45 +1,25 @@
 <script type="text/javascript">
-
-    function do_change(enable) {
+    function do_change() {
         $.ajax({
             type: 'POST',
             headers: { "X-CSRFToken": '{{ csrf_token }}' },
             url: '{% url 'beaming.toggle' %}',
             data: {
-                'enable': enable,
+                'enable': $(this).is(':checked'),
                 'set_pk': '{{ set_pk }}',
                 'song_index': '{{ song_index }}',
             },
             dataType: 'json',
-            success: update_beaming_toggle,
         });
-    }
-
-    function update_beaming_toggle(data) {
-        if (data.beaming_enabled) {
-            $('#btn-enable-beaming').hide()
-            $('#btn-disable-beaming').show()
-        }
-        else {
-            $('#btn-enable-beaming').show()
-            $('#btn-disable-beaming').hide()
-        }
     }
 
     $(function() {
-        $('#btn-enable-beaming').click(function() {do_change(true);});
-        $('#btn-disable-beaming').click(function() {do_change(false);});
-
-        $.ajax({
-            type: 'POST',
-            headers: { "X-CSRFToken": '{{ csrf_token }}' },
-            url: '{% url 'beaming.status' %}',
-            dataType: 'json',
-            success: update_beaming_toggle,
-        });
+        $('#beaming-toggle-switch').click(do_change);
     });
 </script>
 
 
-<button id="btn-enable-beaming" class="btn-unsuccessful">Enable Beaming</button>
-<button id="btn-disable-beaming" class="btn-successful">Disable Beaming</button>
+<label class="toggle-switch">
+    <input type="checkbox" id="beaming-toggle-switch" {% if beaming_enabled %}checked{% endif %}>
+    <span class="toggle-slider round"></span>
+</label>

@@ -1,27 +1,34 @@
 {% load static %}
 
 <script type="text/javascript" src="{% static 'rechorder/js/font-resize.js' %}"></script>
+<div class="centred-div" id="resizer">
+    <h2>Chords</h2>
+    <div class="resizer-buttons">
+        <button class="img-btn-header" id="fs-c-decrease">
+            <img src="{% static 'rechorder/icons/mdi-format-font-size-decrease.svg' %}">
+        </button>
+        <button class="img-btn-header" id="fs-c-reset">
+            <img src="{% static 'rechorder/icons/mdi-format-clear.svg' %}">
+        </button>
+        <button class="img-btn-header" id="fs-c-increase">
+            <img src="{% static 'rechorder/icons/mdi-format-font-size-increase.svg' %}">
+        </button>
+        <button class="img-btn-header" id="fs-c-toggle">
+            <img id="fs-c-eye-on" src="{% static 'rechorder/icons/mdi-eye-outline.svg' %}">
+            <img id="fs-c-eye-off" src="{% static 'rechorder/icons/mdi-eye-off-outline.svg' %}">
+        </button>
+    </div>
 
-<h2>Chords</h2><br>
-<button class="img-btn-header" id="fs-c-decrease">
-    <img src="{% static 'rechorder/icons/mdi-format-font-size-decrease.svg' %}">
-</button>
-<button class="img-btn-header" id="fs-c-reset">
-    <img src="{% static 'rechorder/icons/mdi-format-clear.svg' %}">
-</button>
-<button class="img-btn-header" id="fs-c-increase">
-    <img src="{% static 'rechorder/icons/mdi-format-font-size-increase.svg' %}">
-</button>
-<br>
-
-<h2>Lyrics</h2><br>
-
-<button class="img-btn-header" id="fs-l-decrease">
-    <img src="{% static 'rechorder/icons/mdi-format-font-size-decrease.svg' %}">
-</button>
-<button class="img-btn-header" id="fs-l-reset">
-    <img src="{% static 'rechorder/icons/mdi-format-clear.svg' %}">
-</button>
-<button class="img-btn-header" id="fs-l-increase">
-    <img src="{% static 'rechorder/icons/mdi-format-font-size-increase.svg' %}">
-</button>
+    <h2>Lyrics</h2>
+    <div class="resizer-buttons">
+        <button class="img-btn-header" id="fs-l-decrease">
+            <img src="{% static 'rechorder/icons/mdi-format-font-size-decrease.svg' %}">
+        </button>
+        <button class="img-btn-header" id="fs-l-reset">
+            <img src="{% static 'rechorder/icons/mdi-format-clear.svg' %}">
+        </button>
+        <button class="img-btn-header" id="fs-l-increase">
+            <img src="{% static 'rechorder/icons/mdi-format-font-size-increase.svg' %}">
+        </button>
+    </div>
+</div>

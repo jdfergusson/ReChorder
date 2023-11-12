@@ -9,55 +9,40 @@
             >
         </a>
 
-        <a href="{{ header_link_songs }}">
+        <a href="{{ header_link_songs }}" {% if selected == 'songs' %}class="selected"{% endif %}>
             <img
                     id="img-header-songs"
                     src="{% static 'rechorder/icons/mdi-format-list-bulleted-square.svg' %}"
-                    {% if selected == 'songs' %}
-                        class="selected"
-                    {% endif %}
             >
         </a>
 
-        <a href="{{ header_link_set }}">
+        <a href="{{ header_link_set }}" {% if selected == 'set' %}class="selected"{% endif %}>
             <img
                     id="img-header-set"
                     src="{% static 'rechorder/icons/mdi-playlist-music-outline.svg' %}"
-                    {% if selected == 'set' %}
-                        class="selected"
-                    {% endif %}
             >
         </a>
 
-        <a href="{{ header_link_receive }}">
+        <a href="{{ header_link_receive }}" {% if selected == 'receive' %}class="selected"{% endif %}>
             <img
                     id="img-header-receive"
                     src="{% static 'rechorder/icons/mdi-cellphone-text.svg' %}"
-                    {% if selected == 'receive' %}
-                        class="selected"
-                    {% endif %}
             >
         </a>
 
         {% if user.is_admin %}
-            <a href="{{ header_link_users }}">
+            <a href="{{ header_link_users }}" {% if selected == 'users' %}class="selected"{% endif %}>
                 <img
                         id="img-header-users"
                         src="{% static 'rechorder/icons/mdi-account-multiple-outline.svg' %}"
-                        {% if selected == 'users' %}
-                            class="selected"
-                        {% endif %}
                 >
             </a>
         {% endif %}
 
-        <a href="{{ header_link_settings }}">
+        <a href="{{ header_link_settings }}" {% if selected == 'settings' %}class="selected"{% endif %}>
             <img
                     id="img-header-settings"
                     src="{% static 'rechorder/icons/mdi-cog-outline.svg' %}"
-                    {% if selected == 'settings' %}
-                        class="selected"
-                    {% endif %}
             >
         </a>
     </div>

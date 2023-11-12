@@ -1,4 +1,5 @@
 {% extends 'rechorder/_base.html' %}
+{% load static %}
 
 {% block subtitle %}
     Settings -
@@ -23,9 +24,9 @@
         headers: { "X-CSRFToken": '{{ csrf_token }}' },
         data: {
             'permitted_shapes': JSON.stringify(getFormData($('#shape-selection'))),
-            'display_style': JSON.stringify(getFormData($('#chord-display-style'))),
-            'opt_line_breaks': JSON.stringify(getFormData($('#optional-line-breaks'))),
-            'section_display_order': JSON.stringify(getFormData($('#section-display-order'))),
+            'display_style': $('#chord-display-style').val(),
+            'opt_line_breaks': JSON.stringify($('#opt-line-breaks').prop('checked')),
+            'display_full_song_order': JSON.stringify($('#section-disp-ord').prop('checked')),
             'device_name': $('#text-device-name').val(),
         },
     });
@@ -37,15 +38,22 @@
             $(this).prop('checked', false);
         });
 
+        $('#chord-display-style').change(update);
+        $('#opt-line-breaks').click(update);
+        $('#section-disp-ord').click(update);
+        $('#btn-device-name-save').click(update);
+
         {% for index in selected_shapes %}
             $('#check-{{ index }}').prop('checked', true);
         {% endfor %}
 
-        $('#check-{{ chord_display_style }}').prop('checked', true);
-        $('#line-breaks-{{ opt_line_breaks }}').prop('checked', true);
-        $('#section-display-order-{{ section_display_order }}').prop('checked', true);
-        $('#btn-device-name-save').click(update);
+        $('#chord-display-style').val("{{ chord_display_style }}");
         $('#text-device-name').val("{{ device_name|escapejs }}");
+
+        $('#btn-download-xml').click(function() {
+            window.location.href = "{% url 'songs.download_xml' %}";
+
+        });
     });
 {% endblock %}
 
@@ -58,86 +66,86 @@
 {% endblock %}
 
 {% block content %}
-    <h2>User</h2>
-    {% include 'rechorder/_user_login.html' %}
+    <div class="settings-section">
+        {% include 'rechorder/_user_login.html' %}
 
-    <br>
+    </div>
+    <div class="settings-section">
+        <h1 class="section-title">
+            <p class="left-and-right">
+                <span>Beaming</span>
+                <span>{% include 'rechorder/_beaming_toggle.html' %}</span>
+            </p>
+        </h1>
 
-    <h2>This Device</h2><br>
-    <form id="device-name">
-        Name: <input id="text-device-name">
-        <button type="button" id="btn-device-name-save">Save</button>
-    </form>
-    <br>
+        <p>
+        <form id="device-name">
+            <input id="text-device-name">
+            <p><button type="button" id="btn-device-name-save">Save device name</button>
+        </form>
+    </div>
+    <div class="settings-section">
+        <h1 class="section-title">Song Display Settings</h1>
+        <h2><p class="left-and-right">
+            <span>Chord display style</span>
+            <span>
+                <select id="chord-display-style" name="chord-shape-index">
+                    <option value="letters">Letters</option>
+                    <option value="nashville">Nashville</option>
+                    <option value="roman">Roman Numerals</option>
+                </select>
+            </span>
+        </p></h2>
 
+        <p>
+        <h2><p class="left-and-right">
+            <span>Optional Line Breaks</span>
+            <span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="opt-line-breaks" {% if opt_line_breaks %}checked{% endif %}>
+                    <span class="toggle-slider round"></span>
+                </label>
+            </span>
+        </p></h2>
 
+        <p>
+        <h2><p class="left-and-right">
+            <span>Show Full Song Order</span>
+            <span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="section-disp-ord" {% if display_full_song_order %}checked{% endif %}>
+                    <span class="toggle-slider round"></span>
+                </label>
+            </span>
+        </p></h2>
+    </div>
 
-    <h2>Chord display style</h2><br>
-    <form id="chord-display-style" class="settings-boxes">
-        <ul class="yes-no-selection">
-            <li>
-                <input class="pressable" type="radio" id="check-letters" name="chord-display-style" value="letters">
-                <label for="check-letters">Letters</label>
-            </li>
-            <li>
-                <input class="pressable" type="radio" id="check-nashville" name="chord-display-style" value="nashville">
-                <label for="check-nashville">Nashville</label>
-            </li>
-            <li>
-                <input class="pressable" type="radio" id="check-roman" name="chord-display-style" value="roman">
-                <label for="check-roman">Roman Numerals</label>
-            </li>
-        </ul>
-    </form>
+    <div class="settings-section">
+        <h1 class="section-title">Auto Chord Shapes</h1>
+        <h2>Enabled keys</h2>
 
-    <h2>Optional Line Breaks</h2><br>
-    <form id="optional-line-breaks" class="settings-boxes">
-        <ul class="yes-no-selection">
-            <li>
-                <input class="pressable" type="radio" id="line-breaks-on" name="opt-line-breaks-choice" value="on">
-                <label for="line-breaks-on">On</label>
-            </li>
-            <li>
-                <input class="pressable" type="radio" id="line-breaks-off" name="opt-line-breaks-choice" value="off">
-                <label for="line-breaks-off">Off</label>
-            </li>
-        </ul>
-    </form>
+        <form id="shape-selection" class="settings-boxes">
+            <ul class="yes-no-selection">
+                {% for shape in possible_shapes %}
+                    <li>
+                        <input class="pressable" type="checkbox" id="check-{{ shape.index }}" name="{{ shape.index }}">
+                        <label for="check-{{ shape.index }}" class="key-label">{{ shape.name }}</label>
+                    </li>
+                {% endfor %}
+            </ul>
+        </form>
+    </div>
 
-    <h2>Section Display Order</h2><br>
-    Do you want the minimal amount of text displayed, or the songs displayed in the verse order specified?
-    <form id="section-display-order" class="settings-boxes">
-        <ul class="yes-no-selection">
-            <li>
-                <input class="pressable" type="radio" id="section-display-order-minimal" name="section-disp-ord-choice" value="minimal">
-                <label for="section-display-order-minimal">Minimal</label>
-            </li>
-            <li>
-                <input class="pressable" type="radio" id="section-display-order-expanded" name="section-disp-ord-choice" value="expanded">
-                <label for="section-display-order-expanded">Expanded</label>
-            </li>
-        </ul>
-    </form>
+    <div class="settings-section">
+        <h1 class="section-title">OpenLP Download</h1>
 
-    <h2>Beaming</h2><br>
-    {% include 'rechorder/_beaming_toggle.html' %}
-
-    <br><br><h2>Auto Chord Shapes</h2><br>
-    Select chord shape keys you're comfortable with:
-
-    <form id="shape-selection" class="settings-boxes">
-        <ul class="yes-no-selection">
-            {% for shape in possible_shapes %}
-                <li>
-                    <input class="pressable" type="checkbox" id="check-{{ shape.index }}" name="{{ shape.index }}">
-                    <label for="check-{{ shape.index }}" class="key-label">{{ shape.name }}</label>
-                </li>
-            {% endfor %}
-        </ul>
-    </form>
-
-    <hr>
-    <h2>OpenLP Download</h2><br>
-    <a href="{% url 'songs.download_xml' %}">Download all songs for in OpenLyric format</a>
-
+        <h2><p class="left-and-right">
+            <span>Download all songs in OpenLyric format</span>
+            <span>
+                <a class="img-btn" href="{% url 'songs.download_xml' %}">
+                    <img src="{% static 'rechorder/icons/mdi-file-download-outline.svg' %}">
+                </a>
+            </span>
+        </p></h2>
+    </div>
 {% endblock %}

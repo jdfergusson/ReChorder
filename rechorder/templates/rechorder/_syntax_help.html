@@ -1,95 +1,126 @@
 <script type="text/javascript">
 
     $(function() {
-        $('#syntax-help').hide()
         $('#btn-syntax-help').click(function() {
             $('#syntax-help').toggle()
+            $('#btn-syntax-help').toggleClass('btn-successful');
         });
     });
 </script>
 
-<p><button id="btn-syntax-help">Syntax Help</button>
-<div id="syntax-help">
+<p>
+    <button id="btn-syntax-help">Syntax Help</button>
+</p>
+<div id="syntax-help" hidden>
 
-    <p><h1>Verses/Sections</h1>
-    <br>Sections are named using curly brackets:
-    <br>{&lt;Type&gt;&lt;Number&gt;&lt;!&gt;}
-    <br>Each section should have a unique name
-    <br><h2>Type</h2>
-    <br>The type is what is expanded into the name of the section:
-    <ul class="code-block">
-        <li>v&#8594;Verse</li>
-        <li>c&#8594;Chorus</li>
-        <li>b&#8594;Bridge</li>
-        <li>p&#8594;Prechorus</li>
-        <li>i&#8594;Intro</li>
-        <li>o&#8594;Ending</li>
-        <li>m&#8594;Instrumental</li>
-    </ul>
+    <h1>Verses/Sections</h1>
+    <p>
+        Sections are named using curly brackets:
+        <div class="code-block">
+            <b>{</b>&lt;Type&gt;&lt;Number&gt;&lt;!&gt;<b>}</b>
+        </div>
+        Each section should have a unique name
+    </p>
+
+    <h2>Type</h2>
+    <p>
+        The type is what is expanded into the name of the section:
+        <ul>
+            <li>v&#8594;<b>V</b>erse</li>
+            <li>c&#8594;<b>C</b>horus</li>
+            <li>b&#8594;<b>B</b>ridge</li>
+            <li>p&#8594;<b>P</b>rechorus</li>
+            <li>i&#8594;<b>I</b>ntro</li>
+            <li>o&#8594;Ending (<b>o</b>uttro)</li>
+            <li>m&#8594;Instrumental (<b>m</b>usical interlude)</li>
+        </ul>
+    </p>
+
     <h2>Number</h2>
-    <br>The number is the section number, for example
-    Chorus 1 should be {c1}, verse 3 should be {v3}
-    <br><h2>Exclamation mark</h2>
-    <br>The exclamation mark at the end of the section name
-    tells the system that this section should <i>not</i> be
-    included when exporting lyrics to OpenLP. For example an introduction that
-    contains no lyrics, followed by a verse, might look like this:
+    <p>
+        The number is the section number, for example
+        Chorus 1 should be {c1}, verse 3 should be {v3}
+    </p>
+
+    <h2>Exclamation mark</h2>
+    <p>
+        The exclamation mark at the end of the section name
+        tells the system that this section should <i>not</i> be
+        included when exporting lyrics to OpenLP. For example an introduction that
+        contains no lyrics, followed by a verse, might look like this:
+        <div class="code-block">
+            <b>{i!}</b><br>
+            [G] [D] [Em] [C]<br>
+            <br>
+            <b>{v1}</b><br>
+            [G]Start of a [D]verse...
+        </div>
+    </p>
+
+    <h1>Chords</h1>
+
+    <p>
+        Chords go in square brackets inline with the lyrics
+        <div class="code-block">
+            [&lt;Note&gt;&lt;Chord quality&gt;/&lt;Bass Note&gt;]
+        </div>
+        Everything apart from the <b>Note</b> is optional. Notes should be capitalised
+    </p>
+
+    <h2>Example</h2>
     <div class="code-block">
-        {i!}<br>
-        [G] [D] [Em] [C]<br>
-        <br>
-        {v1}<br>
-        [G]Start of a [D]verse...
+        <b>[G]</b>Some <b>[Fm]</b>really meaningful <b>[Bmb5/D]</b>Lyr<b>[E/F#]</b>ics
     </div>
 
-    <p><h1>Chords</h1>
-    <br>Chords go in square brackets inline with the lyrics
-    <br> [&lt;Note&gt;&lt;Modifier&gt;/&lt;Bass Note&gt;].
-    <br>Everything apart from the Note is optional. Notes should be capitalised
-    <br><h2>Some examples:</h2>
-    <div class="code-block">
-        [G]Some [Fm]really meaningful [Bmb5/D]Lyr[E/F#]ics
-    </div>
+    <h1>Verse Order</h1>
+    <p>
+        The verse order shows which order the different sections of the song would usually be performed in.
+        It tells projection software OpenLP which order to display the verses in.
+        The labels used <b>must</b> match the section labels used in the song.
+    </p>
 
-    <p><h1>Verse Order</h1>
-    <br>The verse order is used only when exporting the song to OpenLP. It
-    tells OpenLP in which order to display the verses. The labels used should
-    match the section labels used in the song.
-    <br><h2>For example:</h2>
+    <h2>Example</h2>
     <div class="code-block">
         v1 c1 v2 c1 b c1 c2 o
     </div>
 
-    <p><h1>Formatting</h1>
-    <br><h2>Optional Line Breaks</h2>
-    <br>You can add optional line breaks using a backslash "\", for when some devices may want short lines, but others may want long.
-    For instance, take this line:
-    <div class="code-block">
-        All I once held dear, built my life upon
-    </div>
-    Some people may want to view this split across two lines:
-    <div class="code-block">
-        All I once held dear, <br>
-        built my life upon
-    </div>
-    To allow for this, use the backslash when writing the song to enter a line break that may or may not be displayed. E.G.:
-    <div class="code-block">
-        [C]All [G/B]I [Am]once [F]held [C]dear, \built my [F]life [G]up[C]on,<br>
-        All [G/B]this [Am]world [F]re[C]veres \and [Am]wars to [G]own;
-    </div>
-    The settings page allows you to change whether the optional line breaks are used or not. The optional line breaks
-    are <i>always</i> used in the OpenLP export of a song.
+    <h1>Formatting</h1>
 
-    <br><h2>Optional sub-section splits</h2>
-    <br>To indicate a sub section (for instance a phrase break within a verse) you can use an empty line. This will be
-    used by OpenLP to split pages more sensibly. For example:
-    <div class="code-block">
-        [E][F#m7][B] [A]Heal my heart and make it [B]clean<br>
-        [E]Open up my eyes to the [C#m]things unseen<br>
-        [A]Show me how to love like [B]You have loved me [C#m]<br>
-        <br>
-        [A]Break my heart for what breaks [B]Yours<br>
-        [E]Everything I am for Your [C#m]kingdom's cause<br>
-        [A]As I walk from earth in[B]to eternity [C#m]<br>
-    </div>
+    <h2>Optional Line Breaks</h2>
+    <p>
+        You can add optional line breaks using a backslash "\", for when some devices may want short lines, but others may want long.
+        For instance, take this line:
+        <div class="code-block">
+            All I once held dear, built my life upon
+        </div>
+        Some people may want to view this split across two lines:
+        <div class="code-block">
+            All I once held dear, <br>
+            built my life upon
+        </div>
+    </p>
+    <p>
+        To allow for this, use the backslash when writing the song to enter a line break that may or may not be displayed. E.G.:
+        <div class="code-block">
+            [C]All [G/B]I [Am]once [F]held [C]dear, \built my [F]life [G]up[C]on,<br>
+            All [G/B]this [Am]world [F]re[C]veres \and [Am]wars to [G]own;
+        </div>
+        The settings page allows you to change whether the optional line breaks are used or not. The optional line breaks
+        are <i>always</i> used in the OpenLP export of a song.
+    </p>
+
+    <h2>Optional sub-section splits</h2>
+    <p>
+        To indicate a sub section (for instance a phrase break within a verse) you can use an empty line. This will be
+        used by OpenLP to split pages more sensibly. For example:
+        <div class="code-block">
+            [E][F#m7][B] [A]Heal my heart and make it [B]clean<br>
+            [E]Open up my eyes to the [C#m]things unseen<br>
+            [A]Show me how to love like [B]You have loved me [C#m]<br>
+            <br>
+            [A]Break my heart for what breaks [B]Yours<br>
+            [E]Everything I am for Your [C#m]kingdom's cause<br>
+            [A]As I walk from earth in[B]to eternity [C#m]<br>
+        </div>
+    </p>
 </div>

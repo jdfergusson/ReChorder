@@ -33,9 +33,6 @@
     {% endif %}
 
     function toggleTab(tab) {
-        $('#btn-song-add-to-set').removeClass('btn-successful');
-        $('#btn-song-add-to-set').text('Add to set list');
-
         if (tab != 'transposer') {
             $('#transposer').hide();
             $('#btn-toggle-transposer').removeClass('img-action-selected');
@@ -91,9 +88,7 @@
              src="{% static 'rechorder/icons/mdi-printer.svg' %}">
     </a>
 
-    <h1 id="song-title">{{ song.title }}</h1><br>
-    <h2 id="song-artist">{{ song.artist }}</h2><br>
-    <h3>Key of: <span id="key-shown"></span> Capo: <span id="key-capo"></span></h3><br>
+    {% include 'rechorder/_song_title.html' %}
 
     <ul class="tab-list">
         <li>
@@ -107,33 +102,33 @@
         </li>
     </ul>
 
-    <div class="tab-container" id="adder">
-        {% if set_is_editable %}
-            <ul>
-                Current set list: <i>{{ current_set.name }}</i>
-                <li>
-                    <button id="btn-song-add-to-set">Add to set list</button>
-                </li>
-                <li><button id="btn-song-add-and-go">Add and go live</button></li>
-            </ul>
-        {% elif current_set.pk is not None %}
-            You do not own the current set "{{ current_set.name }}".
-            Please <a href="{% url 'set.duplicate' current_set.pk %}">make a copy</a> before editing
-        {% else %}
-            You need to <a href="{% url 'set.new' %}">create</a> or <a href="{% url 'sets' %}">open</a> a set before adding a song to one!
-        {% endif %}
-
+    <div class="tab-container" id="adder" hidden>
+        <div class="centred-div">
+            {% if set_is_editable %}
+                <ul>
+                    <li>
+                        <button id="btn-song-add-to-set">Add to set list "{{ current_set.name }}"</button>
+                    </li>
+                    <li><button id="btn-song-add-and-go">Add and go live</button></li>
+                </ul>
+            {% elif current_set.pk is not None %}
+                You do not own the current set "{{ current_set.name }}".
+                Please <a href="{% url 'set.duplicate' current_set.pk %}">make a copy</a> before editing
+            {% else %}
+                You need to <a href="{% url 'set.new' %}">create</a> or <a href="{% url 'sets' %}">open</a> a set before adding a song to one!
+            {% endif %}
+        </div>
     </div>
 
-    <div class="tab-container" id="transposer">
+    <div class="tab-container" id="transposer" hidden>
         {% include 'rechorder/_transposer.html' with sk_editable='true' %}
     </div>
 
-    <div class="tab-container" id="editor">
+    <div class="tab-container" id="editor" hidden>
         {% include 'rechorder/_song_edit.html' %}
     </div>
 
-    <div class="tab-container" id="font-resizer">
+    <div class="tab-container" id="font-resizer" hidden>
     {% include 'rechorder/_font_resizer.html' %}
     </div>
 {% endblock %}

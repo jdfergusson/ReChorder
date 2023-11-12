@@ -95,19 +95,14 @@ def _get_or_create_device_name(request):
 
 
 def _get_optional_line_breaks_setting(request):
-    opt_line_breaks = request.session.get('opt_line_breaks')
-    if opt_line_breaks is None or opt_line_breaks not in ('on', 'off'):
-        opt_line_breaks = 'off'
-        request.session['opt_line_breaks'] = opt_line_breaks
+    opt_line_breaks = request.session['opt_line_breaks'] = bool(request.session.get('opt_line_breaks', False))
     return opt_line_breaks
 
 
-def _get_section_display_order(request):
-    section_display_order = request.session.get('section_display_order')
-    if section_display_order is None or section_display_order not in ('expanded', 'miminal'):
-        section_display_order = 'minimal'
-        request.session['section_display_order'] = section_display_order
-    return section_display_order
+def _get_display_full_song_order(request):
+    display_full_song_order = \
+        request.session['display_full_song_order'] = bool(request.session.get('display_full_song_order', False))
+    return display_full_song_order
 
 
 def _get_base_context(request, **overrides):
@@ -215,9 +210,10 @@ def _get_song_key_index(request, song, item_in_set=None):
             key_index = (sounding_key_index - capo_fret_number) % 12
         elif transpose_type == 'ti':
             delta = ABSOLUTE_LOOKUP['c'] - int(transpose_data.get('transposing-cnote', ABSOLUTE_LOOKUP['c']))
-            key_index = sounding_key_index + delta
+            key_index = (sounding_key_index + delta) % 12;
         elif transpose_type == 'abs':
             key_index = int(transpose_data.get('absolute-force-index', sounding_key_index))
+        print(key_index)
 
     return key_index, capo_fret_number
 
@@ -271,9 +267,10 @@ def _get_base_song_context_dict(request, song, item_in_set=None):
         'key_details': _get_key_details(request, song, item_in_set=item_in_set),
         'current_set': set,
         'set_is_editable': set_is_editable,
-        'opt_line_breaks': _get_optional_line_breaks_setting(request) == 'on',
-        'section_display_order': _get_section_display_order(request),
+        'opt_line_breaks': _get_optional_line_breaks_setting(request),
+        'display_full_song_order': _get_display_full_song_order(request),
         'is_verse_order_okay': not bool(song.check_verse_order()),
+        'beaming_enabled': _is_beaming(request),
     }
 
 
@@ -456,6 +453,7 @@ def set_add_song(request, set_id):
         sounding_key_index=sounding_key_index,
         index_in_set=index_in_set,
         notes='',
+        item_type=ItemInSet.ItemInSetType.SONG,
     )
 
     song_in_set.save()
@@ -701,8 +699,8 @@ def set_print(request, set_id):
     context = {
         'songs': songs,
         'set_id': this_set.pk,
-        'opt_line_breaks': _get_optional_line_breaks_setting(request) == 'on',
-        'section_display_order': _get_section_display_order(request),
+        'opt_line_breaks': _get_optional_line_breaks_setting(request),
+        'display_full_song_order': _get_display_full_song_order(request),
     }
 
     if request.GET.get('no_personal_keys', False):
@@ -873,8 +871,8 @@ def song_print(request, song_id):
 
     context = {
         'songs': songs,
-        'opt_line_breaks': _get_optional_line_breaks_setting(request) == 'on',
-        'section_display_order': _get_section_display_order(request),
+        'opt_line_breaks': _get_optional_line_breaks_setting(request),
+        'display_full_song_order': _get_display_full_song_order(request),
     }
 
     if request.GET.get('no_personal_keys', False):
@@ -981,8 +979,8 @@ def songs(request):
     song_ids_in_set = []
     try:
         this_set = Set.objects.get(pk=_get_current_set_id(request), owner=_get_user_uuid(request))
-        songs_in_set = ItemInSet.objects.filter(set=this_set)
-        song_ids_in_set = [i.pk for i in songs_in_set]
+        items_in_set = ItemInSet.objects.filter(set=this_set, item_type=ItemInSet.ItemInSetType.SONG)
+        song_ids_in_set = [i.song.pk for i in items_in_set]
         current_set_id = this_set.pk
     except Set.DoesNotExist:
         current_set_id = -1
@@ -1024,6 +1022,7 @@ def song(request, song_id):
     }
     return render(request, 'rechorder/song.html', context)
 
+
 ##########################################################################################
 # Settings
 ##########################################################################################
@@ -1043,12 +1042,13 @@ def download_xml(request):
 
 def settings(request):
     context = {
+        'beaming_enabled': _is_beaming(request),
         'selected_shapes': _get_selected_chord_shapes(request),
         'possible_shapes': [{'name': KEYS[i], 'index': i} for i in range(12)],
         'device_name': _get_or_create_device_name(request),
         'chord_display_style': _get_display_style(request),
         'opt_line_breaks': _get_optional_line_breaks_setting(request),
-        'section_display_order': _get_section_display_order(request),
+        'display_full_song_order': _get_display_full_song_order(request),
         **_get_base_context(request),
     }
     return render(request, 'rechorder/settings.html', context)
@@ -1057,10 +1057,10 @@ def settings(request):
 def settings_set(request):
     request.session['selected_chord_shapes'] = \
         [int(i) for i in json.loads(request.POST.get('permitted_shapes', ''))]
-    request.session['chord_display_style'] = json.loads(request.POST.get('display_style', ''))['chord-display-style']
+    request.session['chord_display_style'] = request.POST.get('display_style', 'letters')
     request.session['device_name'] = request.POST.get('device_name', '["Unnamed Device"]').strip()
-    request.session['opt_line_breaks'] = json.loads(request.POST.get('opt_line_breaks', ''))['opt-line-breaks-choice']
-    request.session['section_display_order'] = json.loads(request.POST.get('section_display_order', ''))['section-disp-ord-choice']
+    request.session['opt_line_breaks'] = bool(json.loads(request.POST.get('opt_line_breaks', 'false')))
+    request.session['display_full_song_order'] = bool(json.loads(request.POST.get('display_full_song_order', 'false')))
     request.session.modified = True
 
     # Try to update the user's beam if it exists

@@ -7,7 +7,7 @@
         Please fix errors in the verse order before using the song
     </div>
 {% else %}
-    {% if section_display_order == 'expanded' %}
+    {% if display_full_song_order %}
         {% for section in song.expanded_sections %}
             <h3 class="section-title">{{ section.title }}</h3>
             {% for subsection in section.subsections %}

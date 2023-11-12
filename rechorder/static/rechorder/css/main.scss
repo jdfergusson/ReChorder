@@ -1,0 +1,1101 @@
+@use 'sass:color';
+
+$col-good: #c1e6be;
+$col-bad: #e6bec1;
+
+$col-base: #bed5e6;
+$col-base-dark: #32383c;
+$col-base-transparent: #bed5e600;
+$col-base-light: #dfeaf3;
+
+$col-highlight: #bec1e6;
+$col-highlight-transparent: #bec1e600;
+
+$col-light-grey: #c4c4c4;
+$col-mid-grey: #626262;
+$col-dark-grey: #303539;
+$col-btn-hover: #cee0ec;
+$col-btn-hover-translucent: #cee0ec80;
+$col-disabled: #ffffffa0;
+
+$col-text-light: $col-light-grey;
+
+// Dimensions
+$max-page-width: 1000px;
+$thin-section-width: 400px;
+$spacing-width: 10px;
+
+$fade-time: 0.2s;
+
+
+@font-face {
+    font-family: "GothicA1";
+    src:
+        url("../fonts/GothicA1/GothicA1-Regular.woff2") format("woff2"),
+        url("../fonts/GothicA1/GothicA1-Regular.woff") format("woff"),
+        url("../fonts/GothicA1/GothicA1-Regular.ttf") format("truetype");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "GothicA1";
+    src:
+        url("../fonts/GothicA1/GothicA1-Bold.woff2") format("woff2"),
+        url("../fonts/GothicA1/GothicA1-Bold.woff") format("woff"),
+        url("../fonts/GothicA1/GothicA1-Bold.ttf") format("truetype");
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: "PlayfairDisplay";
+    src:
+        url("../fonts/PlayfairDisplay/PlayfairDisplay-Regular.woff2") format("woff2"),
+        url("../fonts/PlayfairDisplay/PlayfairDisplay-Regular.woff") format("woff"),
+        url("../fonts/PlayfairDisplay/PlayfairDisplay-Regular.ttf") format("truetype");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "PlayfairDisplay";
+    src:
+        url("../fonts/PlayfairDisplay/PlayfairDisplay-Bold.woff2") format("woff2"),
+        url("../fonts/PlayfairDisplay/PlayfairDisplay-Bold.woff") format("woff"),
+        url("../fonts/PlayfairDisplay/PlayfairDisplay-Bold.ttf") format("truetype");
+    font-weight: 700;
+}
+
+
+body, html {
+    font-family: 'GothicA1', sans-serif;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+div, span {
+    box-sizing: border-box;
+}
+
+a {
+    text-decoration: none;
+}
+
+
+sup, sub {
+    vertical-align: baseline;
+    position: relative;
+    top: -0.4em;
+}
+sub {
+    top: 0.4em;
+}
+
+
+form {
+    margin: 0;
+    padding: 0;
+}
+
+.left-and-right {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0;
+}
+
+.right-aligned-img {
+    float: right;
+    min-width: 2em;
+    width: 2.5em;
+    transition-duration: 0.4s;
+}
+
+#div-header {
+    padding: 0.4em;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: $col-highlight;
+    z-index: 100;
+
+    a {
+        border-radius: 100%;
+        transition: $fade-time;
+        -webkit-tap-highlight-color: $col-btn-hover-translucent;
+    }
+
+    img {
+        padding: 0.4em;
+        min-height: 2em;
+        min-width: 2em;
+        max-width: 15vw;
+        display: block;
+        border-radius: 100%;
+    }
+
+    .selected {
+        background-color: $col-base;
+        :hover {
+            background-color: $col-btn-hover;
+            transition: $fade-time;
+        }
+    }
+}
+
+#div-header-images {
+    align: center;
+    max-width: $max-page-width;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-around;
+}
+
+#div-content {
+    max-width: $max-page-width;
+    margin: 0 auto;
+    padding: $spacing-width;
+}
+
+#div-title-bg {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    background-color: $col-base-light;
+}
+
+#div-title {
+    box-shadow: 0 0 20px 0px white;
+    background-color: $col-base;
+    max-width: $max-page-width;
+    margin: 0 auto;
+    padding: $spacing-width;
+    padding-top: 4em;
+}
+
+#adder ul, #transposer ul, #editor ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#adder li:not(:last-child) {
+    margin-bottom: 5px;
+}
+
+button, select {
+    font-size: large;
+    color: $col-mid-grey;
+    font-variant: small-caps;
+    text-decoration: none;
+    border: 2px solid #00000000;
+    background-color: $col-base;
+    padding: 0.3em 1em;
+    transition: $fade-time;
+    border-radius: 100vmax;
+}
+
+input {
+    font-size: large;
+    color: $col-mid-grey;
+    //font-variant: small-caps;
+    text-decoration: none;
+    border: 2px solid $col-light-grey;
+    background-color: #ffffff;
+    padding: 0.3em 1em;
+    transition: $fade-time;
+    border-radius: 100vmax;
+}
+
+input:focus {
+    outline: 2px solid $col-mid-grey;
+}
+
+.btn-successful {
+    background-color: $col-good;
+}
+
+.btn-unsuccessful {
+    background-color: $col-bad;
+}
+
+@media (hover:hover) {
+    button:hover, select:hover, a:hover {
+        background-color: $col-btn-hover;
+    }
+}
+
+button:disabled, select:disabled {
+    border: 2px solid $col-light-grey;
+    color: $col-light-grey;
+    background-color: $col-disabled;
+
+    :hover {
+        background-color: transparent;
+    }
+}
+
+.centred-div {
+    margin: auto;
+    max-width: $thin-section-width;
+
+    button {
+        width: 100%;
+        margin-top: $spacing-width;
+    }
+}
+
+.song-content-edit {
+    width: 100%;
+    height: 40vh;
+}
+
+.img-actions {
+    min-width: 2.5em;
+    transition-duration: $fade-time;
+}
+
+@media(hover:hover) {
+    .img-actions:hover {
+        background-image: $col-btn-hover;
+    }
+}
+
+.img-action-selected {
+    background-color: $col-highlight;
+}
+
+h1 {
+    font-weight: bold;
+    font-size: x-large;
+    font-variant: small-caps;
+    display: inline;
+    margin: 0;
+}
+
+h2 {
+    font-size: large;
+    font-weight: normal;
+    font-variant: small-caps;
+    display: inline;
+    margin: 0;
+    color: $col-mid-grey;
+}
+
+h2 a {
+    color: $col-mid-grey;
+}
+
+h3 {
+    font-size: medium;
+    display: inline;
+    margin: 0;
+    font-weight: normal;
+    color: $col-mid-grey;
+}
+
+textarea {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+hr {
+    height: 0px;
+    border: 0px;
+    border-bottom: 1px solid $col-mid-grey;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.spacious-form button {
+    margin-top: 5px;
+}
+
+.spacious-form input {
+    margin-top: 5px;
+}
+
+/* Hide spinner on CCLI number box */
+/* -> Chrome, Safari, Edge, Opera */
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* -> Firefox */
+.no-spinner {
+  -moz-appearance: textfield;
+}
+
+/**********************************************************
+ * Syntax help
+ *********************************************************/
+
+#syntax-help {
+    transition: 2s;
+
+    h1, h2 {
+        display: block;
+    }
+
+    p {
+        margin: 0;
+    }
+
+    h1 {
+        margin-top: 1em;
+        border-top: 1px solid $col-light-grey;
+        padding-top: 1em;
+    }
+
+    h2 {
+        margin-top: 0.5em;
+        color: black;
+        font-weight: bold;
+    }
+
+    p + p {
+        margin-top: 1em;
+    }
+}
+
+.code-block {
+    background-color: white;
+    color: $col-dark-grey;
+    border: 2px solid $col-light-grey;
+    font-family: monospace;
+    max-width: $thin-section-width;
+    margin: auto;
+}
+
+/**********************************************************
+ * Song Editor
+ *********************************************************/
+
+.editor-feedback {
+    margin-top: 0.5em;
+}
+
+#editor-song-content {
+    margin-bottom: 5px;
+}
+
+.editor-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+#editor-table {
+    margin: auto;
+
+    font-size: large;
+    font-weight: normal;
+    font-variant: small-caps;
+    color: $col-mid-grey;
+
+    td {
+        padding-bottom: $spacing-width;
+    }
+
+    tr > td + td {
+        padding-left: $spacing-width;
+    }
+}
+
+/**********************************************************
+ * Font resizer
+ *********************************************************/
+
+.resizer-buttons {
+    display:flex;
+
+    button {
+        border-radius: 0;
+        margin: 0 2px 0 2px;
+    }
+
+    button:disabled {
+        background-color: $col-base;
+        opacity: 0.5;
+        border: 0;
+    }
+}
+
+.resizer-buttons>:first-child {
+    margin-left: 0;
+    border-top-left-radius: 100vh;
+    border-bottom-left-radius: 100vh;
+    padding-left: 0.7em;
+}
+
+.resizer-buttons>:last-child {
+    margin-right: 0;
+    border-top-right-radius: 100vh;
+    border-bottom-right-radius: 100vh;
+    padding-right: 0.7em;
+}
+
+#resizer {
+    text-align: center;
+
+    h2 {
+        padding: $spacing-width 0 $spacing-width/2 0;
+        display: block;
+        font-size: x-large;
+    }
+}
+
+#resizer>:first-child {
+    padding-top: 0;
+}
+
+/**********************************************************
+ * Transposer
+ *********************************************************/
+
+.transposer {
+    max-width: $thin-section-width;
+    margin: auto;
+    color: $col-mid-grey;
+
+    h2 {
+        font-size: x-large;
+    }
+
+    input {
+        display: none;
+    }
+
+    button {
+        width: 100%;
+        text-align: left;
+    }
+
+    label {
+        display: inline-block;
+        border: 1px solid cyan;
+        align: middle;
+    }
+
+    #selected {
+        background-color: #FF00FF;
+    }
+
+    p {
+        padding-bottom: $spacing-width;
+    }
+
+    select {
+        margin-left: $spacing-width;
+    }
+
+    hr {
+        border-color: $col-light-grey;
+        margin-bottom: $spacing-width;
+        margin-top: 0;
+    }
+}
+
+.tran-rad ~ span {
+    color: $col-mid-grey;
+    background-color: $col-base;
+    font-size: large;
+    border-radius: 100vh;
+}
+
+.tran-rad:checked ~ span {
+    background-color: $col-good;
+}
+
+.trans-selection {
+    display: inline-block;
+    border: 1px solid red;
+    height: 2em;
+}
+
+.tran-selected, .tran-selected:hover {
+    background-color: $col-good;
+}
+
+// .tran-rad-label {
+//     color: $col-mid-grey;
+//     :checked ~ label {
+//         color: black;
+//     }
+// }
+
+/**********************************************************
+ * Song notes
+ *********************************************************/
+
+.notes-textarea {
+    height: 20vh;
+}
+
+.notes {
+    font-style: italic;
+    color: $col-mid-grey;
+}
+
+#notes-section-container {
+    border-left: 2px solid $col-light-grey;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: $spacing-width;
+    display: none;
+}
+
+#notes-section-container h2 {
+    font-style: italic;
+}
+
+/**********************************************************
+ * Error box
+ *********************************************************/
+
+.error-box {
+    border: 2px solid red;
+    padding: 0.2em;
+    background-color: $col-bad;
+}
+
+.error-box h2 {
+    color: black;
+    font-weight: bold;
+}
+
+#verse-order-error ul {
+    list-style: disc inside none;
+}
+
+/**********************************************************
+ * Image buttons
+ *********************************************************/
+
+.img-btn {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    min-width: 2em;
+    min-height: 2em;
+}
+
+.img-btn img:hover {
+    background-color: $col-btn-hover;
+    transition: $fade-time;
+}
+
+.img-btn img {
+    min-width: 2em;
+}
+
+.img-btn-header {
+    background-color: $col-base;
+    padding: 0.2em;
+    margin: 0;
+}
+
+.img-btn-header img {
+    height: 2em;
+    min-width: 2em;
+    vertical-align: middle;
+}
+
+.img-btn-header:disabled img {
+    opacity: 0.5;
+}
+
+/**********************************************************
+ * Tab list
+ *********************************************************/
+
+.tab-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    margin-top: $spacing-width/2;
+
+    li {
+        display: inline-block;
+        padding: 0;
+        margin: 0;
+    }
+
+    img {
+        display: inline;
+        padding: 0.2em;
+        margin: 0;
+        vertical-align: bottom;
+    }
+}
+
+.tab-container {
+    background-color: white;
+    border: 3px solid $col-highlight;
+    margin: 0;
+    padding: $spacing-width;
+    z-index: 20;
+    position: relative;
+}
+
+/**********************************************************
+ * Lists
+ **********************************************************/
+
+.main-content-list .list-primary {
+    font-size: large;
+    font-weight: bold;
+    font-variant: small-caps;
+    color: black;
+}
+
+.main-content-list .list-secondary {
+    font-size: normal;
+    font-weight: normal;
+    font-variant: small-caps;
+    color: $col-mid-grey;
+}
+
+.main-content-list .list-tertiary {
+    font-size: small;
+    font-weight: normal;
+    font-variant: small-caps;
+    color: $col-mid-grey;
+}
+
+.main-content-list li {
+    border-left: 4px solid;
+    padding-left: 1em;
+    padding-bottom: 2px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid;
+    border-color: $col-mid-grey;
+    display: flex;
+    align-items: center;
+    background-color: white;
+    transition: $fade-time;
+}
+
+@media(hover:hover) {
+    .main-content-list li:hover {
+        border-color:$col-base;
+    }
+}
+
+.main-content-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.main-content-list img {
+    height: 2em;
+    vertical-align: middle;
+}
+
+.main-content-list .list-expander {
+    flex-grow: 10;
+}
+
+.main-content-list {
+    button, img {
+        background-color: transparent;
+    }
+
+    select {
+        background-color: transparent;
+        border: 2px solid $col-mid-grey;
+    }
+}
+
+.main-content-list a {
+    color: black;
+}
+
+/**********************************************************
+ * Song display
+ **********************************************************/
+
+.block {
+  float: none;
+  padding-bottom: 0.2em;
+}
+
+.container {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.section-title {
+    font-size: large;
+    /*text-decoration: underline;*/
+    font-weight: bold;
+    padding-top: 0em;
+    padding-bottom: 0.3em;
+    display: block;
+}
+
+.song-section-hr {
+    border: 1px solid #E0E0E0;
+    margin-top: 0.5em;
+    margin-left: 0px;
+}
+
+.block-chord {
+    font-weight: bold;
+    margin-right: 0.2em;
+    padding: 2px;
+    margin-bottom: 2px;
+    height: 1em;
+    min-width: 0;
+}
+
+.block-chord.roman {
+    font-family: 'PlayfairDisplay', serif;
+}
+
+mark {
+    padding-top: 0.2em;
+    background-color: $col-good;
+}
+
+.block-lyric {
+    padding-top: 0.3em;
+}
+
+.text-item-title {
+    font-style: italic;
+}
+
+/**********************************************************
+ * Songs
+ **********************************************************/
+
+#key-filter-list {
+    display: flex;
+    flex-flow: row wrap;
+
+}
+
+.key-filter-button {
+    width: 3em;
+    margin: 2px;
+}
+
+.key-filter-button-selected {
+    background-color: $col-good;
+    transition: $fade-time;
+}
+@media (hover:hover) {
+    .key-filter-button-selected:hover {
+        background-color: $col-btn-hover;
+        transition: $fade-time;
+    }
+}
+
+.footnote {
+    font-size: x-small;
+}
+
+/**********************************************************
+ * Song list
+ **********************************************************/
+
+#songlist {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.song-in-list {
+    .name {
+        font-size: large;
+        font-weight: bold;
+        font-variant: small-caps;
+        color: black;
+    }
+
+    .artist {
+        font-size: normal;
+        font-weight: normal;
+        font-variant: small-caps;
+        color: $col-mid-grey;
+    }
+
+    .key {
+        font-size: small;
+        font-weight: normal;
+        font-variant: small-caps;
+        color: $col-mid-grey;
+    }
+}
+
+
+.song-anchor {
+    position: absolute;
+    transform: translateY(-30vh);
+}
+
+.song-list-add-to-set {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.song-list-song-container {
+    display: flex;
+    width: 100%;
+}
+
+.song-list-song-details {
+    flex-grow: 100;
+}
+
+.add-song-to-set-button, .remove-song-from-set-button {
+    border: 0px;
+    border-radius: 0;
+    padding: 0;
+    min-width: 2.5em;
+    transition: $fade-time;
+}
+
+.remove-song-from-set-button {
+    background-color: $col-good;
+}
+
+.add-song-to-set-button:hover {
+    background-color: $col-btn-hover;
+}
+
+/**********************************************************
+ * Set list
+ **********************************************************/
+
+.sortable-list li {
+    padding-left: 0;
+}
+
+.text-item-in-set {
+    font-style: italic;
+}
+
+
+/**********************************************************
+ * Song in set specifics
+ **********************************************************/
+
+#set-nav-btns {
+    position: fixed;
+    bottom: 0;
+    z-index: 10;
+    width: 100%;
+
+    img {
+        min-width: 45vw;
+        max-height: 45vh;
+        opacity: 0.1;
+    }
+}
+
+/**********************************************************
+ * Settings
+ **********************************************************/
+
+.key-label {
+    width: 1em;
+    display: inline-block;
+    text-align: center;
+    vertical-align: center;
+}
+
+.settings-boxes {
+    ul {
+        display: flex;
+        list-style: None;
+        flex-wrap: wrap;
+        padding-left: 0;
+        justify-content: left;
+    }
+
+    input {
+        position: absolute;
+        left: -9999px;
+
+        + label {
+            font-size: large;
+            color: $col-dark-grey;
+            font-variant: small-caps;
+            text-decoration: none;
+            border: 2px solid #00000000;
+            background-color: $col-bad;
+            padding: 0.3em 1em;
+            transition: $fade-time;
+            border-radius: 100vmax;
+        }
+    }
+}
+
+.settings-section {
+    margin: auto;
+    padding-bottom: $spacing-width;
+    border-bottom: solid 2px $col-light-grey;
+    width: $thin-section-width;
+
+    input, button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+@media (hover:hover) {
+    .settings-section a:hover {
+        background-color: transparent;
+    }
+
+    .yes-no-selection input:checked + label:hover {
+        background-color: $col-btn-hover;
+    }
+
+    .key-label:hover {
+        background-color: $col-btn-hover;
+    }
+}
+
+.yes-no-selection {
+    margin-top: 0.3em;
+
+    input:checked + label {
+        background-color: $col-good;
+    }
+
+    li {
+        margin: 2.5px;
+    }
+}
+
+.section-title {
+    padding-top: $spacing-width;
+    padding-bottom: 5px;
+}
+
+/**********************************************************
+ * Toggle Switch
+ **********************************************************/
+
+ /* The switch - the box around the slider */
+.toggle-switch {
+    vertical-align: middle;
+    font-size: large;
+    position: relative;
+    display: inline-block;
+    width: 3.5em;
+    height: 2em;
+
+    /* Hide default HTML checkbox */
+    input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+}
+
+/* The slider */
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: $col-light-grey;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 1.4em;
+    width: 1.4em;
+    left: 0.3em;
+    bottom: 0.3em;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .toggle-slider {
+    background-color: $col-good;
+}
+@media (hover:hover) {
+
+    input:checked + .toggle-slider:hover {
+        background-color: $col-btn-hover;
+    }
+
+    .toggle-slider:hover {
+        background-color: $col-btn-hover;
+    }
+}
+
+input:focus + .toggle-slider {
+    box-shadow: 0 0 1px $col-highlight;
+}
+
+input:checked + .toggle-slider:before {
+    -webkit-transform: translateX(1.4em);
+    -ms-transform: translateX(1.4em);
+    transform: translateX(1.4em);
+}
+
+/* Rounded sliders */
+.toggle-slider.round {
+    border-radius: 100vh;
+}
+
+.toggle-slider.round:before {
+    border-radius: 100vh;
+}
+
+/**********************************************************
+ * Paginator
+ **********************************************************/
+
+.paginator {
+    text-align: center;
+    font-variant: small-caps;
+    font-size: large;
+    img {
+        height: 2em;
+        vertical-align: middle;
+    }
+
+    img:hover {
+        background-color: $col-btn-hover;
+    }
+
+    a:hover {
+        background: none;
+    }
+}
+
+.paginator-spacer {
+    display: inline-block;
+    /* A guess at the width of the two images that would normally be here */
+    width: 4.4em;
+}
+
+/**********************************************************
+ * Printing
+ **********************************************************/
+
+@media print {
+    .no-print, .no-print * {
+        display: none !important;
+    }
+}
