@@ -17,12 +17,42 @@ function _fsReset(opt) {
     _fsRender(opt, opt.sizeDefault);
 }
 
+function _fsToggleChords() {
+    disabled = JSON.parse(localStorage.getItem('chords-disabled'));
+    console.log(disabled);
+    if (disabled) {
+        // Was disabled, so enable it
+        localStorage.setItem('chords-disabled', JSON.stringify(false));
+    }
+    else
+    {
+        // Wasn't disabled, also default behaviour
+        localStorage.setItem('chords-disabled', JSON.stringify(true));
+    }
+    _fsShowOrHideChords();
+}
+
+function _fsShowOrHideChords() {
+    disabled = JSON.parse(localStorage.getItem('chords-disabled'));
+    if (disabled) {
+        $('.block-chord').hide()
+        $('#fs-c-eye-on').hide()
+        $('#fs-c-eye-off').show()
+    }
+    else
+    {
+        $('.block-chord').show()
+        $('#fs-c-eye-on').show()
+        $('#fs-c-eye-off').hide()
+    }
+}
+
 // Render
 function _fsRender(opt, size) {
     $(opt.selector).css("font-size", size +"px");
-    $(opt.buttonIncrease).prop( "disabled", (size >= opt.sizeMaximum) );
-    $(opt.buttonDecrease).prop( "disabled", size <= opt.sizeMinimum );
-    $(opt.buttonReset).prop( "disabled", (size == opt.sizeDefault) );
+    $(opt.buttonIncrease).prop("disabled", (size >= opt.sizeMaximum));
+    $(opt.buttonDecrease).prop("disabled", size <= opt.sizeMinimum);
+    $(opt.buttonReset).prop("disabled", (size == opt.sizeDefault));
     localStorage.setItem(opt.cookieName, size);
 }
 
@@ -35,6 +65,7 @@ var _fs_chord_opt = {
     buttonIncrease: "#fs-c-increase",
     buttonDecrease: "#fs-c-decrease",
     buttonReset:    "#fs-c-reset",
+    buttonToggle:   "#fs-c-toggle",
     cookieName:     "font-size-chords",
 }
 
@@ -60,10 +91,13 @@ $(function() {
     $(_fs_chord_opt.buttonIncrease).click(function() {_fsIncrease(_fs_chord_opt);});
     $(_fs_chord_opt.buttonDecrease).click(function() {_fsDecrease(_fs_chord_opt);});
     $(_fs_chord_opt.buttonReset).click(function() {_fsReset(_fs_chord_opt);});
+    $(_fs_chord_opt.buttonToggle).click(_fsToggleChords);
+
 
     $(_fs_lyrics_opt.buttonIncrease).click(function() {_fsIncrease(_fs_lyrics_opt);});
     $(_fs_lyrics_opt.buttonDecrease).click(function() {_fsDecrease(_fs_lyrics_opt);});
     $(_fs_lyrics_opt.buttonReset).click(function() {_fsReset(_fs_lyrics_opt);});
 
     fsGo();
+    _fsShowOrHideChords();
 });

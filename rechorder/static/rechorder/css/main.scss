@@ -172,7 +172,7 @@ form {
     background-color: $col-base;
     max-width: $max-page-width;
     margin: 0 auto;
-    padding: 5px;
+    padding: $spacing-width;
     padding-top: 4em;
 }
 
@@ -430,12 +430,14 @@ hr {
     margin-left: 0;
     border-top-left-radius: 100vh;
     border-bottom-left-radius: 100vh;
+    padding-left: 0.7em;
 }
 
 .resizer-buttons>:last-child {
     margin-right: 0;
     border-top-right-radius: 100vh;
     border-bottom-right-radius: 100vh;
+    padding-right: 0.7em;
 }
 
 #resizer {
