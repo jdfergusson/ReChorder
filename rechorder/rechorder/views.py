@@ -213,7 +213,6 @@ def _get_song_key_index(request, song, item_in_set=None):
             key_index = (sounding_key_index + delta) % 12;
         elif transpose_type == 'abs':
             key_index = int(transpose_data.get('absolute-force-index', sounding_key_index))
-        print(key_index)
 
     return key_index, capo_fret_number
 

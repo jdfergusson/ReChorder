@@ -6,19 +6,6 @@
 {{ key_details|json_script:"init_key_details" }}
 
 <script type="text/javascript">
-    current_transposition = 'sk';
-
-    function getFormData($form){
-        var unindexed_array = $form.serializeArray();
-        var indexed_array = {};
-
-        $.map(unindexed_array, function(n, i){
-            indexed_array[n['name']] = n['value'];
-        });
-
-        return indexed_array;
-    }
-
     function updateSong(data) {
         /* Data should contain object with song_html and key_index */
         $('#song').html(data.song_html);
@@ -118,26 +105,6 @@
     }
 
     function transposeSettingsChanged() {
-        enableAndDisableTransposeFields($('input[name=adv-tran-opt]:checked', '#transposer-form').val());
-
-        $.ajax({
-            url: '{% url 'song.transpose' %}',
-            type: 'POST',
-            headers: { "X-CSRFToken": '{{ csrf_token }}' },
-            data: {
-                'song_id': {{ song.id }},
-                {% if set_id %}
-                    'sounding_key_index': "{{ key_details.sounding_key_index }}",
-                    'set_id': "{{ set_id }}",
-                    'song_in_set_index': "{{ current_index }}",
-                {% endif %}
-                'transpose_data': JSON.stringify(getFormData($('#transposer-form'))),
-            },
-            success: updateSong,
-        });
-    }
-
-    function doClick() {
         if ($(this).is('button')) {
             element_id = $(this).attr('id');
             current_transposition = element_id.split("_")[1];
@@ -188,13 +155,12 @@
     }
 
     $(function() {
-
-        $('#transposer-form input, #transposer-form select').each(function(index) {
-            $(this).change(transposeSettingsChanged);
+        $('#transposer-div button').each(function() {
+            $(this).click(transposeSettingsChanged);
         });
 
-        $('#transposer-div button, #transposer-div select').each(function() {
-            $(this).click(doClick);
+        $('#transposer-div select').each(function() {
+            $(this).change(transposeSettingsChanged);
         });
 
         setTransposeUi(JSON.parse($('#init_key_details').text()));
