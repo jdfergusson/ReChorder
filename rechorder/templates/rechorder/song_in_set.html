@@ -87,9 +87,7 @@
     {{ current_index|add:'1' }} of {{ set_length }}
 </h2><br>
 {% if item_in_set.item_type == ItemInSetType.SONG %}
-    <h1 id="song-title">{{ song.title }}</h1><br>
-    <h2 id="song-artist">{{ song.artist }}</h2><br>
-    <h3>Key of: <span id="key-shown"></span> Capo: <span id="key-capo"></span></h3><br>
+    {% include 'rechorder/_song_title.html' %}
 {% elif item_in_set.item_type == ItemInSetType.TEXT %}
     <h1 class="text-item-title">{{ item_in_set.title }}</h1>
 {% endif %}

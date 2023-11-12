@@ -22,6 +22,7 @@ $col-text-light: $col-light-grey;
 // Dimensions
 $max-page-width: 1000px;
 $thin-section-width: 400px;
+$spacing-width: 10px;
 
 $fade-time: 0.2s;
 
@@ -141,8 +142,8 @@ form {
             transition: $fade-time;
         }
     }
-
 }
+
 
 #div-header-images {
     align: center;
@@ -182,13 +183,6 @@ form {
 
 #adder li:not(:last-child) {
     margin-bottom: 5px;
-}
-
-.tran-rad-label {
-    color: $col-mid-grey;
-    :checked ~ label {
-        color: black;
-    }
 }
 
 button, select {
@@ -243,13 +237,19 @@ button:disabled, select:disabled {
     }
 }
 
+.centred-div {
+    margin: auto;
+    max-width: $thin-section-width;
+
+    button {
+        width: 100%;
+        margin-top: $spacing-width;
+    }
+}
+
 .song-content-edit {
     width: 100%;
     height: 40vh;
-}
-
-.editor-feedback {
-    margin-top: 0.5em;
 }
 
 .img-actions {
@@ -257,8 +257,10 @@ button:disabled, select:disabled {
     transition-duration: $fade-time;
 }
 
-.img-actions:hover {
-    background-image: linear-gradient($col-highlight-transparent, $col-highlight);
+@media(hover:hover) {
+    .img-actions:hover {
+        background-image: $col-btn-hover;
+    }
 }
 
 .img-action-selected {
@@ -291,16 +293,7 @@ h3 {
     display: inline;
     margin: 0;
     font-weight: normal;
-}
-
-#editor-song-content {
-    margin-bottom: 5px;
-}
-
-.editor-buttons {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
+    color: $col-mid-grey;
 }
 
 .code-block {
@@ -344,15 +337,119 @@ hr {
 }
 
 /**********************************************************
+ * Song Editor
+ *********************************************************/
+
+.editor-feedback {
+    margin-top: 0.5em;
+}
+
+#editor-song-content {
+    margin-bottom: 5px;
+}
+
+.editor-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+#editor-table {
+    margin: auto;
+
+    font-size: large;
+    font-weight: normal;
+    font-variant: small-caps;
+    color: $col-mid-grey;
+
+    td {
+        padding-bottom: $spacing-width;
+    }
+
+    tr > td + td {
+        padding-left: $spacing-width;
+    }
+}
+
+/**********************************************************
  * Font resizer
  *********************************************************/
 
 .font-resizer-table {
+    margin: auto;
     td {
         padding: 0.2em;
     }
 }
 
+/**********************************************************
+ * Transposer
+ *********************************************************/
+
+.transposer {
+    max-width: $thin-section-width;
+    margin: auto;
+    input {
+        display: none;
+    }
+
+    button {
+        width: 100%;
+        text-align: left;
+    }
+
+    label {
+        display: inline-block;
+        border: 1px solid cyan;
+        align: middle;
+    }
+
+    #selected {
+        background-color: #FF00FF;
+    }
+
+    p {
+        padding-bottom: $spacing-width;
+    }
+
+    select {
+        margin-left: $spacing-width;
+    }
+
+    hr {
+        border-color: $col-light-grey;
+        margin-bottom: $spacing-width;
+        margin-top: 0;
+    }
+}
+
+.tran-rad ~ span {
+    color: $col-mid-grey;
+    background-color: $col-base;
+    font-size: large;
+    border-radius: 100vh;
+}
+
+.tran-rad:checked ~ span {
+    background-color: $col-good;
+}
+
+.trans-selection {
+    display: inline-block;
+    border: 1px solid red;
+    height: 2em;
+}
+
+.tran-selected, .tran-selected:hover {
+    background-color: $col-good;
+}
+
+// .tran-rad-label {
+//     color: $col-mid-grey;
+//     :checked ~ label {
+//         color: black;
+//     }
+// }
 
 /**********************************************************
  * Song notes
@@ -371,7 +468,7 @@ hr {
     border-left: 2px solid $col-light-grey;
     margin-top: 5px;
     margin-bottom: 5px;
-    padding-left: 10px;
+    padding-left: $spacing-width;
     display: none;
 }
 
@@ -420,13 +517,19 @@ hr {
 }
 
 .img-btn-header {
-    padding: 0.3em;
+    background-color: $col-base;
+    padding: 0.2em;
     margin: 0;
 }
 
 .img-btn-header img {
+    height: 2em;
     min-width: 2em;
     vertical-align: middle;
+}
+
+.img-btn-header:disabled img {
+    opacity: 0.5;
 }
 
 /**********************************************************
@@ -437,6 +540,7 @@ hr {
     list-style: none;
     padding: 0;
     margin: 0;
+    margin-top: $spacing-width/2;
 
     li {
         display: inline-block;
@@ -456,7 +560,7 @@ hr {
     background-color: white;
     border: 3px solid $col-highlight;
     margin: 0;
-    padding: 10px;
+    padding: $spacing-width;
     z-index: 20;
     position: relative;
 }
@@ -760,7 +864,7 @@ mark {
 
 .settings-section {
     margin: auto;
-    padding-bottom: 10px;
+    padding-bottom: $spacing-width;
     border-bottom: solid 2px $col-light-grey;
     width: $thin-section-width;
 
@@ -797,7 +901,7 @@ mark {
 }
 
 .section-title {
-    padding-top: 10px;
+    padding-top: $spacing-width;
     padding-bottom: 5px;
 }
 

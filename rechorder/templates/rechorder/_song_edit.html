@@ -120,12 +120,12 @@
 
 
 <form>
-    <table>
-        <tr><td>Title: </td><td><input id="editor-song-title"></td></tr>
-        <tr><td>Artist: </td><td><input id="editor-song-artist"></td></tr>
-        <tr><td>CCLI Number: </td><td><input id="editor-song-ccli-number" type="number" class="no-spinner"></td></tr>
+    <table id="editor-table">
+        <tr><td>Title </td><td><input id="editor-song-title"></td></tr>
+        <tr><td>Artist </td><td><input id="editor-song-artist"></td></tr>
+        <tr><td>CCLI Number </td><td><input id="editor-song-ccli-number" type="number" class="no-spinner"></td></tr>
         <tr>
-            <td>Original Key:</td>
+            <td>Original Key</td>
             <td>
                 <select id="editor-original-key">
                     {% for key in keys %}
@@ -140,8 +140,8 @@
                 </button>
             </td>
         </tr>
-        <tr><td>Advice on key: </td><td><input id="editor-key-notes"></td></tr>
-        <tr><td>Verse order: </td><td><input id="editor-verse-order"></td></tr>
+        <tr><td>Advice on key </td><td><input id="editor-key-notes"></td></tr>
+        <tr><td>Verse order </td><td><input id="editor-verse-order"></td></tr>
     </table>
     <div id="verse-order-errors"></div>
     <textarea class="song-content-edit" id="editor-song-content"></textarea>
