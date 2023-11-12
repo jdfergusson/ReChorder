@@ -33,9 +33,6 @@
     {% endif %}
 
     function toggleTab(tab) {
-        $('#btn-song-add-to-set').removeClass('btn-successful');
-        $('#btn-song-add-to-set').text('Add to set list');
-
         if (tab != 'transposer') {
             $('#transposer').hide();
             $('#btn-toggle-transposer').removeClass('img-action-selected');
@@ -109,9 +106,8 @@
         <div class="centred-div">
             {% if set_is_editable %}
                 <ul>
-                    Current set list: <i>{{ current_set.name }}</i>
                     <li>
-                        <button id="btn-song-add-to-set">Add to set list</button>
+                        <button id="btn-song-add-to-set">Add to set list "{{ current_set.name }}"</button>
                     </li>
                     <li><button id="btn-song-add-and-go">Add and go live</button></li>
                 </ul>

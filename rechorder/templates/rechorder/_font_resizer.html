@@ -1,47 +1,30 @@
 {% load static %}
 
 <script type="text/javascript" src="{% static 'rechorder/js/font-resize.js' %}"></script>
+<div class="centred-div" id="resizer">
+    <h2>Chords</h2>
+    <div class="resizer-buttons">
+        <button class="img-btn-header" id="fs-c-decrease">
+            <img src="{% static 'rechorder/icons/mdi-format-font-size-decrease.svg' %}">
+        </button>
+        <button class="img-btn-header" id="fs-c-reset">
+            <img src="{% static 'rechorder/icons/mdi-format-clear.svg' %}">
+        </button>
+        <button class="img-btn-header" id="fs-c-increase">
+            <img src="{% static 'rechorder/icons/mdi-format-font-size-increase.svg' %}">
+        </button>
+    </div>
 
-<table class="font-resizer-table">
-    <tr>
-        <td>
-            <h2>Chords</h2>
-        </td>
-        <td>
-            <button class="img-btn-header" id="fs-c-decrease">
-                <img src="{% static 'rechorder/icons/mdi-format-font-size-decrease.svg' %}">
-            </button>
-        </td>
-        <td>
-            <button class="img-btn-header" id="fs-c-reset">
-                <img src="{% static 'rechorder/icons/mdi-format-clear.svg' %}">
-            </button>
-        </td>
-        <td>
-            <button class="img-btn-header" id="fs-c-increase">
-                <img src="{% static 'rechorder/icons/mdi-format-font-size-increase.svg' %}">
-            </button>
-        </td>
-    </tr>
-    <tr>
-        <td>
-        <h2>Lyrics</h2>
-        </td>
-        <td>
+    <h2>Lyrics</h2>
+    <div class="resizer-buttons">
         <button class="img-btn-header" id="fs-l-decrease">
             <img src="{% static 'rechorder/icons/mdi-format-font-size-decrease.svg' %}">
         </button>
-        </td>
-        <td>
         <button class="img-btn-header" id="fs-l-reset">
             <img src="{% static 'rechorder/icons/mdi-format-clear.svg' %}">
         </button>
-        </td>
-        <td>
         <button class="img-btn-header" id="fs-l-increase">
             <img src="{% static 'rechorder/icons/mdi-format-font-size-increase.svg' %}">
         </button>
-        </td>
-    </tr>
-
-</table>
+    </div>
+</div>

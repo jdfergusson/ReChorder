@@ -6,6 +6,7 @@ $col-bad: #e6bec1;
 $col-base: #bed5e6;
 $col-base-dark: #32383c;
 $col-base-transparent: #bed5e600;
+$col-base-light: #dfeaf3;
 
 $col-highlight: #bec1e6;
 $col-highlight-transparent: #bec1e600;
@@ -144,7 +145,6 @@ form {
     }
 }
 
-
 #div-header-images {
     align: center;
     max-width: $max-page-width;
@@ -153,26 +153,27 @@ form {
     justify-content: space-around;
 }
 
-
 #div-content {
     max-width: $max-page-width;
     margin: 0 auto;
-    padding: 5px;
+    padding: $spacing-width;
 }
 
 #div-title-bg {
     width: 100%;
-    padding: 5px;
-    padding-top: 4em;
+    padding: 0;
     margin: 0;
-    background-color: $col-base;
     overflow: hidden;
+    background-color: $col-base-light;
 }
 
 #div-title {
+    box-shadow: 0 0 20px 0px white;
+    background-color: $col-base;
     max-width: $max-page-width;
     margin: 0 auto;
     padding: 5px;
+    padding-top: 4em;
 }
 
 #adder ul, #transposer ul, #editor ul {
@@ -296,12 +297,6 @@ h3 {
     color: $col-mid-grey;
 }
 
-.code-block {
-    background-color: white;
-    border: 2px solid black;
-    font-family: monospace;
-}
-
 textarea {
     box-sizing: border-box;
     width: 100%;
@@ -334,6 +329,47 @@ hr {
 /* -> Firefox */
 .no-spinner {
   -moz-appearance: textfield;
+}
+
+/**********************************************************
+ * Syntax help
+ *********************************************************/
+
+#syntax-help {
+    transition: 2s;
+
+    h1, h2 {
+        display: block;
+    }
+
+    p {
+        margin: 0;
+    }
+
+    h1 {
+        margin-top: 1em;
+        border-top: 1px solid $col-light-grey;
+        padding-top: 1em;
+    }
+
+    h2 {
+        margin-top: 0.5em;
+        color: black;
+        font-weight: bold;
+    }
+
+    p + p {
+        margin-top: 1em;
+    }
+}
+
+.code-block {
+    background-color: white;
+    color: $col-dark-grey;
+    border: 2px solid $col-light-grey;
+    font-family: monospace;
+    max-width: $thin-section-width;
+    margin: auto;
 }
 
 /**********************************************************
@@ -375,11 +411,45 @@ hr {
  * Font resizer
  *********************************************************/
 
-.font-resizer-table {
-    margin: auto;
-    td {
-        padding: 0.2em;
+.resizer-buttons {
+    display:flex;
+
+    button {
+        border-radius: 0;
+        margin: 0 2px 0 2px;
     }
+
+    button:disabled {
+        background-color: $col-base;
+        opacity: 0.5;
+        border: 0;
+    }
+}
+
+.resizer-buttons>:first-child {
+    margin-left: 0;
+    border-top-left-radius: 100vh;
+    border-bottom-left-radius: 100vh;
+}
+
+.resizer-buttons>:last-child {
+    margin-right: 0;
+    border-top-right-radius: 100vh;
+    border-bottom-right-radius: 100vh;
+}
+
+#resizer {
+    text-align: center;
+
+    h2 {
+        padding: $spacing-width 0 $spacing-width/2 0;
+        display: block;
+        font-size: x-large;
+    }
+}
+
+#resizer>:first-child {
+    padding-top: 0;
 }
 
 /**********************************************************
@@ -389,6 +459,12 @@ hr {
 .transposer {
     max-width: $thin-section-width;
     margin: auto;
+    color: $col-mid-grey;
+
+    h2 {
+        font-size: x-large;
+    }
+
     input {
         display: none;
     }

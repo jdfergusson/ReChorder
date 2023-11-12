@@ -6,6 +6,42 @@
 {% endblock %}
 
 {% block javascript %}
+    function localBackup() {
+        data = {
+            'title': $('#song-title').val(),
+            'artist':  $('#song-artist').val(),
+            'ccli_number':  $('#song-ccli-number').val(),
+            'original_key':  $('#original-key').val(),
+            'key_notes': $('#editor-key-notes').val(),
+            'verse_order': $('#editor-verse-order').val(),
+            'content':  $('#song-content').val(),
+        };
+
+        localStorage.setItem('song-create-backup', JSON.stringify(data));
+    }
+
+    function clearBackup() {
+        localStorage.removeItem('song-create-backup');
+    }
+
+    function recoverFromBackup() {
+        data = localStorage.getItem('song-create-backup');
+
+        if (data == null) {
+            return;
+        }
+
+        data = JSON.parse(data);
+
+        $('#song-title').val(data['title']);
+        $('#song-artist').val(data['artist']);
+        $('#song-ccli-number').val(data['ccli_number']);
+        $('#original-key').val(data['original_key']);
+        $('#editor-key-notes').val(data['key_notes']);
+        $('#editor-verse-order').val(data['verse_order']);
+        $('#song-content').val(data['content']);
+    }
+
     function saveSong() {
         $('#btn-create').html('Creating...');
         $('#btn-create').prop('disabled', true);
@@ -26,6 +62,7 @@
             dataType: 'json',
             success: function(data) {
                 if (data.success == true) {
+                    clearBackup();
                     window.location = data.new_song_url;
                 }
             },
@@ -33,12 +70,16 @@
     }
 
     function cancelEdit() {
-        $('#areyousure-message').text(
-            "Are you sure you want to cancel? This will lose any changes you had made."
-        );
-
         $('#btn-ays-yes').click(function() {
-            window.location = "{% url 'songs' %}";
+            clearBackup();
+            $('#song-title').val('');
+            $('#song-artist').val('');
+            $('#song-ccli-number').val('');
+            $('#original-key').val(0);
+            $('#editor-key-notes').val('');
+            $('#editor-verse-order').val('');
+            $('#song-content').val('');
+            $('#areyousure').hide();
         });
         $('#btn-ays-no').click(function () {
             $('#areyousure').hide();
@@ -47,6 +88,8 @@
     }
 
     $(function() {
+        recoverFromBackup();
+        setInterval(localBackup, 5000);
         $('#btn-create').click(saveSong);
         $('#btn-cancel').click(cancelEdit);
 
@@ -65,32 +108,28 @@
 
 {% block content %}
 
-
-
-
-    <table>
-        <tr><td>Title: </td><td><input id="song-title"></td></tr>
-        <tr><td>Artist: </td><td><input id="song-artist"></td></tr>
-        <tr><td>CCLI Number: </td><td><input id="song-ccli-number" type="number" class="no-spinner"></td></tr>
-        <tr><td>Original Key:</td>
+    <table id="editor-table">
+        <tr><td>Title</td><td><input id="song-title"></td></tr>
+        <tr><td>Artist</td><td><input id="song-artist"></td></tr>
+        <tr><td>CCLI Number</td><td><input id="song-ccli-number" type="number" class="no-spinner"></td></tr>
+        <tr><td>Original Key</td>
         <td><select id="original-key">
             {% for key in keys %}
                 <option value="{{ forloop.counter0 }}">{{ key }}</option>
             {% endfor %}
         </select></td></tr>
-        <tr><td>Advice on key: </td><td><input id="editor-key-notes"></td></tr>
-        <tr><td>Verse order: </td><td><input id="editor-verse-order"></td></tr>
-        <tr><td>Song content:</td></tr>
+        <tr><td>Advice on key</td><td><input id="editor-key-notes"></td></tr>
+        <tr><td>Verse order</td><td><input id="editor-verse-order"></td></tr>
     </table>
     <textarea class="song-content-edit" id="song-content"></textarea>
     <br>
     <div class="editor-buttons">
         <button id="btn-create">Create</button>
-        <button id="btn-cancel">Cancel</button>
+        <button id="btn-cancel">Clear</button>
     </div>
     <div class="editor-feedback">
         <span id="areyousure">
-            Are you sure you want to cancel creation? This will lose any changes you had made.
+            Are you sure you want to clear the data from this page?
             <button id="btn-ays-yes">Yes</button>
             <button id="btn-ays-no">No</button>
         </span>
