@@ -848,6 +848,7 @@ mark {
 }
 
 .song-list-song-container {
+    transition: 2s;
     display: flex;
     width: 100%;
 }
@@ -870,6 +871,11 @@ mark {
 
 .add-song-to-set-button:hover {
     background-color: $col-btn-hover;
+}
+
+.highlighted-song {
+    background-color: $col-base;
+    transition: 0.3s;
 }
 
 /**********************************************************

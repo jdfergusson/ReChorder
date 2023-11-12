@@ -94,6 +94,12 @@
         }
     }
 
+    function highlightLastViewedSong() {
+        last_song_num = window.location.hash.substring(1).substring(4);
+        $('#song-' + last_song_num).addClass('highlighted-song');
+        setTimeout(function() {$('#song-' + last_song_num).removeClass('highlighted-song');}, 1000);
+    }
+
     $(document).ready(function(){
         $("#filtertext").on("keyup", function() {
             var value = $(this).val().toLowerCase();
@@ -115,6 +121,8 @@
 
         $('#filters').hide();
         $('#btn-toggle-filters').click(function() {toggleTab('filters');});
+
+        highlightLastViewedSong();
     });
 
 {% endblock %}
@@ -165,7 +173,7 @@
     <ul id="songlist" class="main-content-list">
         {% for song in songs %}
         <li>
-            <div class="song-list-song-container">
+            <div class="song-list-song-container" id="song-{{ song.id }}">
                 <div class="song-list-song-details">
                     <span class="song-anchor"><a name="song{{ song.id }}"></a></span>
                     <a href="{% url 'song' song.id %}">
