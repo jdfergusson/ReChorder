@@ -6,6 +6,9 @@
 {{ key_details|json_script:"init_key_details" }}
 
 <script type="text/javascript">
+    /* Effectively a global variable to keep track of the current state - is there a better way? */
+    current_transposition = 'sk';
+
     function updateSong(data) {
         /* Data should contain object with song_html and key_index */
         $('#song').html(data.song_html);
@@ -52,19 +55,24 @@
                 $('#tran-abs-sel').val(key_details.transpose_data['absolute-force-index']);
                 break;
         }
-
+        console.log(key_details);
         enableAndDisableTransposeFields(key_details.transpose_data['adv-tran-opt']);
     }
 
     function enableAndDisableTransposeFields(transpose_type) {
         selected_classname = "tran-selected";
+        enabled_classname = "tran-option-enabled";
+        disabled_classname = "tran-option-disabled";
 
         /* Disable all */
-        $('#tran-cs-shape').prop('disabled', true);
-        $('#tran-cs-auto').prop('disabled', true);
-        $('#tran-gc-capo').prop('disabled', true);
-        $('#tran-ti-cnote').prop('disabled', true);
-        $('#tran-abs-sel').prop('disabled', true);
+        $('#tran-cs-sel-wrapper').addClass(disabled_classname);
+        $('#tran-cs-sel-wrapper').removeClass(enabled_classname);
+        $('#tran-gc-sel-wrapper').addClass(disabled_classname);
+        $('#tran-gc-sel-wrapper').removeClass(enabled_classname);
+        $('#tran-ti-sel-wrapper').addClass(disabled_classname);
+        $('#tran-ti-sel-wrapper').removeClass(enabled_classname);
+        $('#tran-abs-sel-wrapper').addClass(disabled_classname);
+        $('#tran-abs-sel-wrapper').removeClass(enabled_classname);
 
         /* Deselect all */
         $('#tran_sk').removeClass(selected_classname);
@@ -74,6 +82,8 @@
         $('#tran_ti').removeClass(selected_classname);
         $('#tran_abs').removeClass(selected_classname);
 
+        console.log(transpose_type);
+
         /* Re-enable relevant line */
         switch (transpose_type) {
             case 'sk':
@@ -81,30 +91,32 @@
                 break;
             case 'cs':
                 $('#tran_cs').addClass(selected_classname);
-                $('#tran-cs-auto').prop('disabled', false);
-                if (!$('#tran-cs-auto').prop('checked')) {
-                    $('#tran-cs-shape').prop('disabled', false);
-                }
+                $('#tran-cs-sel-wrapper').removeClass(disabled_classname);
+                $('#tran-cs-sel-wrapper').addClass(enabled_classname);
                 break;
             case 'acs':
                 $('#tran_acs').addClass(selected_classname);
                 break;
             case 'gc':
                 $('#tran_gc').addClass(selected_classname);
-                $('#tran-gc-capo').prop('disabled', false);
+                $('#tran-gc-sel-wrapper').removeClass(disabled_classname);
+                $('#tran-gc-sel-wrapper').addClass(enabled_classname);
                 break;
             case 'ti':
                 $('#tran_ti').addClass(selected_classname);
-                $('#tran-ti-cnote').prop('disabled', false);
+                $('#tran-ti-sel-wrapper').removeClass(disabled_classname);
+                $('#tran-ti-sel-wrapper').addClass(enabled_classname);
                 break;
             case 'abs':
                 $('#tran_abs').addClass(selected_classname);
-                $('#tran-abs-sel').prop('disabled', false);
+                $('#tran-abs-sel-wrapper').removeClass(disabled_classname);
+                $('#tran-abs-sel-wrapper').addClass(enabled_classname);
                 break;
         }
     }
 
-    function transposeSettingsChanged() {
+    function transposeSettingsChanged(data) {
+        console.log(data);
         if ($(this).is('button')) {
             element_id = $(this).attr('id');
             current_transposition = element_id.split("_")[1];
@@ -193,51 +205,67 @@
         <hr />
     {% endif %}
 
-    <p class="left-and-right">
+    <div class="tran-option-container">
         <button id="tran_sk">Display in sounding key (<span class="key-info-sounding-key"></span>)</button>
-    </p>
+    </div>
 
-    <p class="left-and-right">
+    <div class="tran-option-container">
         <button id="tran_acs">Auto chord shapes</button>
-    </p>
+    </div>
 
-    <p class="left-and-right">
+    <div class="tran-option-container">
         <button id="tran_cs">Chord shapes</button>
-        <select id="tran-cs-shape" name="chord-shape-index">
-            {% for shape in chord_shapes %}
-                {% if shape.index == -1 %}
-                    <option disabled>──────────</option>
-                {% else %}
-                    <option value="{{ shape.index }}">{{ shape.name }} shapes</option>
-                {% endif %}
-            {% endfor %}
-        </select>
-    </p>
+        <span class="tran-select-wrapper" id="tran-cs-sel-wrapper">
+            <select id="tran-cs-shape" name="chord-shape-index">
+                {% for shape in chord_shapes %}
+                    {% if shape.index == -1 %}
+                        <option disabled>──────────</option>
+                    {% else %}
+                        <option value="{{ shape.index }}">{{ shape.name }} shapes</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </span>
+    </div>
 
-    <p class="left-and-right">
-        <button id="tran_gc">Capo</button>
-        <select id="tran-gc-capo" name="capo-fret-number">
-            {% for fret in frets %}
-                <option value="{{ fret }}">Fret {{ fret }}</option>
-            {% endfor %}
-        </select>
-    </p>
+    <div class="tran-option-container">
+        <div class="tran-btn-wrapper">
+            <button id="tran_gc">Capo on</button>
+        </div>
 
-    <p class="left-and-right">
-        <button id="tran_ti">Transposing instrument</button>
-        <select id="tran-ti-cnote" name="transposing-cnote">
-            {% for cnote in cnotes %}
-                <option value="{{ cnote.index }}">in {{ cnote.name }}</option>
-            {% endfor %}
-        </select>
-    </p>
+        <div class="tran-select-wrapper" id="tran-gc-sel-wrapper">
+            <select id="tran-gc-capo" name="capo-fret-number">
+                {% for fret in frets %}
+                    <option value="{{ fret }}">Fret {{ fret }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
 
-    <p class="left-and-right">
-        <button id="tran_abs">Force key</button>
-        <select id="tran-abs-sel" name="absolute-force-index">
-        {% for key in keys %}
-            <option value="{{ forloop.counter0 }}">{{ key }}</option>
-        {% endfor %}
-        </select>
-    </p>
+    <div class="tran-option-container">
+        <div class="tran-btn-wrapper">
+            <button id="tran_ti">Instrument in</button>
+        </div>
+        <div class="tran-select-wrapper" id="tran-ti-sel-wrapper">
+            <select id="tran-ti-cnote" name="transposing-cnote">
+                {% for cnote in cnotes %}
+                    <option value="{{ cnote.index }}">{{ cnote.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!--<p class="left-and-right">-->
+    <div class="tran-option-container">
+        <div class="tran-btn-wrapper">
+            <button id="tran_abs">Force key to</button>
+        </div>
+        <div class="tran-select-wrapper" id="tran-abs-sel-wrapper">
+            <select id="tran-abs-sel" name="absolute-force-index">
+            {% for key in keys %}
+                <option value="{{ forloop.counter0 }}">{{ key }}</option>
+            {% endfor %}
+            </select>
+        </div>
+    </div>
 </div>

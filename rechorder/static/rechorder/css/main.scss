@@ -458,6 +458,8 @@ hr {
  * Transposer
  *********************************************************/
 
+$tran-transition-time: 0.5s;
+
 .transposer {
     max-width: $thin-section-width;
     margin: auto;
@@ -477,21 +479,13 @@ hr {
     }
 
     label {
-        display: inline-block;
+        display: inline;
         border: 1px solid cyan;
         align: middle;
     }
 
-    #selected {
-        background-color: #FF00FF;
-    }
-
     p {
         padding-bottom: $spacing-width;
-    }
-
-    select {
-        margin-left: $spacing-width;
     }
 
     hr {
@@ -499,17 +493,6 @@ hr {
         margin-bottom: $spacing-width;
         margin-top: 0;
     }
-}
-
-.tran-rad ~ span {
-    color: $col-mid-grey;
-    background-color: $col-base;
-    font-size: large;
-    border-radius: 100vh;
-}
-
-.tran-rad:checked ~ span {
-    background-color: $col-good;
 }
 
 .trans-selection {
@@ -522,12 +505,43 @@ hr {
     background-color: $col-good;
 }
 
-// .tran-rad-label {
-//     color: $col-mid-grey;
-//     :checked ~ label {
-//         color: black;
-//     }
-// }
+.tran-option-disabled {
+    min-width: 0;
+    max-width: 0;
+    transition-property: max-width, min-width, margin-left;
+    transition-duration: $tran-transition-time;
+    overflow: hidden;
+    margin-left: 0;
+}
+
+.tran-option-enabled {
+    max-width: 10em;
+    min-width: 10em;
+    transition-property: max-width, min-width, margin-left;
+    transition-duration: $tran-transition-time;
+    margin-left: $spacing-width;
+    overflow: hidden;
+}
+
+.tran-select-wrapper {
+    select {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+.tran-btn-wrapper {
+    flex-grow: 1;
+}
+
+.tran-option-container {
+    display: flex;
+}
+
+.tran-option-container + .tran-option-container {
+    margin-top: $spacing-width;
+}
+
 
 /**********************************************************
  * Song notes
