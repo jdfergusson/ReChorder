@@ -458,6 +458,8 @@ hr {
  * Transposer
  *********************************************************/
 
+$tran-transition-time: 0.5s;
+
 .transposer {
     max-width: $thin-section-width;
     margin: auto;
@@ -467,31 +469,13 @@ hr {
         font-size: x-large;
     }
 
-    input {
-        display: none;
-    }
-
     button {
         width: 100%;
         text-align: left;
     }
 
-    label {
-        display: inline-block;
-        border: 1px solid cyan;
-        align: middle;
-    }
-
-    #selected {
-        background-color: #FF00FF;
-    }
-
     p {
         padding-bottom: $spacing-width;
-    }
-
-    select {
-        margin-left: $spacing-width;
     }
 
     hr {
@@ -501,33 +485,46 @@ hr {
     }
 }
 
-.tran-rad ~ span {
-    color: $col-mid-grey;
-    background-color: $col-base;
-    font-size: large;
-    border-radius: 100vh;
-}
-
-.tran-rad:checked ~ span {
-    background-color: $col-good;
-}
-
-.trans-selection {
-    display: inline-block;
-    border: 1px solid red;
-    height: 2em;
-}
-
 .tran-selected, .tran-selected:hover {
     background-color: $col-good;
 }
 
-// .tran-rad-label {
-//     color: $col-mid-grey;
-//     :checked ~ label {
-//         color: black;
-//     }
-// }
+.tran-option-disabled {
+    min-width: 0;
+    max-width: 0;
+    margin-left: 0;
+    transition-property: max-width, min-width, margin-left;
+    transition-duration: $tran-transition-time;
+    overflow: hidden;
+}
+
+.tran-option-enabled {
+    max-width: 10em;
+    min-width: 10em;
+    margin-left: $spacing-width;
+    transition-property: max-width, min-width, margin-left;
+    transition-duration: $tran-transition-time;
+    overflow: hidden;
+}
+
+.tran-select-wrapper {
+    select {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+.tran-btn-wrapper {
+    flex-grow: 1;
+}
+
+.tran-option-container {
+    display: flex;
+}
+
+.tran-option-container + .tran-option-container {
+    margin-top: $spacing-width;
+}
 
 /**********************************************************
  * Song notes
@@ -899,12 +896,29 @@ mark {
     position: fixed;
     bottom: 0;
     z-index: 10;
-    width: 100%;
+    left: 0;
+    width: 100vw;
+    text-align: center;
+
 
     img {
-        min-width: 45vw;
+        width: 100%;
+        max-width: 45vw;
         max-height: 45vh;
         opacity: 0.1;
+    }
+
+    img:hover, a:hover {
+        background-color: transparent;
+    }
+
+    p {
+        max-width: $max-page-width;
+        margin: auto;
+    }
+
+    span {
+        width: 45%;
     }
 }
 

@@ -81,6 +81,10 @@ TEMPLATES = [
     },
 ]
 
+COMPRESS_PRECOMPILERS = (
+    ('text/x-scss', 'django_libsass.SassCompiler'),
+)
+
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
