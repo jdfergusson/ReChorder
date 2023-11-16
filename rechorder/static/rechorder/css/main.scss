@@ -899,12 +899,29 @@ mark {
     position: fixed;
     bottom: 0;
     z-index: 10;
-    width: 100%;
+    left: 0;
+    width: 100vw;
+    text-align: center;
+
 
     img {
-        min-width: 45vw;
+        width: 100%;
+        max-width: 45vw;
         max-height: 45vh;
         opacity: 0.1;
+    }
+
+    img:hover, a:hover {
+        background-color: transparent;
+    }
+
+    p {
+        max-width: $max-page-width;
+        margin: auto;
+    }
+
+    span {
+        width: 45%;
     }
 }
 
