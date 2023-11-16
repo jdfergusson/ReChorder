@@ -55,7 +55,7 @@
                 $('#tran-abs-sel').val(key_details.transpose_data['absolute-force-index']);
                 break;
         }
-        console.log(key_details);
+
         enableAndDisableTransposeFields(key_details.transpose_data['adv-tran-opt']);
     }
 
@@ -81,8 +81,6 @@
         $('#tran_gc').removeClass(selected_classname);
         $('#tran_ti').removeClass(selected_classname);
         $('#tran_abs').removeClass(selected_classname);
-
-        console.log(transpose_type);
 
         /* Re-enable relevant line */
         switch (transpose_type) {
@@ -116,7 +114,6 @@
     }
 
     function transposeSettingsChanged(data) {
-        console.log(data);
         if ($(this).is('button')) {
             element_id = $(this).attr('id');
             current_transposition = element_id.split("_")[1];

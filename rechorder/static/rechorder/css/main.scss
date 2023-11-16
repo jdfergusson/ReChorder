@@ -469,19 +469,9 @@ $tran-transition-time: 0.5s;
         font-size: x-large;
     }
 
-    input {
-        display: none;
-    }
-
     button {
         width: 100%;
         text-align: left;
-    }
-
-    label {
-        display: inline;
-        border: 1px solid cyan;
-        align: middle;
     }
 
     p {
@@ -495,12 +485,6 @@ $tran-transition-time: 0.5s;
     }
 }
 
-.trans-selection {
-    display: inline-block;
-    border: 1px solid red;
-    height: 2em;
-}
-
 .tran-selected, .tran-selected:hover {
     background-color: $col-good;
 }
@@ -508,18 +492,18 @@ $tran-transition-time: 0.5s;
 .tran-option-disabled {
     min-width: 0;
     max-width: 0;
+    margin-left: 0;
     transition-property: max-width, min-width, margin-left;
     transition-duration: $tran-transition-time;
     overflow: hidden;
-    margin-left: 0;
 }
 
 .tran-option-enabled {
     max-width: 10em;
     min-width: 10em;
+    margin-left: $spacing-width;
     transition-property: max-width, min-width, margin-left;
     transition-duration: $tran-transition-time;
-    margin-left: $spacing-width;
     overflow: hidden;
 }
 
@@ -541,7 +525,6 @@ $tran-transition-time: 0.5s;
 .tran-option-container + .tran-option-container {
     margin-top: $spacing-width;
 }
-
 
 /**********************************************************
  * Song notes
