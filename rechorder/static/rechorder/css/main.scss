@@ -208,7 +208,10 @@ input {
     padding: 0.3em 1em;
     transition: $fade-time;
     border-radius: 100vmax;
+    width: 100%;
+    box-sizing: border-box;
 }
+
 
 input:focus {
     outline: 2px solid $col-mid-grey;
@@ -964,7 +967,7 @@ mark {
     margin: auto;
     padding-bottom: $spacing-width;
     border-bottom: solid 2px $col-light-grey;
-    width: $thin-section-width;
+    max-width: $thin-section-width;
 
     input, button {
         width: 100%;
