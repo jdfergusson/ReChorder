@@ -115,7 +115,7 @@
 
     function setKey() {
         item_id = getDbRefFromObj(getObjInList($(this)));
-        key_index = $("#target-key_" + item_in_set_id).val();
+        key_index = $("#target-key_" + item_id).val();
         $.ajax({
             type: 'POST',
             url: '{% url 'item_in_set.set_key' 9999 %}'.replace("9999", item_id),
