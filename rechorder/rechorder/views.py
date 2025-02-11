@@ -29,7 +29,7 @@ import zipfile
 from rechorder.music_handler.interpret import KEYS, ABSOLUTE_LOOKUP, interpret_absolute_chord, song_from_onsong_text
 
 
-from .models import Song, Set, Beam, User, ItemInSet
+from .models import Song, Set, Beam, User, ItemInSet, Tag
 
 
 def _get_selected_chord_shapes(request):
@@ -270,6 +270,7 @@ def _get_base_song_context_dict(request, song, item_in_set=None):
         'display_full_song_order': _get_display_full_song_order(request),
         'is_verse_order_okay': not bool(song.check_verse_order()),
         'beaming_enabled': _is_beaming(request),
+        'available_tags': Tag.objects.all,
     }
 
 

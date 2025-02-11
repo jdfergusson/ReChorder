@@ -23,6 +23,13 @@ SECTION_NAMES = {
 }
 
 
+class Tag(models.Model):
+    name = models.CharField(max_length=64, null=False, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Song(models.Model):
     title = models.CharField(max_length=200)
     # TODO: This is an index - maybe the name should reflect this?
@@ -35,6 +42,7 @@ class Song(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     raw = models.TextField()
     ccli_number = models.IntegerField(null=True, default=None)
+    tags = models.ManyToManyField(Tag)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
