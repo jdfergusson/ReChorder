@@ -822,6 +822,7 @@ def song_update(request, song_id):
     # Can't be None
     title = request.POST.get('title')
     artist = request.POST.get('artist')
+    tags = request.POST.getlist('tags[]')
     original_key = int(request.POST.get('original_key'))
     key_notes = request.POST.get('key_notes')
     verse_order = request.POST.get('verse_order')
@@ -841,6 +842,14 @@ def song_update(request, song_id):
         song.key_notes = key_notes
         song.verse_order = verse_order
         song.raw = content
+
+        song.tags.clear()
+        for tag_id in tags:
+            try:
+                song.tags.add(Tag.objects.get(id=tag_id))
+            except Tag.DoesNotExist:
+                pass
+
         song.save()
 
         verse_order_errors = render_to_string('rechorder/_verse_order_errors.html', {'errors': song.check_verse_order})

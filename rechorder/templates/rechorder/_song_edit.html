@@ -7,7 +7,7 @@
         {% endfor %}
     };
 
-    selected_tags = [{% for tag in song.tags.all %} "{{ tag.id }}" {% endfor %}];
+    selected_tags = [{% for tag in song.tags.all %} "{{ tag.id }}", {% endfor %}];
 
     function saveSong() {
         $('#areyousure').hide();
@@ -19,6 +19,7 @@
             data: {
                 'title': $('#editor-song-title').val(),
                 'artist': $('#editor-song-artist').val(),
+                'tags': selected_tags,
                 'ccli_number': $('#editor-song-ccli-number').val(),
                 'original_key': $('#editor-original-key').val(),
                 'key_notes': $('#editor-key-notes').val(),
@@ -170,6 +171,7 @@
         $('.tag-choice').click(toggleTag);
 
         fetchVerseOrderErrors();
+        updateSelectedTags();
 
         $(window).click(function(e) {
             if ($(e.target).hasClass("modal")) {
@@ -179,7 +181,6 @@
     });
 </script>
 
-{{ song.tags.all }}
 <div id="tag-selector" class="modal">
     <div class="modal-content">
         <h1>Click tags to toggle them:</h1>
