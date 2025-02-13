@@ -1005,6 +1005,7 @@ def songs(request):
         'keys': KEYS,
         'current_set_id': current_set_id,
         'song_ids_in_set': song_ids_in_set,
+        'tags': Tag.objects.all,
         **_get_base_context(request, header_link_songs=reverse('songs'))
     }
     return render(request, 'rechorder/songs.html', context)

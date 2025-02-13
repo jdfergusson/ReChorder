@@ -11,7 +11,6 @@
 
     function saveSong() {
         $('#areyousure').hide();
-        console.log($('#editor-song-ccli-number').val());
         $.ajax({
             type: 'POST',
             headers: { "X-CSRFToken": '{{ csrf_token }}' },
@@ -117,7 +116,6 @@
         for (const tag of selected_tags) {
             selected_tag_names.push(available_tags[tag]);
         }
-        console.log(selected_tag_names.join("; "));
         $('#editor-song-tags').text(selected_tag_names.join("; "));
 
     }

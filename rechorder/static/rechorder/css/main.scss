@@ -493,6 +493,11 @@ $tran-transition-time: 0.5s;
     font-weight: bold;
 }
 
+.tran-bad, .tran-bad:hover {
+    background-color: $col-bad;
+    text-decoration: line-through;
+}
+
 .tran-option-disabled {
     min-width: 0;
     max-width: 0;
