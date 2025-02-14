@@ -37,6 +37,14 @@
                         src="{% static 'rechorder/icons/mdi-account-multiple-outline.svg' %}"
                 >
             </a>
+
+
+            <a href="{{ header_link_tags }}" {% if selected == 'tags' %}class="selected"{% endif %}>
+                <img
+                        id="img-header-tags"
+                        src="{% static 'rechorder/icons/mdi-tag-multiple-outline.svg' %}"
+                >
+            </a>
         {% endif %}
 
         <a href="{{ header_link_settings }}" {% if selected == 'settings' %}class="selected"{% endif %}>

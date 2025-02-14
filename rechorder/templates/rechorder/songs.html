@@ -299,8 +299,7 @@
     </ul>
 
     <div class="tab-container" id="filters" hidden>
-        <h2>Filters</h2><br>
-        <table>
+        <table class="filters-table">
             <tr>
                 <td><h3>Title:</h3></td><td><input id="filtertext" /></td>
             </tr>
@@ -329,8 +328,14 @@
                     </div>
                 </td>
             </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <button id="btn-clear-all-filters">Clear all filters</button>
+                </td>
+            </tr>
         </table>
-        <button id="btn-clear-all-filters">Clear all filters</button>
+        
     </div>
 {% endblock %}
 

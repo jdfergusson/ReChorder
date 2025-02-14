@@ -408,6 +408,11 @@ hr {
     tr > td + td {
         padding-left: $spacing-width;
     }
+
+    .img-btn-header {
+        float: right;
+        margin-left: 5px;
+    }
 }
 
 /**********************************************************
@@ -802,6 +807,13 @@ mark {
     .key-filter-button-selected:hover {
         background-color: $col-btn-hover;
         transition: $fade-time;
+    }
+}
+
+.filters-table {
+    td {
+        padding-top: 5px;
+        padding-bottom: 5px;
     }
 }
 

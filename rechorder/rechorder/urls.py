@@ -46,6 +46,9 @@ urlpatterns = [
     re_path(r'^users/login$', views.user_login, name='user.login'),
     re_path(r'^users/create$', views.user_create, name='user.create'),
     re_path(r'^users/logout$', views.user_logout, name='user.logout'),
+    re_path(r'^tag$', views.tags, name='tags'),
+    re_path(r'^tag/create$', views.create_tag, name='tag.create'),
+    re_path(r'^tag/delete$', views.delete_tag, name='tag.delete'),
 
     # These aren't so user facing...
     re_path(r'^upload$', views.upload, name='_upload'),

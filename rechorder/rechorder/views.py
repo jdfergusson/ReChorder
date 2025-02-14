@@ -123,8 +123,10 @@ def _get_base_context(request, **overrides):
     user = _get_user(request)
     if user and user.is_admin:
         users_link = reverse('users')
+        tags_link = reverse('tags')
     else:
         users_link = ""
+        tags_link = ""
 
     links =  {
         'header_link_back': '#',
@@ -132,6 +134,7 @@ def _get_base_context(request, **overrides):
         'header_link_set': set_link,
         'header_link_receive': reverse('slave'),
         'header_link_users': users_link,
+        'header_link_tags': tags_link,
         'header_link_settings': reverse('settings'),
     }
 
@@ -270,7 +273,7 @@ def _get_base_song_context_dict(request, song, item_in_set=None):
         'display_full_song_order': _get_display_full_song_order(request),
         'is_verse_order_okay': not bool(song.check_verse_order()),
         'beaming_enabled': _is_beaming(request),
-        'available_tags': Tag.objects.all,
+        'available_tags': Tag.objects.all().order_by(Lower('name')),
     }
 
 
@@ -708,6 +711,48 @@ def set_print(request, set_id):
 
     return render(request, 'rechorder/print_set.html', context)
 
+##########################################################################################
+# Tags
+##########################################################################################
+
+def tags(request):
+    current_user = get_object_or_404(User, uuid=_get_user_uuid(request))
+
+    if not current_user.is_admin:
+        return redirect(reverse('user', args=[current_user.id]))
+
+    
+    context = {
+        'tags': Tag.objects.all().order_by(Lower('name')),
+        **_get_base_context(
+            request,
+            header_link_back="javascript:history.back()"
+        ),
+    }
+    return render(request, 'rechorder/tags.html', context)
+
+
+def create_tag(request):
+    tag_name = request.POST.get('tag_name', "")
+    if len(tag_name) < 0:
+        return JsonResponse({'success': False, 'failure_message': "Invalid tag name"})
+    
+    if len(tag_name) > 40:
+        return JsonResponse({'success': False, 'failure_message': "Tag name too long"})
+    
+    try:
+        new_tag = Tag(name=tag_name)
+        new_tag.save()
+    except IntegrityError:
+        return JsonResponse({'success': False, 'failure_message': "Tag already exists"})
+    return JsonResponse({'success': True})
+
+
+def delete_tag(request):
+    tag = get_object_or_404(Tag, id=request.POST.get('tag_id'))
+    tag.delete()
+    return JsonResponse({'success': True})
+
 
 ##########################################################################################
 # Beaming
@@ -1005,7 +1050,7 @@ def songs(request):
         'keys': KEYS,
         'current_set_id': current_set_id,
         'song_ids_in_set': song_ids_in_set,
-        'tags': Tag.objects.all,
+        'tags': Tag.objects.all().order_by(Lower('name')),
         **_get_base_context(request, header_link_songs=reverse('songs'))
     }
     return render(request, 'rechorder/songs.html', context)

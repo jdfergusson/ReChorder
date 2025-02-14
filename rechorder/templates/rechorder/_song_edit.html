@@ -181,10 +181,8 @@
 
 <div id="tag-selector" class="modal">
     <div class="modal-content">
-        <h1>Click tags to toggle them:</h1>
-        <button type="button" id="btn-close-tag-selection" class="img-btn-header modal-close">
-            <img src="{% static 'rechorder/icons/mdi-close-box-outline.svg' %}">
-        </button>
+        <img id="btn-close-tag-selection" class="img-btn modal-close" src="{% static 'rechorder/icons/mdi-close-box-outline.svg' %}">
+        <h1>Toggle tags</h1>
         {% for tag in available_tags %}
             <p><button type="button" class="tag-choice" id="tag-choice-{{tag.id}}">{{ tag }}</button></p>
         {% endfor %}
@@ -194,10 +192,14 @@
     <table id="editor-table">
         <tr><td>Title </td><td><input id="editor-song-title"></td></tr>
         <tr><td>Artist </td><td><input id="editor-song-artist"></td></tr>
-        <tr><td>Tags</td><td><span id="editor-song-tags"></span>
-            <button type="button" id="btn-add-tag" class="img-btn-header">
-                <img src="{% static 'rechorder/icons/mdi-tag-edit-outline.svg' %}">
-            </button>
+        <tr><td>Tags</td><td><div class="left-and-right">
+                <div style="display: inline-block">
+                    <span id="editor-song-tags"></span>
+                </div>
+                <button type="button" id="btn-add-tag" class="img-btn-header">
+                    <img src="{% static 'rechorder/icons/mdi-tag-edit-outline.svg' %}">
+                </button>
+        </div>
         </td></tr>
         <tr><td>CCLI Number </td><td><input id="editor-song-ccli-number" type="number" class="no-spinner"></td></tr>
         <tr>
