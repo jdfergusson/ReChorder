@@ -799,6 +799,10 @@ mark {
     margin: 2px;
 }
 
+.tag-filter-button {
+    margin-top: 5px;
+}
+
 .key-filter-button-selected {
     background-color: $col-good;
     transition: $fade-time;
