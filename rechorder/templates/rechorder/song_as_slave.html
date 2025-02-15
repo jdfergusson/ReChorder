@@ -69,7 +69,9 @@
         {{ current_index|add:'1' }} of {{ set_length }}
     </h2><br>
 
-    {% include 'rechorder/_song_title.html' %}
+    <div id="song-title-container">
+        {% include 'rechorder/_song_title.html' %}
+    </div>
 
     <ul class="tab-list">
         <li><img class="img-actions"

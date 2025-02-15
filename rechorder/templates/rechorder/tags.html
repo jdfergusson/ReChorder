@@ -1,0 +1,164 @@
+{% extends 'rechorder/_base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block subtitle %}
+    Tags -
+{% endblock %}
+
+{% block javascript %}
+    tag_to_delete = -1;
+
+    function deleteTag() {
+
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url 'tag.delete' %}',
+            data: {
+                'tag_id': tag_to_delete,
+            },
+            dataType: 'json',
+            success: function() {
+                window.location = "{% url 'tags' %}";
+            },
+        });
+    }
+
+    function checkDelete(event) {
+        id_parts = event.currentTarget.id.split('-');
+        tag_id = id_parts[id_parts.length - 1];
+
+        tag_name = $('#tag-name-' + tag_id).text();
+        $('#modal-tag-name').text(tag_name);
+
+        tag_to_delete = tag_id;
+        
+        showModalConfirm();
+    }
+
+    function showModalConfirm() {
+        $('#modal-confirm').css("display", "block");
+    }
+
+    function hideModalConfirm() {
+        tag_to_delete = -1;
+        $('#modal-confirm').css("display", "none");
+    }
+
+    function showModalAdd() {
+        $('#modal-add').css("display", "block");
+    }
+
+    function hideModalAdd() {
+        $('#modal-add').css("display", "none");
+    }
+
+    function addTag() {
+        tag_name = $('#input-new-tag-name').val();
+        if (tag_name.length > 0) {
+            $.ajax({
+                type: 'POST',
+                headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                url: '{% url 'tag.create' %}',
+                data: {
+                    'tag_name': tag_name,
+                },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.success) {
+                        window.location = "{% url 'tags' %}";
+                    }
+                    else {
+                        alert("Could not add tag:\n" + data.failure_message);
+                    }
+                },
+            });
+        }
+    }
+
+    $(function() {
+        $('.btn-delete-tag').click(checkDelete);
+        $('#modal-confirm-delete').click(deleteTag);
+        $('#modal-confirm-cancel').click(hideModalConfirm);
+        $('#btn-close-confirm-modal').click(hideModalConfirm);
+
+        $('#btn-add-tag').click(showModalAdd);
+        $('#btn-close-add-modal').click(hideModalAdd);
+        $('#modal-add-cancel').click(hideModalAdd);
+        $('#modal-add-add').click(addTag);
+
+        $(window).click(function(e) {
+            if ($(e.target).hasClass("modal")) {
+                hideModalConfirm();
+            }
+        });
+    });
+{% endblock %}
+
+{% block header %}
+    {% include 'rechorder/_header.html' with selected="tags" %}
+{% endblock %}
+
+{% block title %}
+    <img class="img-actions right-aligned-img" src="{% static 'rechorder/icons/mdi-tag-plus-outline.svg' %}" id="btn-add-tag">
+    <h1>Tags</h1>
+    <br>
+    <h2>Modify tags</h2>
+{% endblock %}
+
+{% block content %}
+    
+    <div id="modal-confirm" class="modal">
+        <div class="modal-content">
+            <img id="btn-close-confirm-modal" class="img-btn modal-close" src="{% static 'rechorder/icons/mdi-close-box-outline.svg' %}">
+
+            <h1>Are you sure?</h1>
+            <p>Are you sure you want to delete the "<span id="modal-tag-name"></span>" tag?</p> 
+            <p>This cannot be undone. </p>
+            
+            <p>
+                <button type="button" id="modal-confirm-delete">Delete</button>
+                <button type="button" id="modal-confirm-cancel">Cancel</button>
+            </p>
+        </div>
+    </div>
+
+    <div id="modal-add" class="modal">
+        <div class="modal-content">
+            <img id="btn-close-add-modal" class="img-btn modal-close" src="{% static 'rechorder/icons/mdi-close-box-outline.svg' %}">
+
+            <h1>Add new tag</h1><br />
+            <p>
+                <input id="input-new-tag-name" placeholder="Tag name"/>
+            </p>
+            
+            <p>
+                <button type="button" id="modal-add-add">Add</button>
+                <button type="button" id="modal-add-cancel">Cancel</button>
+            </p>
+        </div>
+    </div>
+
+    <ul class="main-content-list">
+        {% for tag in tags %}
+            <li id="tag-{{ tag.id }}">
+                <div class="song-in-list">
+                    <span class="list-primary" id="tag-name-{{ tag.id }}">{{ tag.name }}</span><br>
+                    <span class="list-secondary">
+                        {{ tag.song_set.count }} songs
+                    </span><br>
+                </div>
+
+                <div class="list-expander">
+                </div>
+
+                <button type="button" id="btn-delete-tag-{{ tag.id }}" class="btn-delete-tag">
+                    <img src="{% static 'rechorder/icons/mdi-delete-forever-outline.svg' %}">
+                </button>
+            </li>
+        {% endfor %}
+    </ul>
+
+
+{% endblock %}

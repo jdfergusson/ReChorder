@@ -29,7 +29,7 @@ import zipfile
 from rechorder.music_handler.interpret import KEYS, ABSOLUTE_LOOKUP, interpret_absolute_chord, song_from_onsong_text
 
 
-from .models import Song, Set, Beam, User, ItemInSet
+from .models import Song, Set, Beam, User, ItemInSet, Tag
 
 
 def _get_selected_chord_shapes(request):
@@ -123,8 +123,10 @@ def _get_base_context(request, **overrides):
     user = _get_user(request)
     if user and user.is_admin:
         users_link = reverse('users')
+        tags_link = reverse('tags')
     else:
         users_link = ""
+        tags_link = ""
 
     links =  {
         'header_link_back': '#',
@@ -132,6 +134,7 @@ def _get_base_context(request, **overrides):
         'header_link_set': set_link,
         'header_link_receive': reverse('slave'),
         'header_link_users': users_link,
+        'header_link_tags': tags_link,
         'header_link_settings': reverse('settings'),
     }
 
@@ -270,6 +273,7 @@ def _get_base_song_context_dict(request, song, item_in_set=None):
         'display_full_song_order': _get_display_full_song_order(request),
         'is_verse_order_okay': not bool(song.check_verse_order()),
         'beaming_enabled': _is_beaming(request),
+        'available_tags': Tag.objects.all().order_by(Lower('name')),
     }
 
 
@@ -707,6 +711,48 @@ def set_print(request, set_id):
 
     return render(request, 'rechorder/print_set.html', context)
 
+##########################################################################################
+# Tags
+##########################################################################################
+
+def tags(request):
+    current_user = get_object_or_404(User, uuid=_get_user_uuid(request))
+
+    if not current_user.is_admin:
+        return redirect(reverse('user', args=[current_user.id]))
+
+    
+    context = {
+        'tags': Tag.objects.all().order_by(Lower('name')),
+        **_get_base_context(
+            request,
+            header_link_back="javascript:history.back()"
+        ),
+    }
+    return render(request, 'rechorder/tags.html', context)
+
+
+def create_tag(request):
+    tag_name = request.POST.get('tag_name', "")
+    if len(tag_name) < 0:
+        return JsonResponse({'success': False, 'failure_message': "Invalid tag name"})
+    
+    if len(tag_name) > 40:
+        return JsonResponse({'success': False, 'failure_message': "Tag name too long"})
+    
+    try:
+        new_tag = Tag(name=tag_name)
+        new_tag.save()
+    except IntegrityError:
+        return JsonResponse({'success': False, 'failure_message': "Tag already exists"})
+    return JsonResponse({'success': True})
+
+
+def delete_tag(request):
+    tag = get_object_or_404(Tag, id=request.POST.get('tag_id'))
+    tag.delete()
+    return JsonResponse({'success': True})
+
 
 ##########################################################################################
 # Beaming
@@ -821,6 +867,7 @@ def song_update(request, song_id):
     # Can't be None
     title = request.POST.get('title')
     artist = request.POST.get('artist')
+    tags = request.POST.getlist('tags[]')
     original_key = int(request.POST.get('original_key'))
     key_notes = request.POST.get('key_notes')
     verse_order = request.POST.get('verse_order')
@@ -840,6 +887,14 @@ def song_update(request, song_id):
         song.key_notes = key_notes
         song.verse_order = verse_order
         song.raw = content
+
+        song.tags.clear()
+        for tag_id in tags:
+            try:
+                song.tags.add(Tag.objects.get(id=tag_id))
+            except Tag.DoesNotExist:
+                pass
+
         song.save()
 
         verse_order_errors = render_to_string('rechorder/_verse_order_errors.html', {'errors': song.check_verse_order})
@@ -897,6 +952,15 @@ def song_create(request):
             raw=request.POST.get('content')
         )
         song.save()
+
+        tags = request.POST.getlist('tags[]')
+        for tag_id in tags:
+            try:
+                song.tags.add(Tag.objects.get(id=tag_id))
+            except Tag.DoesNotExist:
+                pass
+
+        song.save()
         return JsonResponse({
             'success': True,
             'new_song_url': song.get_absolute_url(),
@@ -905,6 +969,7 @@ def song_create(request):
     else:
         context = {
             'keys': KEYS,
+            'available_tags': Tag.objects.all().order_by(Lower('name')),
             **_get_base_context(request, header_link_back=reverse('songs')),
         }
         return render(request, 'rechorder/song_create.html', context)
@@ -958,12 +1023,19 @@ def song_transpose(request):
     display_style = _get_display_style(request)
     song.display_in(key_index, display_style)
 
+    base_song_context_dict = _get_base_song_context_dict(request, song, item_in_set=item_in_set)
+
     return JsonResponse({
         'song_html': render_to_string(
             'rechorder/_print_song.html',
-            {'song': song, **_get_base_song_context_dict(request, song, item_in_set=item_in_set)}
+            {'song': song, **base_song_context_dict}
         ),
         'key_details': _get_key_details(request, song, item_in_set=item_in_set),
+        'title_html': render_to_string(
+            'rechorder/_song_title.html',
+            {'song': song, **base_song_context_dict}
+        ),
+
         'song_meta': {
             'title': song.title,
             'artist': song.artist,
@@ -995,6 +1067,7 @@ def songs(request):
         'keys': KEYS,
         'current_set_id': current_set_id,
         'song_ids_in_set': song_ids_in_set,
+        'tags': Tag.objects.all().order_by(Lower('name')),
         **_get_base_context(request, header_link_songs=reverse('songs'))
     }
     return render(request, 'rechorder/songs.html', context)

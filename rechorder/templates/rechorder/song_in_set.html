@@ -87,7 +87,9 @@
     {{ current_index|add:'1' }} of {{ set_length }}
 </h2><br>
 {% if item_in_set.item_type == ItemInSetType.SONG %}
-    {% include 'rechorder/_song_title.html' %}
+    <div id="song-title-container">
+        {% include 'rechorder/_song_title.html' %}
+    </div>
 {% elif item_in_set.item_type == ItemInSetType.TEXT %}
     <h1 class="text-item-title">{{ item_in_set.title }}</h1>
 {% endif %}

@@ -8,6 +8,8 @@
 
 {% block javascript %}
     var current_key_filter = -1;
+    var current_tag_incl_filters = [];
+    var current_tag_excl_filters = [];
 
     function toggleTab(tab) {
         $('#areyousure').hide();
@@ -92,6 +94,8 @@
                 $(this).toggle($(this).find('.song-key-index').text() == key)
             });
         }
+
+        saveFilters();
     }
 
     function highlightLastViewedSong() {
@@ -100,27 +104,176 @@
         setTimeout(function() {$('#song-' + last_song_num).removeClass('highlighted-song');}, 1000);
     }
 
+    function applyFilters() {
+        key_class = "song-key-" + current_key_filter;
+        
+        included_tag_classes = []
+        for (tag_id of current_tag_incl_filters) {
+            included_tag_classes.push("song-tagged-" + tag_id);
+        }
+
+        excluded_tag_classes = []
+        for (tag_id of current_tag_excl_filters) {
+            excluded_tag_classes.push("song-tagged-" + tag_id);
+        }
+
+        search_text = $('#filtertext').val().toLowerCase();
+
+        $("#songlist li").each(function() {
+            if (current_key_filter > -1 && !$(this).hasClass(key_class)) {
+                $(this).hide();
+                return;
+            }
+
+            if (current_tag_incl_filters.length > 0) {
+                show = false;
+                for (cl of included_tag_classes) {
+                    if ($(this).hasClass(cl)) {
+                        show = true;
+                    }
+                }
+                if (!show) {
+                    $(this).hide();
+                    return;
+                }
+            }
+
+            if (current_tag_excl_filters.length > 0) {
+                for (cl of excluded_tag_classes) {
+                    if ($(this).hasClass(cl)) {
+                        $(this).hide();
+                        return;
+                    }
+                }
+            }
+
+            if (search_text.length > 0) {
+                if ($(this).text().toLowerCase().indexOf(search_text) < 0) {
+                    $(this).hide();
+                    return;
+                }
+            }
+
+            $(this).show();
+        });
+
+        /* Sort out buttons */
+        $('.tag-filter-button').each(function(n, e) {
+            id_parts = e.id.split('-');
+            tag_id = id_parts[id_parts.length - 1];
+            if (current_tag_incl_filters.includes(tag_id)) {
+                $('#tag-' + tag_id).addClass('tran-selected');
+                $('#tag-' + tag_id).removeClass('tran-bad');
+            } else if (current_tag_excl_filters.includes(tag_id)) {
+                $('#tag-' + tag_id).removeClass('tran-selected');
+                $('#tag-' + tag_id).addClass('tran-bad');
+            } else {
+                $('#tag-' + tag_id).removeClass('tran-selected');
+                $('#tag-' + tag_id).removeClass('tran-bad');
+            }
+        });
+
+        $('.key-filter-button').each(function(n, e) {
+            id_parts = e.id.split('-');
+            key_id = id_parts[id_parts.length - 1];
+            if (current_key_filter == key_id) {
+                $('#filter-key-' + key_id).addClass('tran-selected');
+            } else {
+                $('#filter-key-' + key_id).removeClass('tran-selected');
+            }
+        });
+    }
+
+    function changeKeyFilter(event) {
+        id_parts = event.target.id.split('-');
+        key_id = id_parts[id_parts.length - 1];
+
+        if (current_key_filter == key_id) {
+            current_key_filter = -1;
+        } else {
+            current_key_filter = key_id;
+        }
+
+        applyFilters();
+        saveFilters();
+    }
+
+    function changeTagFilters(event) {
+        id_parts = event.target.id.split('-');
+        tag_id = id_parts[id_parts.length - 1];
+
+        if (current_tag_incl_filters.includes(tag_id)) {
+            /* Removes item from array, because yay JS */
+            current_tag_incl_filters = $.grep(current_tag_incl_filters, function(value) {
+                return value != tag_id;
+            });
+            /* Add it to exclude array */
+            current_tag_excl_filters.push(tag_id);
+        } else if (current_tag_excl_filters.includes(tag_id)) {
+            current_tag_excl_filters = $.grep(current_tag_excl_filters, function(value) {
+                return value != tag_id;
+            });
+        } else {
+            current_tag_incl_filters.push(tag_id);
+        }
+
+        applyFilters();
+        saveFilters();
+    }
+
+    function saveFilters() {
+        localStorage.setItem('current_tag_incl_filters', current_tag_incl_filters);
+        localStorage.setItem('current_tag_excl_filters', current_tag_excl_filters);
+        localStorage.setItem('current_key_filter', current_key_filter);
+        localStorage.setItem('filter_text', $("#filtertext").val());
+    }
+
+    function recallFilters() {
+        current_tag_incl_filters = localStorage.getItem('current_tag_incl_filters') || [];
+        current_tag_excl_filters = localStorage.getItem('current_tag_excl_filters') || [];
+        current_key_filter = localStorage.getItem('current_key_filter') || -1;
+        $("#filtertext").val(localStorage.getItem('filter_text') || "");
+        
+        applyFilters();
+    }
+
+    function clearAllFilters() {
+        current_tag_incl_filters = [];
+        current_tag_excl_filters = [];
+        current_key_filter = -1;
+        $("#filtertext").val("");
+
+        applyFilters();
+        saveFilters();
+    }
+
     $(document).ready(function(){
         $("#filtertext").on("keyup", function() {
-            var value = $(this).val().toLowerCase();
-            $("#songlist li").filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-            });
+            applyFilters(); 
+            saveFilters();
         });
 
         setUpAlphabetIndex();
 
-        /* Set up key filters */
-        for (let i = 0; i < 12; i++)
-        {
-            $('#filterByKey' + i).click(function() {filterByKey(i, $(this));});
-        }
+        $('.key-filter-button').click(changeKeyFilter);
 
         $('.add-song-to-set-button').on('click', function() {addSongToSet()});
         $('.remove-song-from-set-button').on('click', function() {removeSongFromSet()});
 
         $('#filters').hide();
         $('#btn-toggle-filters').click(function() {toggleTab('filters');});
+
+        $('.tag-filter-button').click(changeTagFilters);
+        $('#btn-clear-all-filters').click(clearAllFilters);
+        recallFilters();
+
+        if (current_tag_incl_filters.length > 0 
+            || current_tag_excl_filters.length > 0 
+            || current_key_filter > -1
+            || $("#filtertext").val().length > 0)
+        {
+            toggleTab('filters');
+        }
 
         highlightLastViewedSong();
     });
@@ -146,25 +299,43 @@
     </ul>
 
     <div class="tab-container" id="filters" hidden>
-        <h2>Filters</h2><br>
-        <table>
+        <table class="filters-table">
             <tr>
                 <td><h3>Title:</h3></td><td><input id="filtertext" /></td>
             </tr>
             <tr>
                 <td>
-                    <h3>Key Filter:</h3>
+                    <h3>Key filter:</h3>
                 </td>
                 <td>
                     <div id="key-filter-list">
                         {% for key in keys %}
                             <!-- TODO: Re-implement this with radio buttons! -->
-                            <button class="key-filter-button" id="filterByKey{{ forloop.counter0 }}">{{ key }}</button>
+                            <button class="key-filter-button" id="filter-key-{{ forloop.counter0 }}">{{ key }}</button>
                         {% endfor %}
                     </div>
                 </td>
             </tr>
+            <tr>
+                <td>
+                    <h3>Tag filter:</h3>
+                </td>
+                <td>
+                    <div id="tag-filter-list">
+                        {% for tag in tags %}
+                            <button class="tag-filter-button" id="tag-{{ tag.id }}">{{ tag.name }}</button>
+                        {% endfor %}
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <button id="btn-clear-all-filters">Clear all filters</button>
+                </td>
+            </tr>
         </table>
+        
     </div>
 {% endblock %}
 
@@ -172,7 +343,7 @@
 
     <ul id="songlist" class="main-content-list">
         {% for song in songs %}
-        <li>
+        <li class="song-li-all {% for tag in song.tags.all %}song-tagged-{{tag.id}} {% endfor %} song-key-{{ song.original_key }}">
             <div class="song-list-song-container" id="song-{{ song.id }}">
                 <div class="song-list-song-details">
                     <span class="song-anchor"><a name="song{{ song.id }}"></a></span>
@@ -180,7 +351,8 @@
                         <div class="song-in-list">
                             <span class="list-primary">{{ song }}</span><br>
                             <span class="list-secondary">{{ song.artist }}</span>
-                            <span class="song-key-index" style="display: none">{{ song.original_key }}</span>
+                            <span class="song-key-index" style="display: none">{{ song.original_key }}</span><br>
+                            <span class="list-secondary list-tags">{{ song.tags.all|join:'; ' }}</span>
                         </div>
                     </a>
                 </div>

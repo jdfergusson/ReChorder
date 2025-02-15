@@ -408,6 +408,11 @@ hr {
     tr > td + td {
         padding-left: $spacing-width;
     }
+
+    .img-btn-header {
+        float: right;
+        margin-left: 5px;
+    }
 }
 
 /**********************************************************
@@ -490,6 +495,12 @@ $tran-transition-time: 0.5s;
 
 .tran-selected, .tran-selected:hover {
     background-color: $col-good;
+    font-weight: bold;
+}
+
+.tran-bad, .tran-bad:hover {
+    background-color: $col-bad;
+    text-decoration: line-through;
 }
 
 .tran-option-disabled {
@@ -788,6 +799,10 @@ mark {
     margin: 2px;
 }
 
+.tag-filter-button {
+    margin-top: 5px;
+}
+
 .key-filter-button-selected {
     background-color: $col-good;
     transition: $fade-time;
@@ -799,8 +814,38 @@ mark {
     }
 }
 
+.filters-table {
+    td {
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+}
+
 .footnote {
     font-size: x-small;
+}
+
+.song-tags {
+    span {
+        display: inline-block;
+        
+        margin-right: 10px;
+        margin-top: 5px;
+        border-radius: 7px;
+        padding: 5px;
+        background-color: #FFFFFF80;
+    }
+
+
+    img {
+        max-height: 20px;
+        display: inline;
+        vertical-align: middle;
+    }
+
+    span {
+        vertical-align: middle;
+    }
 }
 
 /**********************************************************
@@ -1122,3 +1167,36 @@ input:checked + .toggle-slider:before {
         display: none !important;
     }
 }
+
+
+/**********************************************************
+ * Modals
+ *********************************************************/
+
+ /* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+  
+  /* Modal Content/Box */
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 3px solid #bec1e6;
+    border-radius: 20px;
+    width: 80%; /* Could be more or less, depending on screen size */
+  }
+
+  .modal-close {
+    float: right;
+  }

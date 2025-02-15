@@ -88,7 +88,9 @@
              src="{% static 'rechorder/icons/mdi-printer.svg' %}">
     </a>
 
-    {% include 'rechorder/_song_title.html' %}
+    <div id="song-title-container">
+        {% include 'rechorder/_song_title.html' %}
+    </div>
 
     <ul class="tab-list">
         <li>

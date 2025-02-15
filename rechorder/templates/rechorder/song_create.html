@@ -6,10 +6,20 @@
 {% endblock %}
 
 {% block javascript %}
+
+selected_tags = [];
+
+    available_tags = {
+        {% for tag in available_tags %}
+            "{{ tag.id }}": "{{ tag }}",
+        {% endfor %}
+    };
+
     function localBackup() {
         data = {
             'title': $('#song-title').val(),
             'artist':  $('#song-artist').val(),
+            'tags': selected_tags,
             'ccli_number':  $('#song-ccli-number').val(),
             'original_key':  $('#original-key').val(),
             'key_notes': $('#editor-key-notes').val(),
@@ -40,6 +50,9 @@
         $('#editor-key-notes').val(data['key_notes']);
         $('#editor-verse-order').val(data['verse_order']);
         $('#song-content').val(data['content']);
+
+        selected_tags = data['tags'] || [];
+        updateSelectedTags();
     }
 
     function saveSong() {
@@ -53,6 +66,7 @@
             data: {
                 'title': $('#song-title').val(),
                 'artist':  $('#song-artist').val(),
+                'tags': selected_tags,
                 'ccli_number':  $('#song-ccli-number').val(),
                 'original_key':  $('#original-key').val(),
                 'key_notes': $('#editor-key-notes').val(),
@@ -69,6 +83,48 @@
         });
     }
 
+    function showTagSelection() {
+        $('#tag-selector').css("display", "block");
+    }
+
+    function hideTagSelection() {
+        $('#tag-selector').css("display", "none");
+    }
+
+    function updateSelectedTags() {
+        $('.tag-choice').each(function(n, e) {
+            id_parts = e.id.split('-');
+            tag_id = id_parts[id_parts.length - 1];
+            if (selected_tags.includes(tag_id)) {
+                $('#tag-choice-' + tag_id).addClass('tran-selected');
+            } else {
+                $('#tag-choice-' + tag_id).removeClass('tran-selected');
+            }
+        });
+
+        selected_tag_names = [];
+        for (const tag of selected_tags) {
+            selected_tag_names.push(available_tags[tag]);
+        }
+        $('#editor-song-tags').text(selected_tag_names.join("; "));
+
+    }
+
+    function toggleTag(event) {
+        id_parts = event.target.id.split('-');
+        tag_id = id_parts[id_parts.length - 1];
+        if (selected_tags.includes(tag_id)) {
+            /* Removes item from array, because yay JS */
+            selected_tags = $.grep(selected_tags, function(value) {
+                return value != tag_id;
+            });
+        } else {
+            selected_tags.push(tag_id);
+        }
+
+        updateSelectedTags();
+    }
+
     function cancelEdit() {
         $('#btn-ays-yes').click(function() {
             clearBackup();
@@ -80,6 +136,8 @@
             $('#editor-verse-order').val('');
             $('#song-content').val('');
             $('#areyousure').hide();
+            selected_tags = [];
+            updateSelectedTags;
         });
         $('#btn-ays-no').click(function () {
             $('#areyousure').hide();
@@ -88,13 +146,18 @@
     }
 
     $(function() {
-        recoverFromBackup();
-        setInterval(localBackup, 5000);
         $('#btn-create').click(saveSong);
         $('#btn-cancel').click(cancelEdit);
 
         $('#areyousure').hide();
         $('#success').hide();
+
+        $('#btn-add-tag').click(showTagSelection);
+        $('#btn-close-tag-selection').click(hideTagSelection);
+        $('.tag-choice').click(toggleTag);
+
+        recoverFromBackup();
+        setInterval(localBackup, 5000);
     });
 {% endblock %}
 
@@ -108,9 +171,32 @@
 
 {% block content %}
 
+    <div id="tag-selector" class="modal">
+        <div class="modal-content">
+            <img id="btn-close-tag-selection" class="img-btn modal-close" src="{% static 'rechorder/icons/mdi-close-box-outline.svg' %}">
+            <h1>Toggle tags</h1>
+            {% for tag in available_tags %}
+                <p><button type="button" class="tag-choice" id="tag-choice-{{tag.id}}">{{ tag }}</button></p>
+            {% endfor %}
+        </div>
+    </div>
+
     <table id="editor-table">
         <tr><td>Title</td><td><input id="song-title"></td></tr>
         <tr><td>Artist</td><td><input id="song-artist"></td></tr>
+        <tr>
+            <td>Tags</td>
+            <td>
+                <div class="left-and-right">
+                    <div style="display: inline-block">
+                        <span id="editor-song-tags"></span>
+                    </div>
+                    <button type="button" id="btn-add-tag" class="img-btn-header">
+                        <img src="{% static 'rechorder/icons/mdi-tag-edit-outline.svg' %}">
+                    </button>
+                </div>
+            </td>
+        </tr>
         <tr><td>CCLI Number</td><td><input id="song-ccli-number" type="number" class="no-spinner"></td></tr>
         <tr><td>Original Key</td>
         <td><select id="original-key">
