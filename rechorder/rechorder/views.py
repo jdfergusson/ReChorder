@@ -952,6 +952,15 @@ def song_create(request):
             raw=request.POST.get('content')
         )
         song.save()
+
+        tags = request.POST.getlist('tags[]')
+        for tag_id in tags:
+            try:
+                song.tags.add(Tag.objects.get(id=tag_id))
+            except Tag.DoesNotExist:
+                pass
+
+        song.save()
         return JsonResponse({
             'success': True,
             'new_song_url': song.get_absolute_url(),
@@ -960,6 +969,7 @@ def song_create(request):
     else:
         context = {
             'keys': KEYS,
+            'available_tags': Tag.objects.all().order_by(Lower('name')),
             **_get_base_context(request, header_link_back=reverse('songs')),
         }
         return render(request, 'rechorder/song_create.html', context)
