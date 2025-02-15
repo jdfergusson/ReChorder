@@ -1023,12 +1023,19 @@ def song_transpose(request):
     display_style = _get_display_style(request)
     song.display_in(key_index, display_style)
 
+    base_song_context_dict = _get_base_song_context_dict(request, song, item_in_set=item_in_set)
+
     return JsonResponse({
         'song_html': render_to_string(
             'rechorder/_print_song.html',
-            {'song': song, **_get_base_song_context_dict(request, song, item_in_set=item_in_set)}
+            {'song': song, **base_song_context_dict}
         ),
         'key_details': _get_key_details(request, song, item_in_set=item_in_set),
+        'title_html': render_to_string(
+            'rechorder/_song_title.html',
+            {'song': song, **base_song_context_dict}
+        ),
+
         'song_meta': {
             'title': song.title,
             'artist': song.artist,

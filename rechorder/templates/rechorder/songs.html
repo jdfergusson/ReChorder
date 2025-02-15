@@ -351,7 +351,8 @@
                         <div class="song-in-list">
                             <span class="list-primary">{{ song }}</span><br>
                             <span class="list-secondary">{{ song.artist }}</span>
-                            <span class="song-key-index" style="display: none">{{ song.original_key }}</span>
+                            <span class="song-key-index" style="display: none">{{ song.original_key }}</span><br>
+                            <span class="list-secondary list-tags">{{ song.tags.all|join:'; ' }}</span>
                         </div>
                     </a>
                 </div>
