@@ -249,6 +249,9 @@ button:disabled, select:disabled {
         width: 100%;
         margin-top: $spacing-width;
     }
+    input {
+        margin-top: $spacing-width;
+    }
 }
 
 .song-content-edit {
@@ -563,6 +566,50 @@ $tran-transition-time: 0.5s;
 
 #notes-section-container h2 {
     font-style: italic;
+}
+
+/**********************************************************
+ * Collaborators
+ *********************************************************/
+#collaborators {
+    text-align: center;
+    color: $col-dark-grey;
+
+    h2 {
+        padding: $spacing-width 0 $spacing-width/2 0;
+        display: block;
+        font-size: x-large;
+    }
+}
+
+#collaborators-list {
+    list-style: none;
+    text-align: left;
+    padding: 0;
+
+    button {
+        width: auto;
+        background: none;
+        margin-top: 5px;
+        border-radius: 100vh;
+    }
+
+    img {
+        border-radius: 100vh;
+    }
+
+    li {
+        background-color: $col-base;
+        margin-top: $spacing-width;
+        border-radius: 100vmax;
+        padding-left: $spacing-width;
+        padding-right: $spacing-width;
+    }
+
+    .collaborator-name {
+        font-variant: small-caps;
+        font-size: large;
+    }
 }
 
 /**********************************************************
@@ -1185,18 +1232,50 @@ input:checked + .toggle-slider:before {
     overflow: auto; /* Enable scroll if needed */
     background-color: rgb(0,0,0); /* Fallback color */
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-  }
+}
   
-  /* Modal Content/Box */
-  .modal-content {
+/* Modal Content/Box */
+.modal-content {
     background-color: #fefefe;
     margin: 15% auto; /* 15% from the top and centered */
     padding: 20px;
     border: 3px solid #bec1e6;
     border-radius: 20px;
     width: 80%; /* Could be more or less, depending on screen size */
-  }
+}
 
-  .modal-close {
+.modal-close {
     float: right;
-  }
+}
+
+/**********************************************************
+ * Autocomplete
+ *********************************************************/
+.ui-autocomplete {
+    z-index: 100;
+}
+
+.ui-helper-hidden-accessible {
+    display: none;
+}
+
+.ui-menu {
+    text-align: left;
+    background-color: white;
+    border: 3px solid $col-light-grey;
+    color: $col-mid-grey;
+    list-style-type: none;
+    font-size: large;
+    font-variant: small-caps;
+    padding: 0;
+
+
+    li {
+        padding: 10px;
+    }
+
+
+    :hover {
+        background-color: $col-base;
+    }
+}
