@@ -74,6 +74,13 @@
         $('#btn-song-add-and-go').click(function() {addSongToSet(true);});
         $('#add-actions-success').hide();
 
+        {% if current_set %}
+            $('#btn-goto-copy-set').click(function() {window.location = "{% url 'set.duplicate' current_set.pk %}";});
+        {% endif %}
+
+        $('#btn-goto-create-new-set').click(function() {window.location = "{% url 'set.new' %}";});
+        $('#btn-goto-choose-set').click(function() {window.location = "{% url 'sets' %}";});
+
         document.onkeydown = processKeyPress;
     });
 {% endblock %}
@@ -107,18 +114,18 @@
     <div class="tab-container" id="adder" hidden>
         <div class="centred-div">
             {% if set_is_editable %}
-                <ul>
-                    <li>
-                        <button id="btn-song-add-to-set">Add to set list "{{ current_set.name }}"</button>
-                    </li>
-                    <li><button id="btn-song-add-and-go">Add and go live</button></li>
-                </ul>
-            {% elif current_set.pk is not None %}
-                You do not own the current set "{{ current_set.name }}".
-                Please <a href="{% url 'set.duplicate' current_set.pk %}">make a copy</a> before editing
+                <button id="btn-song-add-to-set">Add to set list "{{ current_set.name }}"</button>
+                <button id="btn-song-add-and-go">Add and go live</button>
             {% else %}
-                You need to <a href="{% url 'set.new' %}">create</a> or <a href="{% url 'sets' %}">open</a> a set before adding a song to one!
+                {% if current_set.pk is not None %}
+                    You cannot edit the current set "{{ current_set.name }}".
+                    <button id="btn-goto-copy-set">Copy this set</button>
+                {% else %}
+                    You don't have a set open.
+                {% endif %}
             {% endif %}
+            <button id="btn-goto-create-new-set">Create new set</button>
+            <button id="btn-goto-choose-set">Choose different set</button>
         </div>
     </div>
 

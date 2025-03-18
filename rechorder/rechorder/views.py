@@ -252,7 +252,8 @@ def _get_base_song_context_dict(request, song, item_in_set=None):
     if current_set_id is not None:
         try:
             set = Set.objects.get(pk=current_set_id)
-            set_is_editable = set.owner == _get_user_uuid(request)
+
+            set_is_editable = set.can_user_edit(_get_user_uuid(request))
         except Set.DoesNotExist:
             pass
 
@@ -1077,10 +1078,13 @@ def songs(request):
     # In this case, the current set is only wanted if it's owned by the current user.
     song_ids_in_set = []
     try:
-        this_set = Set.objects.get(pk=_get_current_set_id(request), owner=_get_user_uuid(request))
-        items_in_set = ItemInSet.objects.filter(set=this_set, item_type=ItemInSet.ItemInSetType.SONG)
-        song_ids_in_set = [i.song.pk for i in items_in_set]
-        current_set_id = this_set.pk
+        this_set = Set.objects.get(pk=_get_current_set_id(request)) 
+        if this_set.can_user_edit(_get_user_uuid(request)):
+            items_in_set = ItemInSet.objects.filter(set=this_set, item_type=ItemInSet.ItemInSetType.SONG)
+            song_ids_in_set = [i.song.pk for i in items_in_set]
+            current_set_id = this_set.pk
+        else:
+            current_set_id = -1
     except Set.DoesNotExist:
         current_set_id = -1
 

@@ -448,7 +448,9 @@
                 </table>
                 <div class="editor-buttons">
                     <button id="btn-editor-save" type="button">Save</button>
-                    <button id="btn-editor-delete" type="button">Delete</button>
+                    {% if am_i_owner %}
+                        &nbsp;<button id="btn-editor-delete" type="button">Delete</button>
+                    {% endif %}
                 </div>
 
                 <div class="editor-feedback">
