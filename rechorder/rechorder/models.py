@@ -356,6 +356,18 @@ class Set(models.Model):
     @property
     def num_of_songs(self):
         return ItemInSet.objects.filter(set=self, item_type=ItemInSet.ItemInSetType.SONG).count()
+    
+    def can_user_edit(self, uuid):
+        print(uuid, self.name, self.owner, self.collaborators)
+        if uuid == self.owner:
+            return True
+        
+        # Gets correct user or None
+        for collab in self.collaborators.all():
+            if collab.uuid == uuid:
+                return True
+        
+        return False
 
 
 class ItemInSet(models.Model):

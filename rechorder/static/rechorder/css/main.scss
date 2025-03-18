@@ -176,6 +176,11 @@ form {
     padding-top: 4em;
 }
 
+#adder {
+    text-align: center;
+    color: $col-dark-grey;
+}
+
 #adder ul, #transposer ul, #editor ul {
     list-style-type: none;
     padding: 0;
