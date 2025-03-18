@@ -7,13 +7,28 @@
 {% endblock %}
 
 {% block extrahead %}
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
 
     <!-- (Start) Add jQuery UI Touch Punch -->
     <script>!function(a){function f(a,b){if(!(a.originalEvent.touches.length>1)){a.preventDefault();var c=a.originalEvent.changedTouches[0],d=document.createEvent("MouseEvents");d.initMouseEvent(b,!0,!0,window,1,c.screenX,c.screenY,c.clientX,c.clientY,!1,!1,!1,!1,0,null),a.target.dispatchEvent(d)}}if(a.support.touch="ontouchend"in document,a.support.touch){var e,b=a.ui.mouse.prototype,c=b._mouseInit,d=b._mouseDestroy;b._touchStart=function(a){var b=this;!e&&b._mouseCapture(a.originalEvent.changedTouches[0])&&(e=!0,b._touchMoved=!1,f(a,"mouseover"),f(a,"mousemove"),f(a,"mousedown"))},b._touchMove=function(a){e&&(this._touchMoved=!0,f(a,"mousemove"))},b._touchEnd=function(a){e&&(f(a,"mouseup"),f(a,"mouseout"),this._touchMoved||f(a,"click"),e=!1)},b._mouseInit=function(){var b=this;b.element.bind({touchstart:a.proxy(b,"_touchStart"),touchmove:a.proxy(b,"_touchMove"),touchend:a.proxy(b,"_touchEnd")}),c.call(b)},b._mouseDestroy=function(){var b=this;b.element.unbind({touchstart:a.proxy(b,"_touchStart"),touchmove:a.proxy(b,"_touchMove"),touchend:a.proxy(b,"_touchEnd")}),d.call(b)}}}(jQuery);</script>
 {% endblock %}
 
 {% block javascript %}
+    {% if can_edit %}
+        users_list = [
+            {% for user in users %}
+                "{{ user.name }}",
+            {% endfor %}
+        ];
+
+        collaborators = [
+            {% for user in set.collaborators.all %}
+                "{{ user.name }}",
+            {% endfor %}
+        ]
+    {% endif %}
+
+
     function deleteItem()
     {
         var obj_in_list = getObjInList($(this));
@@ -79,6 +94,11 @@
         if (tab != 'editor') {
             $('#editor').hide();
             $('#btn-toggle-editor').removeClass('img-action-selected');
+        }
+
+        if (tab != 'collaborators') {
+            $('#collaborators').hide();
+            $('#btn-toggle-collaborators').removeClass('img-action-selected');
         }
 
         $('#' + tab).toggle();
@@ -199,6 +219,72 @@
         });
     }
 
+    function addCollaborator() {
+        $('#collaborators-feedback').text();
+        new_collaborator = $('#input-collaborator').val();
+        if (collaborators.includes(new_collaborator)) {
+            $('#collaborators-feedback').text("User already a collaborator");
+            return;
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url 'set.add_collaborator' set.pk %}',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            data: {
+                'collaborator_name': new_collaborator,
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data.success) {
+                    collaborators.push(new_collaborator);
+                    $('#input-collaborator').val("");
+                    updateCollaborators();
+                }
+            },
+            error: function(data) {
+                $('#collaborators-feedback').text("Unknown user");
+            }
+        });
+    }
+
+    function removeCollaborator(event) {
+        $('#collaborators-feedback').text();
+        c_name = event.currentTarget.id.split('_')[1];
+        $.ajax({
+            type: 'POST',
+            url: '{% url 'set.remove_collaborator' set.pk %}',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            data: {
+                'collaborator_name': c_name,
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data.success) {
+                    collaborators.splice( $.inArray(c_name, collaborators), 1 );
+                    updateCollaborators();
+                }
+            }
+        });
+    }
+
+    function updateCollaborators() {
+        fb_div = $('#collaborators-list')
+        fb_div.empty();
+
+        for (const collaborator of collaborators) {
+            h = '<li><div class="left-and-right"><div class="collaborator-name">' + collaborator + `</div>
+                <div>
+                    <button class="img-btn btn-remove-collaborator" id="set-collaborator-remove_` + collaborator + `">
+                        <img src="{% static 'rechorder/icons/mdi-delete-outline.svg' %}">
+                    </button>
+                </div></div></li>`;
+            fb_div.append(h);
+        }
+
+        $('.btn-remove-collaborator').click(removeCollaborator);
+    }
+
     $( function() {
         {% if can_edit %}
             /* Set up sortable list */
@@ -220,6 +306,22 @@
 
             $('#editor').hide();
             $('#btn-toggle-editor').click(function() {toggleTab('editor');});
+            $('#collaborators').hide();
+            $('#btn-toggle-collaborators').click(function() {toggleTab('collaborators');});
+
+            $('#btn-collaborator-add').click(addCollaborator);
+
+            $('#input-collaborator').autocomplete({
+                source: function(request, response) {
+                    var results = $.ui.autocomplete.filter(users_list, request.term);
+                    response(results.slice(0, 10));
+                },
+                minLength: 0,
+                scroll: true,
+                appendTo: "#autocomplete-container"
+            });
+
+            updateCollaborators();
 
             $('#btn-add-text-item').click(addNewTextItem);
 
@@ -301,56 +403,84 @@
             <li>
                 <img class="img-actions" id="btn-toggle-editor" src="{% static 'rechorder/icons/mdi-pencil-outline.svg' %}">
             </li>
+
+            {% if am_i_owner %}
+            <li>
+                <img class="img-actions" id="btn-toggle-collaborators" src="{% static 'rechorder/icons/mdi-account-multiple-outline.svg' %}">
+            </li>
+            {% endif %}
         </ul>
 
         <div class="tab-container" id="editor">
-            <table>
-                <tr>
-                    <td>
-                        Set Name
-                    </td>
-                    <td>
-                        <input id="input-set-name">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Publicly listed
-                    </td>
-                    <td>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="input-set-is-public">
-                            <span class="toggle-slider round"></span>
-                        </label>
+            <div class="centred-div">
+                <table>
+                    <tr>
+                        <td>
+                            Set Name
+                        </td>
+                        <td>
+                            <input id="input-set-name">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Publicly listed
+                        </td>
+                        <td>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="input-set-is-public">
+                                <span class="toggle-slider round"></span>
+                            </label>
 
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Protected from deletion
-                    </td>
-                    <td>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="input-set-is-protected">
-                            <span class="toggle-slider round"></span>
-                        </label>
-                    </td>
-                </tr>
-            </table>
-            <div class="editor-buttons">
-                <button id="btn-editor-save" type="button">Save</button>
-                <button id="btn-editor-delete" type="button">Delete</button>
-            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Protected from deletion
+                        </td>
+                        <td>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="input-set-is-protected">
+                                <span class="toggle-slider round"></span>
+                            </label>
+                        </td>
+                    </tr>
+                </table>
+                <div class="editor-buttons">
+                    <button id="btn-editor-save" type="button">Save</button>
+                    <button id="btn-editor-delete" type="button">Delete</button>
+                </div>
 
-            <div class="editor-feedback">
-                <span id="success">Set updated successfully</span>
-                <span id="areyousure">
-                    <span id="areyousure-message"></span><br>
-                    <button id="btn-ays-yes" type="button">Yes</button>
-                    <button id="btn-ays-no" type="button">No</button>
-                </span>
+                <div class="editor-feedback">
+                    <span id="success">Set updated successfully</span>
+                    <span id="areyousure">
+                        <span id="areyousure-message"></span><br>
+                        <button id="btn-ays-yes" type="button">Yes</button>
+                        <button id="btn-ays-no" type="button">No</button>
+                    </span>
+                </div>
             </div>
         </div>
+
+        {% if am_i_owner %} 
+            <div class="tab-container" id="collaborators">
+                <div class="centred-div">
+                    <h2>Collaborators</h2>
+                        <ul id="collaborators-list">
+
+                        </ul>
+                    <div id="autocomplete-container" class="ui-widget">
+                        <div class="left-and-right">
+                            <input id="input-collaborator">&nbsp;
+                            <button id="btn-collaborator-add" type="button">Add</button>
+                        </div>
+                        <br>
+                    </div>
+                    <div id="collaborators-feedback"></div>
+                </div>
+                
+            </div>
+        {% endif %}
     {% endif %}
 {% endblock %}
 

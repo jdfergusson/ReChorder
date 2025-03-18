@@ -489,9 +489,11 @@ def set_add_song(request, set_id):
 def view_set(request, set_id):
     this_set = get_object_or_404(Set, pk=set_id)
     set_songs = []
+    user_uuid = _get_user_uuid(request)
 
     # Check permissions etc.
-    am_i_owner = this_set.owner == _get_user_uuid(request)
+    am_i_owner = this_set.owner == user_uuid
+    am_i_collaborator = this_set.collaborators.filter(uuid=user_uuid).exists()
     is_viewable = this_set.is_public | am_i_owner
 
     # Make this the current set
@@ -510,9 +512,10 @@ def view_set(request, set_id):
         'set_items': set_items,
         'set': this_set,
         'keys': KEYS,
-        'can_edit': am_i_owner,
+        'can_edit': am_i_owner or am_i_collaborator,
         'am_i_owner': am_i_owner,
         'is_viewable': is_viewable,
+        'users': User.objects.exclude(uuid=user_uuid),
         **_get_base_context(
             request,
             header_link_back=reverse('sets_mine') if am_i_owner else reverse('sets_others')),
@@ -589,6 +592,31 @@ def set_add_text_item(request, set_id):
         'item_pk': new_text_item.pk,
         'title': new_text_item.title,
     })
+
+
+def set_add_collaborator(request, set_id):
+    this_set = get_object_or_404(Set, pk=set_id)
+    # Check we are the owner
+    if _get_user_uuid(request) != this_set.owner:
+        return HttpResponseForbidden()
+    
+    collaborator_name = request.POST['collaborator_name']
+    collaborator = get_object_or_404(User, name=collaborator_name)
+    this_set.collaborators.add(collaborator)
+    return JsonResponse({'success': True})
+
+
+def set_remove_collaborator(request, set_id):
+    this_set = get_object_or_404(Set, pk=set_id)
+    # Check we are the owner
+    if _get_user_uuid(request) != this_set.owner:
+        return HttpResponseForbidden()
+    
+    print(request.POST)
+    collaborator_name = request.POST['collaborator_name']
+    collaborator = get_object_or_404(User, name=collaborator_name)
+    this_set.collaborators.remove(collaborator)
+    return JsonResponse({'success': True})
 
 
 def item_set_key(request, item_in_set_id):

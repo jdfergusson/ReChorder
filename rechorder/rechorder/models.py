@@ -329,6 +329,7 @@ class Set(models.Model):
     name = models.CharField(max_length=200, default='')
     is_public = models.BooleanField(default=True)
     is_protected = models.BooleanField(default=False)
+    collaborators = models.ManyToManyField('User')
 
     def save(self, *args, **kwargs):
 
