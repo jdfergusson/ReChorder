@@ -58,7 +58,6 @@ selected_tags = [];
     function saveSong() {
         $('#btn-create').html('Creating...');
         $('#btn-create').prop('disabled', true);
-        $('#areyousure').hide();
         $.ajax({
             type: 'POST',
             headers: { "X-CSRFToken": '{{ csrf_token }}' },
@@ -126,7 +125,7 @@ selected_tags = [];
     }
 
     function cancelEdit() {
-        $('#btn-ays-yes').click(function() {
+        $('#btn-ays-yes').off('click').click(function() {
             clearBackup();
             $('#song-title').val('');
             $('#song-artist').val('');
@@ -135,26 +134,31 @@ selected_tags = [];
             $('#editor-key-notes').val('');
             $('#editor-verse-order').val('');
             $('#song-content').val('');
-            $('#areyousure').hide();
             selected_tags = [];
-            updateSelectedTags;
+            updateSelectedTags();
+            $('#clear-modal').hide();
         });
-        $('#btn-ays-no').click(function () {
-            $('#areyousure').hide();
-        });
-        $('#areyousure').show();
+        $('#clear-modal').show();
     }
 
     $(function() {
         $('#btn-create').click(saveSong);
         $('#btn-cancel').click(cancelEdit);
 
-        $('#areyousure').hide();
-        $('#success').hide();
+        $('#clear-modal').hide();
+        $('#btn-clear-modal-close').click(function() { $('#clear-modal').hide(); });
+        $('#btn-ays-no').click(function() { $('#clear-modal').hide(); });
 
         $('#btn-add-tag').click(showTagSelection);
         $('#btn-close-tag-selection').click(hideTagSelection);
         $('.tag-choice').click(toggleTag);
+
+        $(window).click(function(e) {
+            if ($(e.target).hasClass("modal")) {
+                hideTagSelection();
+                $('#clear-modal').hide();
+            }
+        });
 
         recoverFromBackup();
         setInterval(localBackup, 5000);
@@ -170,6 +174,18 @@ selected_tags = [];
 {% endblock %}
 
 {% block content %}
+
+    <div id="clear-modal" class="modal">
+        <div class="modal-content">
+            <img id="btn-clear-modal-close" class="img-btn modal-close" src="{% static 'rechorder/icons/mdi-close-box-outline.svg' %}">
+            <h1>Clear Form</h1>
+            <p>Are you sure you want to clear the data from this page?</p>
+            <div class="editor-buttons">
+                <button id="btn-ays-yes" type="button">Yes, clear</button>
+                <button id="btn-ays-no" type="button">No, cancel</button>
+            </div>
+        </div>
+    </div>
 
     <div id="tag-selector" class="modal">
         <div class="modal-content">
@@ -212,13 +228,6 @@ selected_tags = [];
     <div class="editor-buttons">
         <button id="btn-create">Create</button>
         <button id="btn-cancel">Clear</button>
-    </div>
-    <div class="editor-feedback">
-        <span id="areyousure">
-            Are you sure you want to clear the data from this page?
-            <button id="btn-ays-yes">Yes</button>
-            <button id="btn-ays-no">No</button>
-        </span>
     </div>
 
 {% include 'rechorder/_syntax_help.html' %}

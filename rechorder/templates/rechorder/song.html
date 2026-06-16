@@ -94,6 +94,8 @@
         <img class="img-btn right-aligned-img"
              src="{% static 'rechorder/icons/mdi-printer.svg' %}">
     </a>
+    <img class="img-btn right-aligned-img" id="btn-share"
+         src="{% static 'rechorder/icons/mdi-share-outline.svg' %}">
 
     <div id="song-title-container">
         {% include 'rechorder/_song_title.html' %}
@@ -146,4 +148,5 @@
     <div id="song">
         {% include 'rechorder/_print_song.html' %}
     </div>
+    {% include 'rechorder/_share_modal.html' %}
 {% endblock %}
