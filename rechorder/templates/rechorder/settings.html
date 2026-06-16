@@ -27,6 +27,9 @@
             'display_style': $('#chord-display-style').val(),
             'opt_line_breaks': JSON.stringify($('#opt-line-breaks').prop('checked')),
             'display_full_song_order': JSON.stringify($('#section-disp-ord').prop('checked')),
+            'hide_section_hr': JSON.stringify($('#hide-section-hr').prop('checked')),
+            'hide_chord_highlight': JSON.stringify($('#hide-chord-highlight').prop('checked')),
+            'hide_nav_buttons': JSON.stringify($('#hide-nav-buttons').prop('checked')),
             'device_name': $('#text-device-name').val(),
         },
     });
@@ -41,6 +44,9 @@
         $('#chord-display-style').change(update);
         $('#opt-line-breaks').click(update);
         $('#section-disp-ord').click(update);
+        $('#hide-section-hr').click(update);
+        $('#hide-chord-highlight').click(update);
+        $('#hide-nav-buttons').click(update);
         $('#btn-device-name-save').click(update);
 
         {% for index in selected_shapes %}
@@ -134,6 +140,41 @@
                 {% endfor %}
             </ul>
         </form>
+    </div>
+
+    <div class="settings-section">
+        <h1 class="section-title">Visual Style</h1>
+        <h2><p class="left-and-right">
+            <span>Hide section dividers</span>
+            <span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="hide-section-hr" {% if hide_section_hr %}checked{% endif %}>
+                    <span class="toggle-slider round"></span>
+                </label>
+            </span>
+        </p></h2>
+
+        <p>
+        <h2><p class="left-and-right">
+            <span>Hide chord highlighting</span>
+            <span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="hide-chord-highlight" {% if hide_chord_highlight %}checked{% endif %}>
+                    <span class="toggle-slider round"></span>
+                </label>
+            </span>
+        </p></h2>
+
+        <p>
+        <h2><p class="left-and-right">
+            <span>Hide nav buttons</span>
+            <span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="hide-nav-buttons" {% if hide_nav_buttons %}checked{% endif %}>
+                    <span class="toggle-slider round"></span>
+                </label>
+            </span>
+        </p></h2>
     </div>
 
     <div class="settings-section">

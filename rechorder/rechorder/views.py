@@ -105,6 +105,21 @@ def _get_display_full_song_order(request):
     return display_full_song_order
 
 
+def _get_hide_section_hr(request):
+    hide_section_hr = request.session['hide_section_hr'] = bool(request.session.get('hide_section_hr', False))
+    return hide_section_hr
+
+
+def _get_hide_chord_highlight(request):
+    hide_chord_highlight = request.session['hide_chord_highlight'] = bool(request.session.get('hide_chord_highlight', False))
+    return hide_chord_highlight
+
+
+def _get_hide_nav_buttons(request):
+    hide_nav_buttons = request.session['hide_nav_buttons'] = bool(request.session.get('hide_nav_buttons', False))
+    return hide_nav_buttons
+
+
 def _get_base_context(request, **overrides):
     if 'last_visited_song' in request.session:
         songs_link = reverse('song', args=[request.session['last_visited_song']])
@@ -145,6 +160,9 @@ def _get_base_context(request, **overrides):
         **links,
         'user': user,
         'ItemInSetType': ItemInSet.ItemInSetType,
+        'hide_section_hr': _get_hide_section_hr(request),
+        'hide_chord_highlight': _get_hide_chord_highlight(request),
+        'hide_nav_buttons': _get_hide_nav_buttons(request),
     }
 
     return context
@@ -733,6 +751,7 @@ def set_print(request, set_id):
         'set_id': this_set.pk,
         'opt_line_breaks': _get_optional_line_breaks_setting(request),
         'display_full_song_order': _get_display_full_song_order(request),
+        **_get_base_context(request),
     }
 
     if request.GET.get('no_personal_keys', False):
@@ -956,6 +975,7 @@ def song_print(request, song_id):
         'songs': songs,
         'opt_line_breaks': _get_optional_line_breaks_setting(request),
         'display_full_song_order': _get_display_full_song_order(request),
+        **_get_base_context(request),
     }
 
     if request.GET.get('no_personal_keys', False):
@@ -1165,6 +1185,9 @@ def settings_set(request):
     request.session['device_name'] = request.POST.get('device_name', '["Unnamed Device"]').strip()
     request.session['opt_line_breaks'] = bool(json.loads(request.POST.get('opt_line_breaks', 'false')))
     request.session['display_full_song_order'] = bool(json.loads(request.POST.get('display_full_song_order', 'false')))
+    request.session['hide_section_hr'] = bool(json.loads(request.POST.get('hide_section_hr', 'false')))
+    request.session['hide_chord_highlight'] = bool(json.loads(request.POST.get('hide_chord_highlight', 'false')))
+    request.session['hide_nav_buttons'] = bool(json.loads(request.POST.get('hide_nav_buttons', 'false')))
     request.session.modified = True
 
     # Try to update the user's beam if it exists
