@@ -1,0 +1,37 @@
+{% load static %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script type="text/javascript">
+    $(function() {
+        var shareUrl = window.location.origin + window.location.pathname;
+
+        $('#btn-share').click(function() {
+            if (!window._shareQrCode) {
+                window._shareQrCode = new QRCode(document.getElementById('share-qrcode'), {
+                    text: shareUrl,
+                    width: 200,
+                    height: 200
+                });
+                $('#share-url').text(shareUrl);
+            }
+            $('#share-modal').show();
+        });
+        $('#share-modal-close').click(function() { $('#share-modal').hide(); });
+        $('#share-modal').click(function(e) { if (e.target === this) $(this).hide(); });
+        $('#btn-copy-url').click(function() {
+            navigator.clipboard.writeText(shareUrl).then(function() {
+                $('#btn-copy-url').text('Copied!');
+                setTimeout(function() { $('#btn-copy-url').text('Copy link'); }, 2000);
+            });
+        });
+    });
+</script>
+
+<div id="share-modal" class="modal">
+    <div class="modal-content">
+        <img class="img-btn modal-close" id="share-modal-close" src="{% static 'rechorder/icons/mdi-close-box-outline.svg' %}">
+        <h1>Share</h1>
+        <p><div id="share-qrcode"></div></p>
+        <p id="share-url"></p>
+        <button type="button" id="btn-copy-url">Copy link</button>
+    </div>
+</div>

@@ -1250,7 +1250,24 @@ input:checked + .toggle-slider:before {
 }
 
 .modal-close {
-    float: right;
+    position: absolute;
+    top: 1em;
+    right: 1em;
+}
+
+#share-modal .modal-content {
+    text-align: center;
+    position: relative;
+}
+
+#share-qrcode {
+    display: inline-block;
+    margin: 10px 0;
+}
+
+#share-url {
+    word-break: break-all;
+    font-size: 0.85em;
 }
 
 /**********************************************************

@@ -386,6 +386,8 @@
             <img class="img-btn right-aligned-img"
                  src="{% static 'rechorder/icons/mdi-content-duplicate.svg' %}">
         </a>
+        <img class="img-btn right-aligned-img" id="btn-share"
+             src="{% static 'rechorder/icons/mdi-share-outline.svg' %}">
     {% endif %}
 
     <h2>
@@ -505,4 +507,6 @@
         Set list currently empty.
         {% if can_edit %}Why not add some <a href="{% url 'songs' %}">songs</a>?{% endif %}
     {% endif %}
+
+    {% include 'rechorder/_share_modal.html' %}
 {% endblock %}
