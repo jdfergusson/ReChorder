@@ -4,6 +4,38 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
 
+all_sets = {}
+
+
+def backup_sets(apps, schema_editor):
+    print("\nBacking up sets!")
+    sets = apps.get_model('rechorder', 'Set')
+    for this_set in sets.objects.all():
+        all_sets[this_set.id] = this_set.song_list
+    print(all_sets)
+
+
+def restore_sets(apps, schema_editor):
+    print("\nRestoring Sets!")
+    Sets = apps.get_model('rechorder', 'Set')
+    ItemInSet = apps.get_model('rechorder', 'ItemInSet')
+    Song = apps.get_model('rechorder', 'Song')
+    for set_id in all_sets:
+        try:
+            song_list = all_sets[set_id]
+            for idx, song in enumerate(song_list):
+                new_item_in_set = ItemInSet(
+                    index_in_set=idx,
+                    sounding_key_index=song['key_index'],
+                    notes=song['notes'],
+                    song=Song.objects.get(pk=song['id']),
+                    set=Sets.objects.get(pk=set_id),
+                )
+                new_item_in_set.save()
+            print("Restored set {}".format(set_id))
+        except Exception:
+            continue
+
 
 def set_created_at(apps, schema_editor):
     sets = apps.get_model('rechorder', 'Set')
@@ -18,6 +50,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(backup_sets, migrations.RunPython.noop),
         migrations.RemoveField(
             model_name='set',
             name='song_list',
@@ -39,5 +72,6 @@ class Migration(migrations.Migration):
                 ('song', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rechorder.song')),
             ],
         ),
+        migrations.RunPython(restore_sets, migrations.RunPython.noop),
         migrations.RunPython(set_created_at, migrations.RunPython.noop),
     ]
